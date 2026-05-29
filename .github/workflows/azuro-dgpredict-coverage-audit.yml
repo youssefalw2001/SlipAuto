@@ -1,0 +1,78 @@
+name: Azuro / DGPredict Correct-Score Coverage Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      azuro_api_base:
+        description: "Azuro API Base endpoint"
+        required: true
+        default: "https://api.azuro.org"
+      app_id:
+        description: "DGPredict / Azuro Referral Application ID"
+        required: false
+        default: "first-set-score-auditor"
+      chain_id:
+        description: "EVM Chain ID (Polygon is 137, Gnosis is 100)"
+        required: true
+        default: "137"
+      environment:
+        description: "Auditing environment selector (production / testnet)"
+        required: true
+        default: "production"
+      limit:
+        description: "Maximum number of signals to query in a single sweep"
+        required: true
+        default: "15"
+      min_group_stake:
+        description: "Minimum liquidity threshold (USDT) to declare BETTABLE"
+        required: true
+        default: "25"
+      min_edge:
+        description: "Minimum target percentage advantage vs baseline odds"
+        required: true
+        default: "0.2"
+      write_supabase:
+        description: "Commit the audit rows to Supabase database"
+        required: true
+        default: "true"
+
+jobs:
+  audit:
+    name: Execute Coverage Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run Market Audit Scanner
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          AZURO_API_BASE: ${{ github.event.inputs.azuro_api_base }}
+          CHAIN_ID: ${{ github.event.inputs.chain_id }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          WRITE_SUPABASE: ${{ github.event.inputs.write_supabase }}
+          DGPREDICT_API_KEY: ${{ secrets.DGPREDICT_API_KEY }}
+          AZURO_API_KEY: ${{ secrets.AZURO_API_KEY }}
+        run: node scripts/audit-azuro-dgpredict-first-set-score-coverage.mjs
+
+      - name: Compile and Save Results Artifact
+        run: |
+          mkdir -p build-artifacts
+          echo '{"run_id": "run_${{ github.run_id }}", "status": "COMPLETED", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > build-artifacts/run-report.json
+
+      - name: Upload Run Manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-audit-data-manifest
+          path: build-artifacts/
