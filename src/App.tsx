@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Ghost, RotateCcw, Trophy, Users } from "lucide-react";
+import { Crosshair, RotateCcw, Trophy, Users, X, Menu } from "lucide-react";
 import { useState } from "react";
 import LiveFeed from "./components/LiveFeed";
 import Leaderboard from "./components/Leaderboard";
@@ -9,10 +9,10 @@ import YoinkGame from "./components/YoinkGame";
 
 export type Page = "yoink" | "wheel" | "leaderboard" | "referral";
 
-const pageVariants = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
-  exit:    { opacity: 0, y: -16, transition: { duration: 0.2 } },
+const pageAnim = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 1, 0.5, 1] } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.15 } },
 };
 
 export default function App() {
@@ -20,175 +20,131 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const nav = [
-    { id: "yoink",       label: "YOINK",       icon: <Ghost className="w-4 h-4" />,      tag: "HOT" },
-    { id: "wheel",       label: "Swap Wheel",  icon: <RotateCcw className="w-4 h-4" />,  tag: null },
-    { id: "leaderboard", label: "Leaderboard", icon: <Trophy className="w-4 h-4" />,     tag: null },
-    { id: "referral",    label: "Referrals",   icon: <Users className="w-4 h-4" />,      tag: "EARN" },
-  ] as const;
+    { id: "yoink" as const, label: "Yoink", icon: <Crosshair className="w-3.5 h-3.5" /> },
+    { id: "wheel" as const, label: "Swap Wheel", icon: <RotateCcw className="w-3.5 h-3.5" /> },
+    { id: "leaderboard" as const, label: "Leaderboard", icon: <Trophy className="w-3.5 h-3.5" /> },
+    { id: "referral" as const, label: "Referrals", icon: <Users className="w-3.5 h-3.5" /> },
+  ];
 
   return (
-    <div className="min-h-screen bg-yoink-bg text-yoink-text flex flex-col bg-grid">
-
-      {/* Ambient Orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full bg-yoink-pink/8 blur-[120px]" />
-        <div className="absolute top-1/2 -right-40 w-[400px] h-[400px] rounded-full bg-yoink-purple/8 blur-[100px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[450px] h-[450px] rounded-full bg-yoink-cyan/5 blur-[120px]" />
-      </div>
-
-      {/* ── Header ── */}
-      <header className="relative z-30 border-b border-white/5 bg-yoink-bg/80 backdrop-blur-xl sticky top-0">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-
+    <div className="min-h-screen bg-y-bg text-y-text flex flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-y-border bg-y-bg/90 backdrop-blur-lg">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Logo */}
-          <motion.div
-            className="flex items-center gap-3 cursor-pointer select-none"
+          <button
             onClick={() => setPage("yoink")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2.5 group"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-yoink-pink to-yoink-orange flex items-center justify-center text-lg shadow-[0_0_20px_rgba(255,51,102,0.5)]">
-              😈
+            {/* SVG Mark */}
+            <div className="w-7 h-7 rounded-lg bg-y-accent flex items-center justify-center">
+              <Crosshair className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
-            <div className="font-display font-extrabold text-xl tracking-tight">
-              <span className="text-white">YOINK</span>
-              <span className="text-yoink-pink">.gg</span>
-            </div>
-            <span className="hidden sm:flex items-center gap-1.5 tag tag-green ml-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-yoink-green animate-pulse" />
-              LIVE
+            <span className="text-[15px] font-bold tracking-tight text-white">
+              yoink<span className="text-y-accent">.gg</span>
             </span>
-          </motion.div>
+            <span className="hidden sm:inline-flex items-center gap-1.5 pill pill-green text-[10px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
+              live
+            </span>
+          </button>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/3 border border-white/6 rounded-2xl p-1">
-            {nav.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => setPage(item.id)}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                  page === item.id
-                    ? "bg-yoink-pink text-white shadow-[0_0_20px_rgba(255,51,102,0.4)]"
-                    : "text-yoink-muted hover:text-white hover:bg-white/5"
+          <nav className="hidden md:flex items-center gap-0.5 bg-y-surface border border-y-border rounded-xl p-1">
+            {nav.map((n) => (
+              <button
+                key={n.id}
+                onClick={() => setPage(n.id)}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
+                  page === n.id
+                    ? "bg-y-accent text-white shadow-sm"
+                    : "text-y-muted hover:text-white"
                 }`}
               >
-                {item.icon}
-                {item.label}
-                {item.tag && (
-                  <span className={`tag ${item.tag === "HOT" ? "tag-pink" : "tag-green"} text-[9px] py-0.5`}>
-                    {item.tag}
-                  </span>
-                )}
-              </motion.button>
+                {n.icon}
+                {n.label}
+              </button>
             ))}
           </nav>
 
-          {/* Right: Wallet + Stats */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="stat-badge text-yoink-muted">
-              <span className="text-yoink-green font-bold">2,841</span> SOL stolen today
+          {/* Right */}
+          <div className="flex items-center gap-3">
+            <div className="hidden lg:flex stat-box">
+              <span className="text-y-green font-semibold">2,841</span>
+              <span className="text-y-muted">SOL stolen</span>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="btn-yoink text-sm py-2.5 px-5"
-            >
+            <button className="btn-primary text-[12px] px-4 py-2">
               Connect Wallet
-            </motion.button>
+            </button>
+            {/* Mobile toggle */}
+            <button
+              className="md:hidden p-1.5 rounded-lg text-y-muted hover:text-white"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
-
-          {/* Mobile Hamburger */}
-          <button
-            className="md:hidden p-2 rounded-lg text-yoink-muted hover:text-white transition-colors"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            <div className="w-5 space-y-1.5">
-              <motion.span
-                animate={menuOpen ? { rotate: 45, y: 7 } : { rotate: 0, y: 0 }}
-                className="block h-0.5 bg-current rounded"
-              />
-              <motion.span
-                animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-                className="block h-0.5 bg-current rounded"
-              />
-              <motion.span
-                animate={menuOpen ? { rotate: -45, y: -7 } : { rotate: 0, y: 0 }}
-                className="block h-0.5 bg-current rounded"
-              />
-            </div>
-          </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Nav */}
         <AnimatePresence>
           {menuOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="md:hidden overflow-hidden border-t border-white/5 bg-yoink-bg/95 backdrop-blur-xl"
+              className="md:hidden overflow-hidden border-t border-y-border bg-y-bg"
             >
-              <div className="px-4 py-3 flex flex-col gap-1">
-                {nav.map((item) => (
+              <div className="px-4 py-2 flex flex-col gap-0.5">
+                {nav.map((n) => (
                   <button
-                    key={item.id}
-                    onClick={() => { setPage(item.id); setMenuOpen(false); }}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                      page === item.id ? "bg-yoink-pink/10 text-yoink-pink" : "text-yoink-muted hover:text-white hover:bg-white/5"
+                    key={n.id}
+                    onClick={() => { setPage(n.id); setMenuOpen(false); }}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+                      page === n.id ? "bg-y-accent/10 text-y-accent" : "text-y-muted hover:text-white"
                     }`}
                   >
-                    {item.icon}
-                    {item.label}
-                    {item.tag && (
-                      <span className={`tag ${item.tag === "HOT" ? "tag-pink" : "tag-green"}`}>{item.tag}</span>
-                    )}
+                    {n.icon}
+                    {n.label}
                   </button>
                 ))}
-                <button className="btn-yoink mt-2 w-full">Connect Wallet</button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
-      {/* Live Feed Ticker */}
+      {/* Ticker */}
       <LiveFeed />
 
-      {/* Main Content */}
-      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+      {/* Content */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={page}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            {page === "yoink"       && <YoinkGame />}
-            {page === "wheel"       && <SwapWheel />}
+          <motion.div key={page} variants={pageAnim} initial="initial" animate="animate" exit="exit">
+            {page === "yoink" && <YoinkGame />}
+            {page === "wheel" && <SwapWheel />}
             {page === "leaderboard" && <Leaderboard />}
-            {page === "referral"    && <ReferralDashboard />}
+            {page === "referral" && <ReferralDashboard />}
           </motion.div>
         </AnimatePresence>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-6 mt-4">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-yoink-muted">
-          <div className="flex items-center gap-2 font-display font-bold">
-            <span className="text-white">YOINK</span><span className="text-yoink-pink">.gg</span>
-            <span className="text-yoink-muted font-normal">— Provably Fair on Solana</span>
+      <footer className="border-t border-y-border py-5">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-y-muted">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-white">yoink</span>
+            <span className="font-semibold text-y-accent">.gg</span>
+            <span className="mx-1 text-y-dim">—</span>
+            <span>Provably fair on Solana</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span>18+ Only</span>
-            <span className="text-white/20">•</span>
-            <span>Gamble Responsibly</span>
-            <span className="text-white/20">•</span>
+          <div className="flex items-center gap-3">
+            <span>18+</span>
+            <span className="text-y-dim">·</span>
+            <span>Gamble responsibly</span>
+            <span className="text-y-dim">·</span>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <span className="text-white/20">•</span>
+            <span className="text-y-dim">·</span>
             <a href="#" className="hover:text-white transition-colors">@YoinkGG</a>
           </div>
         </div>

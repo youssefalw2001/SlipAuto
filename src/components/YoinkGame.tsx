@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Eye, Ghost, Shield, Target, Zap } from "lucide-react";
+import { AlertCircle, Crosshair, Shield, Target, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 interface Player {
@@ -7,472 +7,358 @@ interface Player {
   wallet: string;
   balance: number;
   isYou: boolean;
-  isNew?: boolean;
-  justStolen?: boolean;
+  hit?: boolean;
 }
 
-interface Notification {
+interface Toast {
   id: number;
   text: string;
-  type: "success" | "fail" | "info";
+  type: "win" | "lose" | "info";
 }
 
-const WALLETS = [
+const W = [
   "7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x",
   "Qm3a...Rt5u","Ew7b...Ln0z","Fs2c...Vg4k","Jp8e...Ah9w",
   "Ux1f...Dm6y","Nt4g...Sb7i","Rk5h...Oc2p","Wj9i...Ef3n",
   "Lp2k...Mx7t","Dv5n...Qs9b","Cy4h...Tz8r","Ab6j...Wu3o",
 ];
 
-function randomWallet() { return WALLETS[Math.floor(Math.random() * WALLETS.length)]; }
-function randomBal()    { return parseFloat((Math.random() * 4 + 0.1).toFixed(3)); }
+const rBal = () => parseFloat((Math.random() * 4 + 0.1).toFixed(3));
+let uid = 40;
 
-let nextId = 50;
-
-const initialPlayers: Player[] = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  wallet: WALLETS[i],
-  balance: randomBal(),
-  isYou: false,
+const seed: Player[] = Array.from({ length: 12 }, (_, i) => ({
+  id: i + 1, wallet: W[i], balance: rBal(), isYou: false,
 }));
 
 export default function YoinkGame() {
-  const [players, setPlayers]         = useState<Player[]>(initialPlayers);
-  const [myBalance, setMyBalance]     = useState(1.5);
-  const [targeted, setTargeted]       = useState<number | null>(null);
-  const [stakeAmount, setStakeAmount] = useState("0.1");
-  const [isYoinking, setIsYoinking]   = useState(false);
-  const [shakeId, setShakeId]         = useState<number | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [totalStolen, setTotalStolen] = useState(284.12);
-  const [roundsPlayed, setRoundsPlayed] = useState(1847);
-  const [joined, setJoined]           = useState(false);
-  const notifId = useRef(0);
+  const [players, setPlayers] = useState<Player[]>(seed);
+  const [myBal, setMyBal] = useState(1.5);
+  const [target, setTarget] = useState<number | null>(null);
+  const [stake, setStake] = useState("0.1");
+  const [acting, setActing] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [totalStolen, setTotalStolen] = useState(284.1);
+  const tid = useRef(0);
 
-  // Add notification helper
-  const addNotif = (text: string, type: Notification["type"]) => {
-    notifId.current++;
-    const id = notifId.current;
-    setNotifications(prev => [{ id, text, type }, ...prev.slice(0, 4)]);
-    setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 3500);
+  const toast = (text: string, type: Toast["type"]) => {
+    tid.current++;
+    const id = tid.current;
+    setToasts(t => [{ id, text, type }, ...t.slice(0, 3)]);
+    setTimeout(() => setToasts(t => t.filter(n => n.id !== id)), 3200);
   };
 
-  // Simulate other players getting yoinked
+  // Simulate arena activity
   useEffect(() => {
-    const interval = setInterval(() => {
+    const iv = setInterval(() => {
       setPlayers(prev => {
         const arr = [...prev];
-        const fromIdx = Math.floor(Math.random() * arr.length);
-        const toIdx   = Math.floor(Math.random() * arr.length);
-        if (fromIdx === toIdx || arr[fromIdx].isYou || arr[toIdx].isYou) return arr;
-        const stolen = parseFloat((arr[toIdx].balance * (0.2 + Math.random() * 0.4)).toFixed(3));
-        arr[fromIdx] = { ...arr[fromIdx], balance: parseFloat((arr[fromIdx].balance + stolen * 0.9).toFixed(3)) };
-        arr[toIdx]   = { ...arr[toIdx],   balance: parseFloat((arr[toIdx].balance - stolen).toFixed(3)), justStolen: true };
-        setTimeout(() => setPlayers(p => p.map(pl => pl.id === arr[toIdx].id ? { ...pl, justStolen: false } : pl)), 1200);
-        setTotalStolen(t => parseFloat((t + stolen).toFixed(3)));
+        const a = Math.floor(Math.random() * arr.length);
+        const b = Math.floor(Math.random() * arr.length);
+        if (a === b || arr[a].isYou || arr[b].isYou) return arr;
+        const amt = parseFloat((arr[b].balance * (0.15 + Math.random() * 0.35)).toFixed(3));
+        arr[a] = { ...arr[a], balance: parseFloat((arr[a].balance + amt * 0.9).toFixed(3)) };
+        arr[b] = { ...arr[b], balance: Math.max(0.01, parseFloat((arr[b].balance - amt).toFixed(3))), hit: true };
+        setTimeout(() => setPlayers(p => p.map(pl => pl.id === arr[b].id ? { ...pl, hit: false } : pl)), 900);
+        setTotalStolen(t => parseFloat((t + amt).toFixed(2)));
         return arr;
       });
 
-      // Occasionally add/remove player
-      if (Math.random() > 0.7) {
-        nextId++;
+      if (Math.random() > 0.75) {
+        uid++;
         setPlayers(prev => {
-          const arr = prev.length >= 16 ? prev.slice(1) : prev;
-          return [...arr, { id: nextId, wallet: randomWallet(), balance: randomBal(), isYou: false, isNew: true }];
+          const next = prev.length >= 16 ? prev.slice(1) : prev;
+          return [...next, { id: uid, wallet: W[Math.floor(Math.random() * W.length)], balance: rBal(), isYou: false }];
         });
-        setTimeout(() => setPlayers(p => p.map(pl => ({ ...pl, isNew: false }))), 800);
       }
-    }, 2800);
-    return () => clearInterval(interval);
+    }, 3200);
+    return () => clearInterval(iv);
   }, []);
 
-  const targetPlayer = players.find(p => p.id === targeted);
+  const tp = players.find(p => p.id === target);
 
-  const successChance = () => {
-    if (!targetPlayer) return 50;
-    const ratio = myBalance / targetPlayer.balance;
-    if (ratio > 2) return 75;
-    if (ratio > 1) return 60;
-    if (ratio > 0.5) return 45;
+  const chance = () => {
+    if (!tp) return 50;
+    const r = myBal / tp.balance;
+    if (r > 2) return 75;
+    if (r > 1) return 60;
+    if (r > 0.5) return 45;
     return 30;
   };
 
-  const handleJoin = () => {
-    const cost = parseFloat(stakeAmount);
-    if (isNaN(cost) || cost < 0.05) return;
+  const join = () => {
+    const v = parseFloat(stake);
+    if (isNaN(v) || v < 0.05) return;
     setJoined(true);
-    setMyBalance(cost);
-    nextId++;
-    setPlayers(prev => [...prev, { id: nextId, wallet: "You 😈", balance: cost, isYou: true }]);
-    addNotif(`You entered the arena with ${cost} SOL`, "info");
-    setRoundsPlayed(r => r + 1);
+    setMyBal(v);
+    uid++;
+    setPlayers(prev => [...prev, { id: uid, wallet: "You", balance: v, isYou: true }]);
+    toast(`Entered arena with ${v} SOL`, "info");
   };
 
-  const handleYoink = () => {
-    if (!targeted || !targetPlayer || isYoinking) return;
-    setIsYoinking(true);
-
+  const yoink = () => {
+    if (!target || !tp || acting) return;
+    setActing(true);
     setTimeout(() => {
-      const chance = successChance();
-      const roll   = Math.random() * 100;
-      const fee    = parseFloat(stakeAmount) * 0.1; // 10% yoink fee
-      const stolen = parseFloat((targetPlayer.balance * 0.5).toFixed(3));
+      const c = chance();
+      const roll = Math.random() * 100;
+      const fee = parseFloat((tp.balance * 0.05).toFixed(3));
+      const steal = parseFloat((tp.balance * 0.5).toFixed(3));
 
-      if (roll < chance) {
-        // SUCCESS 😈
-        setMyBalance(prev => parseFloat((prev + stolen - fee).toFixed(3)));
+      if (roll < c) {
+        setMyBal(b => parseFloat((b + steal - fee).toFixed(3)));
         setPlayers(prev => prev.map(p => {
-          if (p.id === targeted) return { ...p, balance: parseFloat((p.balance - stolen).toFixed(3)), justStolen: true };
-          if (p.isYou)           return { ...p, balance: parseFloat((p.balance + stolen - fee).toFixed(3)) };
+          if (p.id === target) return { ...p, balance: parseFloat((p.balance - steal).toFixed(3)), hit: true };
+          if (p.isYou) return { ...p, balance: parseFloat((p.balance + steal - fee).toFixed(3)) };
           return p;
         }));
-        setTimeout(() => setPlayers(p => p.map(pl => pl.id === targeted ? { ...pl, justStolen: false } : pl)), 1500);
-        setTotalStolen(t => parseFloat((t + stolen).toFixed(3)));
-        addNotif(`😈 YOINKED! Stole ${stolen} SOL from ${targetPlayer.wallet}`, "success");
+        setTimeout(() => setPlayers(p => p.map(pl => pl.id === target ? { ...pl, hit: false } : pl)), 1000);
+        setTotalStolen(t => parseFloat((t + steal).toFixed(2)));
+        toast(`Stole ${steal} SOL from ${tp.wallet}`, "win");
       } else {
-        // FAIL
-        setShakeId(targeted);
-        setTimeout(() => setShakeId(null), 600);
-        const penalty = fee;
-        setMyBalance(prev => parseFloat((prev - penalty).toFixed(3)));
-        setPlayers(prev => prev.map(p => p.isYou ? { ...p, balance: parseFloat((p.balance - penalty).toFixed(3)) } : p));
-        addNotif(`❌ YOINK failed! Lost ${penalty.toFixed(3)} SOL fee`, "fail");
+        setMyBal(b => parseFloat((b - fee).toFixed(3)));
+        setPlayers(prev => prev.map(p => p.isYou ? { ...p, balance: parseFloat((p.balance - fee).toFixed(3)) } : p));
+        toast(`Failed — lost ${fee} SOL fee`, "lose");
       }
-
-      setTargeted(null);
-      setIsYoinking(false);
-      setRoundsPlayed(r => r + 1);
-    }, 1800);
+      setTarget(null);
+      setActing(false);
+    }, 1500);
   };
 
-  const solPrice = 148;
-
   return (
-    <div className="space-y-6">
-
-      {/* Toast Notifications */}
-      <div className="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="space-y-5">
+      {/* Toasts */}
+      <div className="fixed top-16 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         <AnimatePresence>
-          {notifications.map(n => (
+          {toasts.map(t => (
             <motion.div
-              key={n.id}
-              initial={{ x: 80, opacity: 0 }}
+              key={t.id}
+              initial={{ x: 60, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 80, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className={`px-4 py-3 rounded-xl text-sm font-semibold border backdrop-blur-xl shadow-2xl max-w-xs ${
-                n.type === "success" ? "bg-yoink-green/10 border-yoink-green/30 text-yoink-green" :
-                n.type === "fail"    ? "bg-yoink-pink/10 border-yoink-pink/30 text-yoink-pink" :
-                                       "bg-white/5 border-white/10 text-white"
+              exit={{ x: 60, opacity: 0 }}
+              className={`px-3 py-2.5 rounded-lg text-[12px] font-medium border backdrop-blur-md max-w-[260px] ${
+                t.type === "win"  ? "bg-y-green/10 border-y-green/25 text-y-green" :
+                t.type === "lose" ? "bg-y-accent/10 border-y-accent/25 text-y-accent" :
+                                    "bg-white/5 border-y-border text-y-text"
               }`}
             >
-              {n.text}
+              {t.text}
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {/* Hero Header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-yoink-pink/5 via-yoink-surface to-yoink-purple/5 p-6 sm:p-8">
-        <div className="absolute inset-0 bg-grid opacity-30" />
-        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 mb-3"
-            >
-              <span className="text-4xl animate-float">😈</span>
-              <div>
-                <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
-                  YOINK
-                </h1>
-                <p className="text-yoink-muted text-sm mt-0.5">Target a wallet. Pay the fee. Steal their SOL.</p>
-              </div>
-            </motion.div>
-            <div className="flex flex-wrap gap-3">
-              <div className="stat-badge"><span className="text-yoink-pink font-bold">{totalStolen.toFixed(2)}</span><span className="text-yoink-muted"> SOL stolen all time</span></div>
-              <div className="stat-badge"><span className="text-yoink-cyan font-bold">{players.length}</span><span className="text-yoink-muted"> players in arena</span></div>
-              <div className="stat-badge"><span className="text-yoink-green font-bold">{roundsPlayed.toLocaleString()}</span><span className="text-yoink-muted"> rounds played</span></div>
-            </div>
-          </div>
-
-          {/* My Balance */}
+      {/* Top Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <Crosshair className="w-4.5 h-4.5 text-y-accent" />
+            Yoink
+          </h1>
+          <p className="text-[13px] text-y-muted mt-0.5">Target a wallet. Pay the fee. Steal their SOL.</p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <div className="stat-box"><span className="text-y-accent font-semibold">{totalStolen.toFixed(1)}</span><span className="text-y-muted">stolen total</span></div>
+          <div className="stat-box"><span className="text-y-cyan font-semibold">{players.length}</span><span className="text-y-muted">in arena</span></div>
           {joined && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="card bg-yoink-surface border-yoink-cyan/20 text-center min-w-[160px]"
-            >
-              <p className="text-xs font-mono text-yoink-muted mb-1">YOUR BALANCE</p>
-              <p className="font-display text-3xl font-extrabold text-yoink-cyan text-glow-cyan">
-                {myBalance.toFixed(3)}
-              </p>
-              <p className="text-xs text-yoink-muted font-mono">SOL ≈ ${(myBalance * solPrice).toFixed(0)}</p>
-            </motion.div>
+            <div className="stat-box border-y-cyan/20">
+              <span className="text-y-cyan font-bold">{myBal.toFixed(3)}</span>
+              <span className="text-y-muted">your SOL</span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* How It Works */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* How it works (compact) */}
+      <div className="grid grid-cols-4 gap-2">
         {[
-          { emoji: "🎯", step: "1", title: "Enter Arena",   desc: "Lock SOL to join" },
-          { emoji: "👁️", step: "2", title: "Pick a Target", desc: "See everyone's balance" },
-          { emoji: "😈", step: "3", title: "YOINK!",        desc: "Pay 10% fee, steal 50%" },
-          { emoji: "💰", step: "4", title: "Walk Away Rich",desc: "Win big or lose fee" },
+          { n:"1", t:"Enter", d:"Lock SOL" },
+          { n:"2", t:"Target", d:"Pick a wallet" },
+          { n:"3", t:"Yoink", d:"Pay 5% fee" },
+          { n:"4", t:"Win", d:"Steal 50%" },
         ].map(s => (
-          <motion.div
-            key={s.step}
-            whileHover={{ y: -3 }}
-            className="card text-center py-5"
-          >
-            <div className="text-2xl mb-2">{s.emoji}</div>
-            <p className="text-xs font-mono text-yoink-muted mb-1">STEP {s.step}</p>
-            <p className="font-display font-bold text-white text-sm">{s.title}</p>
-            <p className="text-xs text-yoink-muted mt-1">{s.desc}</p>
-          </motion.div>
+          <div key={s.n} className="card-sm text-center">
+            <div className="text-[10px] font-mono text-y-dim mb-1">{s.n}</div>
+            <div className="text-[12px] font-semibold text-white">{s.t}</div>
+            <div className="text-[11px] text-y-muted">{s.d}</div>
+          </div>
         ))}
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* LEFT: Player Grid */}
-        <div className="lg:col-span-2 space-y-4">
+      {/* Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Arena Grid */}
+        <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-display font-bold text-white flex items-center gap-2">
-              <Eye className="w-4 h-4 text-yoink-muted" />
+            <h2 className="text-[13px] font-semibold text-y-muted flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
               Live Arena
-              <span className="tag tag-pink">{players.length} PLAYERS</span>
             </h2>
-            <p className="text-xs text-yoink-muted">Click any wallet to target it</p>
+            {joined && <p className="text-[11px] text-y-dim">Click a wallet to target</p>}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             <AnimatePresence>
               {players.map(p => (
                 <motion.div
                   key={p.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{
-                    opacity: 1,
-                    scale: p.justStolen ? [1, 1.05, 0.95, 1] : 1,
-                    x: shakeId === p.id ? [-6, 6, -4, 4, 0] : 0,
-                  }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={() => !p.isYou && joined && setTargeted(targeted === p.id ? null : p.id)}
-                  className={`wallet-card select-none ${targeted === p.id ? "targeted" : ""} ${p.isYou ? "is-you" : ""} ${!joined || p.isYou ? "cursor-default" : "cursor-pointer"}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1, x: p.hit ? [-4, 4, -2, 2, 0] : 0 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => !p.isYou && joined && setTarget(target === p.id ? null : p.id)}
+                  className={`wallet-target ${target === p.id ? "active" : ""} ${p.isYou ? "is-self" : ""} ${p.hit ? "hit" : ""} ${!joined || p.isYou ? "cursor-default" : ""}`}
                 >
-                  {/* Target indicator */}
-                  {targeted === p.id && (
-                    <div className="absolute top-2 right-2">
-                      <Target className="w-4 h-4 text-yoink-pink animate-pulse" />
-                    </div>
+                  {target === p.id && (
+                    <Target className="absolute top-2 right-2 w-3.5 h-3.5 text-y-accent" />
                   )}
-                  {p.isNew && (
-                    <div className="absolute top-2 right-2">
-                      <span className="tag tag-green text-[9px]">NEW</span>
-                    </div>
-                  )}
-                  {p.justStolen && (
-                    <div className="absolute inset-0 bg-yoink-pink/10 rounded-2xl flex items-center justify-center">
-                      <span className="text-2xl">😱</span>
-                    </div>
-                  )}
-
-                  <p className={`font-mono text-xs font-bold truncate mb-2 ${p.isYou ? "text-yoink-cyan" : "text-white"}`}>
-                    {p.isYou ? "😈 You" : p.wallet}
+                  <p className={`font-mono text-[11px] font-medium mb-1.5 truncate ${p.isYou ? "text-y-cyan" : "text-y-muted"}`}>
+                    {p.isYou ? "You" : p.wallet}
                   </p>
-
-                  <p className={`font-display text-xl font-extrabold ${
-                    p.justStolen ? "text-yoink-pink" :
-                    p.isYou      ? "text-yoink-cyan" :
-                    p.balance > 2 ? "text-yoink-green" :
-                    p.balance > 1 ? "text-white" :
-                                    "text-yoink-muted"
+                  <p className={`text-[17px] font-bold tabular-nums leading-tight ${
+                    p.hit ? "text-y-accent" :
+                    p.isYou ? "text-y-cyan" :
+                    p.balance > 2 ? "text-y-green" :
+                    "text-white"
                   }`}>
-                    {p.balance.toFixed(2)}
-                    <span className="text-sm ml-1 opacity-70">SOL</span>
+                    {p.balance.toFixed(3)}
+                    <span className="text-[11px] font-normal text-y-muted ml-1">SOL</span>
                   </p>
-
-                  {!p.isYou && joined && targeted !== p.id && (
-                    <p className="text-[10px] text-yoink-muted mt-1">click to target</p>
-                  )}
-                  {targeted === p.id && (
-                    <p className="text-[10px] text-yoink-pink font-bold mt-1">TARGETED 🎯</p>
-                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
 
-        {/* RIGHT: Action Panel */}
+        {/* Right Panel */}
         <div className="space-y-4">
-
           {!joined ? (
-            /* JOIN PANEL */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="card border-yoink-pink/20 bg-gradient-to-b from-yoink-pink/5 to-transparent"
-            >
-              <div className="text-center mb-5">
-                <div className="text-4xl mb-2">😈</div>
-                <h3 className="font-display text-xl font-extrabold text-white">Enter the Arena</h3>
-                <p className="text-xs text-yoink-muted mt-1">Lock SOL to start stealing</p>
+            <div className="card space-y-4">
+              <div>
+                <h3 className="text-[14px] font-semibold text-white mb-1">Enter the Arena</h3>
+                <p className="text-[12px] text-y-muted">Lock SOL to start stealing from others.</p>
               </div>
-
-              <p className="text-xs text-yoink-muted mb-2">Your entry amount (min 0.05 SOL)</p>
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-1.5">
                 {["0.1","0.25","0.5","1.0","2.0"].map(v => (
                   <button
                     key={v}
-                    onClick={() => setStakeAmount(v)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                      stakeAmount === v
-                        ? "bg-yoink-pink/20 border-yoink-pink text-yoink-pink"
-                        : "bg-white/3 border-white/10 text-yoink-muted hover:text-white"
+                    onClick={() => setStake(v)}
+                    className={`px-3 py-1.5 rounded-lg text-[12px] font-medium border transition-all ${
+                      stake === v
+                        ? "bg-y-accent/12 border-y-accent/40 text-y-accent"
+                        : "bg-white/3 border-y-border text-y-muted hover:text-white"
                     }`}
                   >
-                    {v} SOL
+                    {v}
                   </button>
                 ))}
               </div>
               <input
                 type="number"
-                value={stakeAmount}
-                onChange={e => setStakeAmount(e.target.value)}
-                className="input-yoink mb-4"
+                value={stake}
+                onChange={e => setStake(e.target.value)}
+                className="input"
                 placeholder="Custom amount..."
               />
-
-              <div className="bg-white/3 rounded-xl p-3 mb-4 text-xs space-y-1.5 border border-white/5">
-                <div className="flex justify-between"><span className="text-yoink-muted">Entry amount</span><span className="text-white font-mono">{stakeAmount} SOL</span></div>
-                <div className="flex justify-between"><span className="text-yoink-muted">Yoink fee (per attempt)</span><span className="text-yoink-pink font-mono">10% of target</span></div>
-                <div className="flex justify-between"><span className="text-yoink-muted">Payout on success</span><span className="text-yoink-green font-mono">50% of target balance</span></div>
+              <div className="bg-y-surface rounded-lg p-3 space-y-1.5 text-[11px] border border-y-border">
+                <div className="flex justify-between"><span className="text-y-muted">Entry</span><span className="text-white font-mono">{stake} SOL</span></div>
+                <div className="flex justify-between"><span className="text-y-muted">Fee per yoink</span><span className="text-y-accent font-mono">5% of target</span></div>
+                <div className="flex justify-between"><span className="text-y-muted">Payout on success</span><span className="text-y-green font-mono">50% of target</span></div>
               </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={handleJoin}
-                className="btn-yoink w-full py-3.5 text-base"
-              >
-                <Ghost className="w-5 h-5" />
-                Enter Arena — {stakeAmount} SOL
-              </motion.button>
-            </motion.div>
-
+              <button onClick={join} className="btn-primary w-full py-2.5">
+                <Zap className="w-3.5 h-3.5" />
+                Enter — {stake} SOL
+              </button>
+            </div>
           ) : (
-            /* YOINK PANEL */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="card"
-            >
-              <h3 className="font-display font-bold text-white mb-4 flex items-center gap-2">
-                <Target className="w-4 h-4 text-yoink-pink" />
-                YOINK Attack
+            <div className="card space-y-4">
+              <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
+                <Crosshair className="w-4 h-4 text-y-accent" />
+                Yoink Attack
               </h3>
 
-              {/* Target preview */}
-              {targetPlayer ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-yoink-pink/5 border border-yoink-pink/20 rounded-xl p-4 mb-4"
-                >
-                  <p className="text-xs text-yoink-muted mb-1">TARGET</p>
-                  <p className="font-mono font-bold text-white">{targetPlayer.wallet}</p>
-                  <p className="font-display text-2xl font-extrabold text-yoink-pink mt-1">{targetPlayer.balance.toFixed(3)} SOL</p>
-                  <div className="mt-3 space-y-1.5 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-yoink-muted">Steal if success</span>
-                      <span className="text-yoink-green font-bold">+{(targetPlayer.balance * 0.5).toFixed(3)} SOL</span>
+              {tp ? (
+                <div className="bg-y-accent/5 border border-y-accent/15 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-y-muted">Target</span>
+                    <span className="font-mono text-[12px] font-medium text-white">{tp.wallet}</span>
+                  </div>
+                  <div className="text-[22px] font-bold text-y-accent tabular-nums">{tp.balance.toFixed(3)} <span className="text-[12px] font-normal text-y-muted">SOL</span></div>
+                  <div className="grid grid-cols-3 gap-2 text-center pt-1 border-t border-y-border">
+                    <div>
+                      <p className="text-[10px] text-y-muted">Steal</p>
+                      <p className="text-[12px] font-semibold text-y-green">+{(tp.balance * 0.5).toFixed(3)}</p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-yoink-muted">Fee paid</span>
-                      <span className="text-yoink-pink font-bold">-{(targetPlayer.balance * 0.05).toFixed(3)} SOL</span>
+                    <div>
+                      <p className="text-[10px] text-y-muted">Fee</p>
+                      <p className="text-[12px] font-semibold text-y-accent">-{(tp.balance * 0.05).toFixed(3)}</p>
                     </div>
-                    <div className="flex justify-between border-t border-white/5 pt-1.5">
-                      <span className="text-yoink-muted">Success chance</span>
-                      <span className={`font-bold ${successChance() >= 60 ? "text-yoink-green" : successChance() >= 45 ? "text-yoink-yellow" : "text-yoink-pink"}`}>
-                        {successChance()}%
-                      </span>
+                    <div>
+                      <p className="text-[10px] text-y-muted">Chance</p>
+                      <p className={`text-[12px] font-semibold ${chance() >= 60 ? "text-y-green" : chance() >= 45 ? "text-y-yellow" : "text-y-accent"}`}>{chance()}%</p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ) : (
-                <div className="bg-white/3 border border-dashed border-white/10 rounded-xl p-6 mb-4 text-center">
-                  <Target className="w-8 h-8 text-yoink-muted mx-auto mb-2" />
-                  <p className="text-sm text-yoink-muted">Click any wallet in the arena to target it</p>
+                <div className="border border-dashed border-y-border rounded-xl p-5 text-center">
+                  <Target className="w-5 h-5 text-y-dim mx-auto mb-2" />
+                  <p className="text-[12px] text-y-muted">Select a wallet in the arena</p>
                 </div>
               )}
 
               <motion.button
-                whileHover={targeted ? { scale: 1.02 } : {}}
-                whileTap={targeted ? { scale: 0.96 } : {}}
-                onClick={handleYoink}
-                disabled={!targeted || isYoinking}
-                className="btn-yoink w-full py-4 text-lg disabled:opacity-40"
+                whileTap={target ? { scale: 0.97 } : {}}
+                onClick={yoink}
+                disabled={!target || acting}
+                className="btn-primary w-full py-3 text-[13px] disabled:opacity-30"
               >
-                {isYoinking ? (
-                  <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Yoinking...</>
+                {acting ? (
+                  <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
                 ) : (
-                  <><Ghost className="w-5 h-5" />YOINK! 😈</>
+                  <><Crosshair className="w-3.5 h-3.5" />YOINK</>
                 )}
               </motion.button>
 
-              <p className="text-[11px] text-yoink-muted text-center mt-3 flex items-center justify-center gap-1">
+              <p className="text-[10px] text-y-dim text-center flex items-center justify-center gap-1">
                 <AlertCircle className="w-3 h-3" />
-                Fee charged win or lose. Higher balance = higher chance.
+                Fee paid win or lose. Higher balance = higher chance.
               </p>
-            </motion.div>
+            </div>
           )}
 
-          {/* Chance Breakdown */}
-          <div className="card">
-            <h3 className="text-xs font-mono uppercase text-yoink-muted mb-3 flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-yoink-yellow" />
-              Success Rates
-            </h3>
-            <div className="space-y-2.5">
-              {[
-                { label: "2x their balance", pct: 75, color: "bg-yoink-green" },
-                { label: "1x their balance", pct: 60, color: "bg-yoink-cyan" },
-                { label: "0.5x their balance", pct: 45, color: "bg-yoink-yellow" },
-                { label: "Under 0.5x", pct: 30, color: "bg-yoink-pink" },
-              ].map(r => (
-                <div key={r.label}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-yoink-muted">You have {r.label}</span>
-                    <span className="font-mono font-bold text-white">{r.pct}%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${r.pct}%` }}
-                      transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-                      className={`h-full ${r.color} rounded-full`}
-                    />
-                  </div>
+          {/* Success rates */}
+          <div className="card space-y-3">
+            <h3 className="text-[12px] font-semibold text-y-muted">Success Rates</h3>
+            {[
+              { label: "You have 2x+ their balance", pct: 75, color: "bg-y-green" },
+              { label: "You have ~1x their balance", pct: 60, color: "bg-y-cyan" },
+              { label: "You have ~0.5x", pct: 45, color: "bg-y-yellow" },
+              { label: "You have less than 0.5x", pct: 30, color: "bg-y-accent" },
+            ].map(r => (
+              <div key={r.label}>
+                <div className="flex justify-between text-[11px] mb-1">
+                  <span className="text-y-muted">{r.label}</span>
+                  <span className="font-mono font-medium text-white">{r.pct}%</span>
                 </div>
-              ))}
-            </div>
+                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${r.pct}%` }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                    className={`h-full ${r.color} rounded-full`}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Shield info */}
-          <div className="card bg-yoink-cyan/3 border-yoink-cyan/15">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-yoink-cyan flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-white">Provably Fair</p>
-                <p className="text-xs text-yoink-muted mt-1">Every YOINK result is determined by on-chain randomness (Switchboard VRF). No server can manipulate outcomes.</p>
-              </div>
+          {/* Provably fair */}
+          <div className="card-sm bg-y-cyan/3 border-y-cyan/12 flex items-start gap-3">
+            <Shield className="w-4 h-4 text-y-cyan flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[12px] font-medium text-white">Provably Fair</p>
+              <p className="text-[11px] text-y-muted mt-0.5">On-chain randomness via Switchboard VRF. No server manipulation.</p>
             </div>
           </div>
         </div>
