@@ -1,10 +1,11 @@
 import NumberFlow from "@number-flow/react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Crosshair, Shield, Target, Zap } from "lucide-react";
+import { AlertCircle, Crosshair, HelpCircle, Shield, Target, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
+import RoomSystem from "./RoomSystem";
 
 interface Player {
   id: number;
@@ -59,6 +60,9 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
   const [stolen, setStolen]       = useState(284.1);
   const [rounds, setRounds]       = useState(1847);
   const [livePlayers, setLive]    = useState(14);
+
+  // Room system
+  const [roomId, setRoomId]       = useState(() => Math.floor(Math.random() * 1100) + 3800);
 
   // Pity system — tracks consecutive losses per target attempt
   const pityCounts  = useRef<Record<number, number>>({});  // targetId → consecutive losses
@@ -310,6 +314,20 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
 
         {/* Arena grid */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Room system */}
+          <RoomSystem
+            levelId={levelId}
+            roomId={roomId}
+            onRoomChange={(id) => {
+              setRoomId(id);
+              // Refresh players when switching rooms
+              setPlayers(Array.from({ length: 12 }, (_, i) => makePlayer(uid + i + 1, W[(uid + i) % W.length])));
+              toast(`Switched to Room #${id.toLocaleString()}`);
+            }}
+            playerCount={players.length + 847}
+            potSOL={parseFloat(players.reduce((s, p) => s + p.balance, 0).toFixed(2))}
+          />
+
           <div className="flex items-center justify-between">
             <h2 className="text-[13px] font-semibold text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-y-green blink" />
@@ -326,18 +344,40 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 relative">
             <AnimatePresence>
               {players.map(p => {
-                const pct = (p.balance / maxBal) * 100;
-                const isT = target === p.id;
-                const c   = chance(myBal, p.balance);
+                const pct      = (p.balance / maxBal) * 100;
+                const isT      = target === p.id;
+                const c        = chance(myBal, p.balance);
                 const lvlColor = LEVEL_COLORS[(p.levelId ?? 1) - 1];
                 const lvlName  = LEVEL_NAMES[(p.levelId ?? 1) - 1];
-                const barColor = p.isYou
-                  ? 'linear-gradient(90deg,#00e5ff,#7000ff)'
-                  : p.isBounty ? 'linear-gradient(90deg,#ffd200,#ff4d00)'
-                  : p.balance > 1.5 ? 'linear-gradient(90deg,#00e87a,#00c8e8)'
-                  : 'linear-gradient(90deg,#ff4d00,#cc0044)';
 
-                const stealAmt = p.isBounty
+                // Tier classification
+                const isKing     = p.isBounty && !p.isYou;    // 3+ SOL
+                const isPredator = !isKing && p.balance >= 1.5 && !p.isYou;
+                const isCommon   = !isKing && !isPredator && p.balance >= 0.5 && !p.isYou;
+                const isDust     = !isKing && !isPredator && !isCommon && !p.isYou;
+
+                const tierClass = p.isYou ? "is-you"
+                  : isKing     ? "wc-king"
+                  : isPredator ? "wc-predator"
+                  : isCommon   ? "wc-common"
+                  : "wc-dust";
+
+                const tierIcon = isKing ? "🔥" : isPredator ? "⚡" : isCommon ? "🟢" : "👻";
+
+                const balColor = p.hit ? '#ff4d00'
+                  : p.isYou    ? '#00e5ff'
+                  : isKing     ? '#ffd200'
+                  : isPredator ? '#a060ff'
+                  : isCommon   ? '#00d470'
+                  : '#a0a0c0';
+
+                const barColor = p.isYou     ? 'linear-gradient(90deg,#00e5ff,#7000ff)'
+                  : isKing     ? 'linear-gradient(90deg,#ffd200,#ff4d00)'
+                  : isPredator ? 'linear-gradient(90deg,#a060ff,#00e5ff)'
+                  : isCommon   ? 'linear-gradient(90deg,#00e87a,#00c8e8)'
+                  : 'linear-gradient(90deg,#606080,#404060)';
+
+                const stealAmt = isKing
                   ? parseFloat((p.balance * 0.9).toFixed(3))
                   : parseFloat((p.balance * 0.5).toFixed(3));
 
@@ -345,33 +385,59 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                   <motion.div
                     key={p.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.88 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.82 }}
-                    transition={{ duration: 0.22 }}
+                    initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.25, type: "spring", stiffness: 200, damping: 20 }}
                     onClick={() => !p.isYou && joined && setTarget(isT ? null : p.id)}
                     onMouseEnter={() => !p.isYou && joined && showTooltip(p.id)}
                     onMouseLeave={hideTooltip}
-                    className={`wallet-card relative ${isT ? "targeted" : ""} ${p.isYou ? "is-you" : ""} ${p.hit ? "hit" : ""} ${p.isBounty && !p.isYou ? "bounty" : ""} ${(!joined || p.isYou) ? "!cursor-default" : ""}`}
+                    className={`wallet-card relative overflow-visible ${tierClass} ${isT ? "targeted" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou) ? "!cursor-default" : ""}`}
                   >
-                    {/* Bounty crown */}
-                    {p.isBounty && !p.isYou && (
-                      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+                    {/* Tier particle decorations */}
+                    {isDust && !p.isYou && (
+                      <>
+                        <span className="ghost-dot" style={{ left: '20%', bottom: '30%' }} />
+                        <span className="ghost-dot" style={{ left: '60%', bottom: '20%' }} />
+                        <span className="ghost-dot" style={{ left: '80%', bottom: '40%' }} />
+                      </>
+                    )}
+                    {isPredator && (
+                      <>
+                        <span className="spark" />
+                        <span className="spark" />
+                        <span className="spark" />
+                      </>
+                    )}
+                    {isKing && (
+                      <>
+                        <span className="flame" />
+                        <span className="flame" />
+                        <span className="flame" />
+                      </>
+                    )}
+
+                    {/* Bounty crown badge */}
+                    {isKing && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                         <motion.div
-                          animate={{ y: [0, -2, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                          className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold flex items-center gap-1"
-                          style={{ background: 'rgba(255,210,0,0.9)', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.5)' }}
+                          animate={{ y: [0, -3, 0] }}
+                          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                          className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold whitespace-nowrap"
+                          style={{ background: 'rgba(255,210,0,0.92)', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.6)' }}
                         >
                           👑 BOUNTY
                         </motion.div>
                       </div>
                     )}
 
-                    {/* Targeted icon */}
+                    {/* Targeted crosshair */}
                     {isT && (
-                      <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }}
-                        className="absolute top-2.5 right-2.5">
+                      <motion.div
+                        initial={{ scale: 0, rotate: -45 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        className="absolute top-2.5 right-2.5 z-10"
+                      >
                         <Target className="w-3.5 h-3.5" style={{ color: '#ff4d00' }} />
                       </motion.div>
                     )}
@@ -379,23 +445,26 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                     {/* Hover tooltip */}
                     {joined && !p.isYou && !isT && tooltip?.playerId === p.id && (
                       <motion.div
-                        initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                        className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 px-3 py-2 rounded-lg text-[11px] font-mono font-bold whitespace-nowrap"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 px-3 py-2 rounded-xl text-[11px] font-mono font-bold whitespace-nowrap"
                         style={{
                           background: '#0c0c1a',
                           border: `1px solid ${chanceColor(c)}40`,
                           color: chanceColor(c),
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+                          boxShadow: `0 4px 20px rgba(0,0,0,0.7), 0 0 12px ${chanceColor(c)}20`,
                         }}
                       >
-                        {c}% · steal {stealAmt} SOL{p.isBounty ? " (2x BOUNTY!)" : ""}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent" style={{ borderTopColor: '#0c0c1a' }} />
+                        {c}% · steal {stealAmt} SOL{isKing ? " 👑" : ""}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent"
+                          style={{ borderTopColor: '#0c0c1a' }} />
                       </motion.div>
                     )}
 
-                    {/* Top row: wallet + level badge */}
+                    {/* Top: wallet + level badge */}
                     <div className="flex items-center justify-between mb-2">
-                      <p className="font-mono text-[10px] truncate" style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
+                      <p className="font-mono text-[10px] truncate flex-1"
+                        style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
                         {p.isYou ? "● YOU" : p.wallet}
                       </p>
                       {!p.isYou && (
@@ -406,26 +475,44 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                       )}
                     </div>
 
-                    <p className={`font-display leading-none ${p.balance > 3 ? "text-[30px]" : p.balance > 1.5 ? "text-[26px]" : "text-[22px]"} ${p.hit ? "glow-accent" : p.isYou ? "glow-cyan" : p.isBounty ? "glow-yellow" : ""}`}
-                      style={{ color: p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : p.isBounty ? '#ffd200' : p.balance > 2.5 ? '#00d470' : p.balance > 1 ? '#eeeef8' : '#a0a0c0' }}
+                    {/* Balance — size scales with tier */}
+                    <p className={`font-display leading-none mb-0.5 ${
+                      isKing     ? "text-[32px] glow-yellow"
+                      : isPredator ? "text-[28px]"
+                      : isCommon   ? "text-[25px]"
+                      : "text-[22px]"
+                    } ${p.hit ? "glow-accent" : p.isYou ? "glow-cyan" : ""}`}
+                      style={{ color: balColor }}
                     >
                       {p.balance.toFixed(3)}
                     </p>
-                    <p className="text-[10px] font-mono mt-0.5" style={{ color: '#30304a' }}>SOL</p>
+                    <p className="text-[10px] font-mono" style={{ color: '#30304a' }}>SOL</p>
 
                     {/* Balance bar */}
-                    <div className="wallet-bar mt-3">
-                      <motion.div className="wallet-bar-fill" animate={{ width: `${pct}%` }} transition={{ duration: 0.7 }}
-                        style={{ background: barColor }} />
+                    <div className="wallet-bar mt-2.5">
+                      <motion.div
+                        className="wallet-bar-fill"
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{ background: barColor }}
+                      />
                     </div>
 
-                    {/* Live chance on targeted card */}
+                    {/* Tier icon */}
+                    {!p.isYou && (
+                      <span className="tier-icon">{tierIcon}</span>
+                    )}
+
+                    {/* Targeted chance */}
                     {isT && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="mt-2 text-[10px] font-mono font-bold"
-                        style={{ color: chanceColor(c) }}>
-                        {c}% success chance
-                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-[10px] font-mono font-bold mt-1.5"
+                        style={{ color: chanceColor(c) }}
+                      >
+                        {c}% success
+                      </motion.p>
                     )}
                   </motion.div>
                 );

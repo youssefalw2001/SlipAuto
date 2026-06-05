@@ -3,6 +3,8 @@ import { Crosshair, Menu, Package, RotateCcw, Trophy, Users, X } from "lucide-re
 import { useState } from "react";
 import { Toaster } from "sonner";
 import CrateShop from "./components/CrateShop";
+import GlobalStats from "./components/GlobalStats";
+import JoinToast from "./components/JoinToast";
 import LiveFeed from "./components/LiveFeed";
 import Leaderboard from "./components/Leaderboard";
 import OnboardingModal from "./components/OnboardingModal";
@@ -178,6 +180,9 @@ export default function App() {
       {/* Live ticker */}
       <LiveFeed />
 
+      {/* Global stats bar */}
+      <GlobalStats />
+
       {/* Main content */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-5 py-8">
         <AnimatePresence mode="wait">
@@ -212,6 +217,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Bottom-left join toast */}
+      <JoinToast />
     </div>
   );
 }

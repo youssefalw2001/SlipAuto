@@ -602,3 +602,226 @@ number-flow-react {
   50%     { opacity: 0.7; transform: scale(1.04); }
 }
 .pity-active { animation: pityPulse 1.2s ease-in-out infinite; }
+
+
+/* ============================================================
+   WALLET CARD TIERS — Bubbly Cartoon Frames
+   4 visual personalities based on SOL balance
+   ============================================================ */
+
+/* ── TIER 1: DUST (< 0.5 SOL) — Ghost / Lost Soul ── */
+.wc-dust {
+  border-color: rgba(120,120,160,0.25) !important;
+  border-style: dashed !important;
+  background: rgba(120,120,160,0.03) !important;
+  opacity: 0.8;
+}
+.wc-dust::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 50% 0%, rgba(160,160,200,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+@keyframes ghostFloat {
+  0%,100% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+  33%     { transform: translateY(-3px) rotate(-1deg); opacity: 0.9; }
+  66%     { transform: translateY(-1px) rotate(1deg); opacity: 0.75; }
+}
+.wc-dust { animation: ghostFloat 4s ease-in-out infinite; }
+.wc-dust:hover {
+  opacity: 1 !important;
+  border-color: rgba(160,160,200,0.5) !important;
+  border-style: solid !important;
+  animation: none;
+}
+
+/* Ghost particles */
+@keyframes ghostParticle {
+  0%   { transform: translateY(0) scale(1); opacity: 0.4; }
+  100% { transform: translateY(-20px) scale(0); opacity: 0; }
+}
+.wc-dust .ghost-dot {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(160,160,200,0.5);
+  animation: ghostParticle 2.5s ease-out infinite;
+  pointer-events: none;
+}
+.wc-dust .ghost-dot:nth-child(2) { animation-delay: 0.8s; left: 30%; }
+.wc-dust .ghost-dot:nth-child(3) { animation-delay: 1.6s; left: 70%; }
+
+
+/* ── TIER 2: COMMON (0.5–1.5 SOL) — Slime / Green Blob ── */
+@keyframes blobMorph {
+  0%,100% { border-radius: 16px; }
+  25%     { border-radius: 20px 14px 18px 12px; }
+  50%     { border-radius: 14px 20px 12px 18px; }
+  75%     { border-radius: 18px 12px 20px 14px; }
+}
+.wc-common {
+  border-color: rgba(0,212,112,0.25) !important;
+  background: rgba(0,212,112,0.04) !important;
+  animation: blobMorph 3.5s ease-in-out infinite;
+}
+.wc-common::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 30% 80%, rgba(0,212,112,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+/* Drip at bottom */
+.wc-common::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 50%; transform: translateX(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50% 50% 60% 60%;
+  background: rgba(0,212,112,0.4);
+  animation: drip 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes drip {
+  0%,100% { transform: translateX(-50%) scaleY(1); opacity: 0.4; }
+  50%     { transform: translateX(-50%) scaleY(1.6); opacity: 0.7; }
+}
+.wc-common:hover {
+  border-color: rgba(0,212,112,0.55) !important;
+  box-shadow: 0 8px 32px rgba(0,212,112,0.18) !important;
+  animation: none;
+  border-radius: 16px !important;
+}
+
+
+/* ── TIER 3: PREDATOR (1.5–3 SOL) — Electric Wolf / Lightning ── */
+@keyframes electricPulse {
+  0%,100% {
+    box-shadow: 0 0 8px rgba(160,96,255,0.3), 0 0 16px rgba(0,229,255,0.1);
+    border-color: rgba(160,96,255,0.4);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(160,96,255,0.6), 0 0 36px rgba(0,229,255,0.2), inset 0 0 12px rgba(160,96,255,0.05);
+    border-color: rgba(0,229,255,0.6);
+  }
+}
+.wc-predator {
+  border-color: rgba(160,96,255,0.4) !important;
+  background: rgba(160,96,255,0.05) !important;
+  animation: electricPulse 2s ease-in-out infinite;
+}
+.wc-predator::before {
+  content: '';
+  position: absolute;
+  inset: 0; border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(160,96,255,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(0,229,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+/* Corner sparks */
+@keyframes spark {
+  0%,90%,100% { opacity: 0; transform: scale(0); }
+  5%,85%      { opacity: 1; transform: scale(1); }
+}
+.wc-predator .spark {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+  animation: spark 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.wc-predator .spark:nth-child(1) { top: 4px; right: 4px; animation-delay: 0s; }
+.wc-predator .spark:nth-child(2) { top: 4px; left: 4px; animation-delay: 1s; background: #a060ff; box-shadow: 0 0 6px #a060ff; }
+.wc-predator .spark:nth-child(3) { bottom: 4px; right: 4px; animation-delay: 2s; }
+.wc-predator:hover {
+  animation: none;
+  border-color: #a060ff !important;
+  box-shadow: 0 0 0 2px rgba(160,96,255,0.25), 0 12px 40px rgba(160,96,255,0.2) !important;
+}
+
+
+/* ── TIER 4: KING (3+ SOL / Bounty) — Red Dragon / Monster King ── */
+@keyframes kingFlame {
+  0%,100% {
+    box-shadow:
+      0 0 12px rgba(255,77,0,0.5),
+      0 0 30px rgba(255,77,0,0.2),
+      0 -4px 20px rgba(255,210,0,0.2);
+    border-color: rgba(255,77,0,0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 24px rgba(255,77,0,0.8),
+      0 0 50px rgba(255,77,0,0.3),
+      0 -8px 30px rgba(255,210,0,0.4);
+    border-color: rgba(255,210,0,0.7);
+  }
+}
+.wc-king {
+  border-color: rgba(255,77,0,0.6) !important;
+  background: linear-gradient(135deg, rgba(255,77,0,0.08) 0%, rgba(255,210,0,0.04) 100%) !important;
+  animation: kingFlame 1.8s ease-in-out infinite;
+}
+.wc-king::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #ff4d00, #ffd200, #ff4d00, transparent);
+  animation: kingShimmer 2s linear infinite;
+  pointer-events: none;
+}
+@keyframes kingShimmer {
+  0%   { background-position: -200% 0; opacity: 0.6; }
+  50%  { opacity: 1; }
+  100% { background-position: 200% 0; opacity: 0.6; }
+}
+/* Flame particles rising */
+@keyframes riseFlame {
+  0%   { transform: translateY(0) scale(1); opacity: 0.6; }
+  100% { transform: translateY(-22px) scale(0.2); opacity: 0; }
+}
+.wc-king .flame {
+  position: absolute;
+  bottom: 6px;
+  width: 4px; height: 6px;
+  border-radius: 50% 50% 20% 20%;
+  background: linear-gradient(to top, #ff4d00, #ffd200);
+  animation: riseFlame 1.4s ease-out infinite;
+  pointer-events: none;
+}
+.wc-king .flame:nth-child(1) { left: 20%; animation-delay: 0s; }
+.wc-king .flame:nth-child(2) { left: 50%; animation-delay: 0.5s; width: 3px; height: 5px; }
+.wc-king .flame:nth-child(3) { left: 75%; animation-delay: 0.9s; }
+.wc-king:hover {
+  animation: none;
+  border-color: #ffd200 !important;
+  box-shadow: 0 0 0 2px rgba(255,210,0,0.3), 0 16px 48px rgba(255,77,0,0.3) !important;
+}
+
+
+/* ── Bounce on hover (all tiers) ── */
+.wallet-card:hover {
+  transform: translateY(-4px) scale(1.025) !important;
+}
+.wc-dust:hover   { transform: translateY(-3px) scale(1.02) !important; }
+.wc-king:hover   { transform: translateY(-5px) scale(1.03) !important; }
+
+
+/* ── Tier icon corner badge ── */
+.tier-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.wc-king .tier-icon  { opacity: 1; animation: floatY 2s ease-in-out infinite; font-size: 16px; }
+.wc-predator .tier-icon { opacity: 0.8; }
