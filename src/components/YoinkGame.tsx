@@ -197,19 +197,52 @@ export default function YoinkGame() {
         </div>
       </div>
 
-      {/* How it works */}
-      <div className="grid grid-cols-4 gap-3">
+      {/* How it works — richer cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { n:"01", s:"◎", t:"Enter",   d:"Lock SOL to join",     c:"#ff4d00" },
-          { n:"02", s:"◉", t:"Target",  d:"Click any wallet",     c:"#a060ff" },
-          { n:"03", s:"⊕", t:"Yoink",   d:"Pay 5% fee to steal",  c:"#40d8f0" },
-          { n:"04", s:"◈", t:"Collect", d:"Win 50% of their bal", c:"#00d470" },
+          {
+            n:"01", c:"#ff4d00",
+            t:"Lock SOL to Enter",
+            d:"Your deposit becomes your live balance. Everyone in the arena can see it — and target you.",
+            earn: null,
+          },
+          {
+            n:"02", c:"#a060ff",
+            t:"See Live Balances",
+            d:"That number on each card? Real SOL locked in. It grows when they win steals, shrinks when they get yoinked.",
+            earn:"Hover any card → see steal odds",
+          },
+          {
+            n:"03", c:"#40d8f0",
+            t:"Pay Fee, Steal SOL",
+            d:"Fee = 5% of target's balance. Win = steal 50% of their locked SOL. Lose = only lose the fee. They keep everything if you miss.",
+            earn:"Win: +50% of theirs  |  Lose: -5% fee only",
+          },
+          {
+            n:"04", c:"#00d470",
+            t:"Win & Compound",
+            d:"Every successful yoink grows your balance. Bigger balance = better odds on your next attack. Stack wins to dominate.",
+            earn:"10x your entry in one session is real",
+          },
         ].map(s => (
-          <motion.div key={s.n} whileHover={{ y: -3 }} className="card-sm text-center cursor-default">
-            <div className="text-[20px] mb-2 leading-none" style={{ color: s.c }}>{s.s}</div>
-            <div className="text-[10px] font-mono tracking-[0.1em] mb-1" style={{ color: '#30304a' }}>{s.n}</div>
-            <div className="text-[13px] font-bold text-white">{s.t}</div>
-            <div className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>{s.d}</div>
+          <motion.div key={s.n} whileHover={{ y: -3 }} className="card-sm cursor-default">
+            <div className="text-[10px] font-mono tracking-[0.1em] mb-2" style={{ color: '#30304a' }}>{s.n}</div>
+            <div className="text-[13px] font-bold text-white mb-1.5">{s.t}</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: '#6060a0' }}>{s.d}</div>
+            {s.earn && (
+              <div className="mt-2.5 text-[10px] font-mono px-2 py-1.5 rounded-lg"
+                style={{
+                  background: `rgba(${
+                    s.c === "#ff4d00" ? "255,77,0"
+                    : s.c === "#a060ff" ? "112,0,255"
+                    : s.c === "#40d8f0" ? "0,229,255"
+                    : "0,232,122"
+                  },0.08)`,
+                  color: s.c,
+                }}>
+                {s.earn}
+              </div>
+            )}
           </motion.div>
         ))}
       </div>
