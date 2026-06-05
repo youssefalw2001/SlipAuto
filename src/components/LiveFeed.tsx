@@ -1,71 +1,69 @@
 import { Crosshair, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface FeedItem {
-  id: number;
-  wallet: string;
-  target?: string;
-  amount: number;
-  game: "yoink" | "wheel";
-  success: boolean;
-}
+interface Item { id: number; wallet: string; target?: string; amount: number; game: "yoink"|"wheel"; win: boolean; }
 
-const W = [
-  "7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x",
-  "Qm3a...Rt5u","Ew7b...Ln0z","Fs2c...Vg4k","Jp8e...Ah9w",
-  "Ux1f...Dm6y","Nt4g...Sb7i","Rk5h...Oc2p","Wj9i...Ef3n",
+const W = ["7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x","Qm3a...Rt5u","Ew7b...Ln0z","Fs2c...Vg4k","Jp8e...Ah9w","Ux1f...Dm6y","Nt4g...Sb7i","Rk5h...Oc2p","Wj9i...Ef3n"];
+
+const SEED: Item[] = [
+  { id:1,  wallet:W[0],  target:W[5],  amount:3.21, game:"yoink", win:true  },
+  { id:2,  wallet:W[1],                amount:5.44, game:"wheel", win:true  },
+  { id:3,  wallet:W[2],  target:W[3],  amount:1.82, game:"yoink", win:true  },
+  { id:4,  wallet:W[7],                amount:8.12, game:"wheel", win:true  },
+  { id:5,  wallet:W[4],  target:W[6],  amount:0.45, game:"yoink", win:false },
+  { id:6,  wallet:W[9],                amount:4.30, game:"wheel", win:true  },
+  { id:7,  wallet:W[10], target:W[8],  amount:2.14, game:"yoink", win:true  },
+  { id:8,  wallet:W[11],               amount:6.70, game:"wheel", win:true  },
+  { id:9,  wallet:W[3],  target:W[0],  amount:0.92, game:"yoink", win:true  },
+  { id:10, wallet:W[5],                amount:3.15, game:"wheel", win:true  },
 ];
 
-const SEED: FeedItem[] = [
-  { id:1, wallet:W[0], target:W[5], amount:3.21, game:"yoink", success:true },
-  { id:2, wallet:W[1], amount:5.44, game:"wheel", success:true },
-  { id:3, wallet:W[2], target:W[3], amount:1.82, game:"yoink", success:true },
-  { id:4, wallet:W[7], amount:8.12, game:"wheel", success:true },
-  { id:5, wallet:W[4], target:W[6], amount:0.45, game:"yoink", success:false },
-  { id:6, wallet:W[9], amount:4.30, game:"wheel", success:true },
-  { id:7, wallet:W[10], target:W[8], amount:2.14, game:"yoink", success:true },
-  { id:8, wallet:W[11], amount:6.70, game:"wheel", success:true },
-];
-
-let uid = 50;
+let uid = 100;
 
 export default function LiveFeed() {
-  const [items, setItems] = useState<FeedItem[]>(SEED);
+  const [items, setItems] = useState<Item[]>(SEED);
 
   useEffect(() => {
     const iv = setInterval(() => {
       uid++;
       const game: "yoink"|"wheel" = Math.random() > 0.5 ? "yoink" : "wheel";
-      const success = game === "wheel" ? true : Math.random() > 0.2;
-      const amount = parseFloat((Math.random() * 6 + 0.2).toFixed(2));
+      const win = game === "wheel" ? true : Math.random() > 0.22;
+      const amount = parseFloat((Math.random() * 7 + 0.2).toFixed(2));
       const wallet = W[Math.floor(Math.random() * W.length)];
       const target = game === "yoink" ? W[Math.floor(Math.random() * W.length)] : undefined;
-      setItems(prev => [...prev.slice(-25), { id: uid, wallet, target, amount, game, success }]);
-    }, 4500);
+      setItems(p => [...p.slice(-30), { id: uid, wallet, target, amount, game, win }]);
+    }, 5000);
     return () => clearInterval(iv);
   }, []);
 
   return (
-    <div className="border-b border-y-border bg-y-surface/50 overflow-hidden">
-      <div className="flex items-center">
-        <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 border-r border-y-border">
+    <div className="border-b border-y-border overflow-hidden" style={{ background: 'rgba(13,13,28,0.7)' }}>
+      <div className="flex items-stretch h-8">
+        {/* Label */}
+        <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-y-border">
           <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
-          <span className="text-[10px] font-mono font-medium text-y-muted uppercase tracking-wider">feed</span>
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-widest text-y-green">Live</span>
         </div>
-        <div className="flex-1 overflow-hidden py-1.5">
-          <div className="ticker-scroll flex items-center gap-6 whitespace-nowrap px-4">
+
+        {/* Ticker */}
+        <div className="flex-1 overflow-hidden flex items-center">
+          <div className="ticker flex items-center gap-8 whitespace-nowrap px-4">
             {[...items, ...items].map((e, i) => (
-              <span key={`${e.id}-${i}`} className="inline-flex items-center gap-1.5 text-[11px]">
+              <span key={`${e.id}-${i}`} className="inline-flex items-center gap-2 text-[11px] font-mono">
                 {e.game === "yoink"
-                  ? <Crosshair className="w-3 h-3 text-y-accent" />
-                  : <RotateCcw className="w-3 h-3 text-y-accent2" />}
-                <span className="font-mono text-y-muted">{e.wallet}</span>
-                <span className={`font-semibold ${e.success ? "text-y-green" : "text-y-accent"}`}>
-                  {e.success ? "+" : "-"}{e.amount} SOL
+                  ? <Crosshair className="w-3 h-3 flex-shrink-0" style={{ color: '#ff4d00' }} />
+                  : <RotateCcw className="w-3 h-3 flex-shrink-0" style={{ color: '#9b3dff' }} />
+                }
+                <span style={{ color: '#6060a0' }}>{e.wallet}</span>
+                <span className="font-semibold" style={{ color: e.win ? '#00d470' : '#ff4d00' }}>
+                  {e.win ? "+" : "-"}{e.amount} SOL
                 </span>
                 {e.target && (
-                  <span className="text-y-dim">{e.success ? "from" : "→"} {e.target}</span>
+                  <span style={{ color: '#383855' }}>
+                    {e.win ? "stolen from" : "→"} {e.target}
+                  </span>
                 )}
+                <span style={{ color: '#1a1a2e', margin: '0 4px' }}>◆</span>
               </span>
             ))}
           </div>

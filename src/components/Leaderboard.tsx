@@ -2,19 +2,11 @@ import { motion } from "framer-motion";
 import { Crosshair, Crown, RotateCcw, Trophy } from "lucide-react";
 import { useState } from "react";
 
-type Period = "daily" | "weekly" | "alltime";
+type P = "daily"|"weekly"|"alltime";
 
-interface Player {
-  rank: number;
-  wallet: string;
-  stolen: number;
-  games: number;
-  winRate: number;
-  game: "yoink" | "wheel" | "both";
-  streak: number;
-}
+interface Player { rank:number; wallet:string; stolen:number; games:number; winRate:number; game:"yoink"|"wheel"|"both"; streak:number; }
 
-const DATA: Record<Period, Player[]> = {
+const DATA: Record<P, Player[]> = {
   daily: [
     { rank:1,  wallet:"Ew7b...Ln0z", stolen:18.44, games:22, winRate:77, game:"yoink", streak:7 },
     { rank:2,  wallet:"Rk5h...Oc2p", stolen:12.21, games:31, winRate:65, game:"wheel", streak:4 },
@@ -53,58 +45,49 @@ const DATA: Record<Period, Player[]> = {
   ],
 };
 
-const PRIZES: Record<Period, string[]> = {
-  daily:   ["2 SOL", "1 SOL", "0.5 SOL"],
-  weekly:  ["10 SOL", "5 SOL", "2 SOL"],
-  alltime: ["50 SOL", "20 SOL", "10 SOL"],
+const PRIZES: Record<P,string[]> = {
+  daily:   ["2 SOL","1 SOL","0.5 SOL"],
+  weekly:  ["10 SOL","5 SOL","2 SOL"],
+  alltime: ["50 SOL","20 SOL","10 SOL"],
 };
 
 export default function Leaderboard() {
-  const [period, setPeriod] = useState<Period>("weekly");
+  const [period, setPeriod] = useState<P>("weekly");
   const data = DATA[period];
   const prizes = PRIZES[period];
 
-  const rankStyle = (r: number) =>
-    r === 1 ? "text-y-yellow font-bold" : r === 2 ? "text-slate-300 font-bold" : r === 3 ? "text-amber-500 font-bold" : "text-y-muted";
-
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Trophy className="w-4.5 h-4.5 text-y-yellow" />
-            Leaderboard
-          </h1>
-          <p className="text-[13px] text-y-muted mt-0.5">Top stealers win SOL from the prize pool</p>
+      <div className="card-hero">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="big-number text-[48px] leading-none text-white mb-1">LEADERBOARD</h1>
+            <p className="text-[13px]" style={{ color: '#6060a0' }}>Top stealers win SOL from the prize pool every round</p>
+          </div>
+          <div className="flex items-center gap-5">
+            {prizes.map((p, i) => (
+              <div key={i} className="text-center">
+                <div className="text-[11px] font-mono mb-0.5" style={{ color: '#6060a0' }}>
+                  {i === 0 ? "1ST" : i === 1 ? "2ND" : "3RD"}
+                </div>
+                <div className="big-number text-[22px]" style={{ color: i === 0 ? '#ffd200' : i === 1 ? '#c0c0c0' : '#cd7f32' }}>{p}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Prize row */}
-      <div className="card flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Crown className="w-4 h-4 text-y-yellow" />
-          <span className="text-[13px] font-medium text-white">{period === "alltime" ? "All-Time" : period.charAt(0).toUpperCase() + period.slice(1)} Prizes</span>
-        </div>
-        <div className="flex items-center gap-5">
-          {prizes.map((p, i) => (
-            <div key={i} className="text-center">
-              <p className="text-[10px] text-y-muted">{i === 0 ? "1st" : i === 1 ? "2nd" : "3rd"}</p>
-              <p className="text-[13px] font-bold text-y-yellow">{p}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-y-surface border border-y-border rounded-xl p-1 w-fit">
-        {(["daily","weekly","alltime"] as Period[]).map(p => (
-          <button
-            key={p}
-            onClick={() => setPeriod(p)}
-            className={`px-4 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-              period === p ? "bg-y-accent text-white" : "text-y-muted hover:text-white"
-            }`}
+      {/* Period tabs */}
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        {(["daily","weekly","alltime"] as P[]).map(p => (
+          <button key={p} onClick={() => setPeriod(p)}
+            className="px-5 py-2 rounded-lg text-[13px] font-semibold transition-all"
+            style={{
+              background: period === p ? '#ff4d00' : 'transparent',
+              color: period === p ? '#fff' : '#6060a0',
+              boxShadow: period === p ? '0 4px 16px rgba(255,77,0,0.3)' : 'none',
+            }}
           >
             {p === "alltime" ? "All Time" : p.charAt(0).toUpperCase() + p.slice(1)}
           </button>
@@ -112,44 +95,67 @@ export default function Leaderboard() {
       </div>
 
       {/* Table */}
-      <div className="card p-0 overflow-hidden">
+      <div className="card-flat overflow-hidden p-0">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-[12px]">
             <thead>
-              <tr className="border-b border-y-border bg-y-surface/50">
-                <th className="text-left px-4 py-2.5 font-medium text-y-muted">#</th>
-                <th className="text-left px-4 py-2.5 font-medium text-y-muted">Player</th>
-                <th className="text-left px-4 py-2.5 font-medium text-y-muted hidden sm:table-cell">Game</th>
-                <th className="text-right px-4 py-2.5 font-medium text-y-muted">Stolen</th>
-                <th className="text-right px-4 py-2.5 font-medium text-y-muted hidden md:table-cell">Games</th>
-                <th className="text-right px-4 py-2.5 font-medium text-y-muted hidden md:table-cell">Win%</th>
-                <th className="text-right px-4 py-2.5 font-medium text-y-muted hidden sm:table-cell">Streak</th>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
+                {["#","Player","Game","SOL Stolen","Games","Win%","Streak"].map((h, i) => (
+                  <th key={h} className={`px-4 py-3 text-left font-mono uppercase tracking-widest ${["Games","Win%","Streak"].includes(h) ? "hidden md:table-cell" : ""}`}
+                    style={{ color: '#383855', fontSize: '10px' }}
+                  >{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {data.map((p, i) => (
                 <motion.tr
                   key={p.rank}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.03 }}
-                  className={`border-b border-y-border/50 hover:bg-white/2 transition-colors ${p.rank <= 3 ? "bg-y-yellow/2" : ""}`}
+                  style={{
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    background: p.rank <= 3 ? 'rgba(255,210,0,0.015)' : 'transparent',
+                  }}
+                  className="hover:bg-white/1 transition-colors"
                 >
-                  <td className="px-4 py-2.5"><span className={`text-[13px] ${rankStyle(p.rank)}`}>{p.rank}</span></td>
-                  <td className="px-4 py-2.5"><span className="font-mono font-medium text-white">{p.wallet}</span></td>
-                  <td className="px-4 py-2.5 hidden sm:table-cell">
+                  <td className="px-4 py-3">
+                    <span className="big-number text-[18px]"
+                      style={{ color: p.rank === 1 ? '#ffd200' : p.rank === 2 ? '#a0a0a0' : p.rank === 3 ? '#cd7f32' : '#383855' }}
+                    >
+                      {p.rank}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-mono font-medium text-white text-[12px]">{p.wallet}</span>
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex gap-1">
-                      {(p.game === "yoink" || p.game === "both") && <span className="pill pill-accent"><Crosshair className="w-2.5 h-2.5" />Y</span>}
-                      {(p.game === "wheel" || p.game === "both") && <span className="pill pill-purple"><RotateCcw className="w-2.5 h-2.5" />W</span>}
+                      {(p.game === "yoink" || p.game === "both") && (
+                        <span className="pill pill-accent" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                          <Crosshair className="w-2.5 h-2.5" />Y
+                        </span>
+                      )}
+                      {(p.game === "wheel" || p.game === "both") && (
+                        <span className="pill pill-violet" style={{ fontSize: '10px', padding: '2px 7px' }}>
+                          <RotateCcw className="w-2.5 h-2.5" />W
+                        </span>
+                      )}
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right"><span className="font-mono font-semibold text-y-green">{p.stolen.toFixed(2)}</span></td>
-                  <td className="px-4 py-2.5 text-right hidden md:table-cell text-y-muted">{p.games}</td>
-                  <td className="px-4 py-2.5 text-right hidden md:table-cell">
-                    <span className={`font-medium ${p.winRate >= 65 ? "text-y-green" : p.winRate >= 50 ? "text-y-yellow" : "text-y-muted"}`}>{p.winRate}%</span>
+                  <td className="px-4 py-3">
+                    <span className="font-mono font-bold" style={{ color: '#00d470' }}>{p.stolen.toFixed(2)}</span>
                   </td>
-                  <td className="px-4 py-2.5 text-right hidden sm:table-cell">
-                    {p.streak > 0 ? <span className="pill pill-orange">{p.streak}W</span> : <span className="text-y-dim">—</span>}
+                  <td className="px-4 py-3 hidden md:table-cell" style={{ color: '#6060a0' }}>{p.games}</td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    <span style={{ color: p.winRate >= 65 ? '#00d470' : p.winRate >= 50 ? '#ffd200' : '#6060a0', fontWeight: 600 }}>{p.winRate}%</span>
+                  </td>
+                  <td className="px-4 py-3 hidden md:table-cell">
+                    {p.streak > 0
+                      ? <span className="pill pill-yellow" style={{ fontSize: '10px' }}>{p.streak}W</span>
+                      : <span style={{ color: '#383855' }}>—</span>
+                    }
                   </td>
                 </motion.tr>
               ))}
@@ -158,13 +164,18 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      {/* Your rank */}
-      <div className="card flex items-center justify-between">
+      {/* Connect */}
+      <div className="card-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <p className="text-[13px] font-medium text-white">Your Ranking</p>
-          <p className="text-[11px] text-y-muted">Connect wallet to see your position</p>
+          <p className="text-[13px] font-semibold text-white flex items-center gap-2">
+            <Trophy className="w-4 h-4" style={{ color: '#ffd200' }} />
+            Your Ranking
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>Connect wallet to see your position and claim prizes</p>
         </div>
-        <button className="btn-primary text-[12px]">Connect Wallet</button>
+        <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-yoink text-[13px] py-2.5">
+          Connect Wallet
+        </motion.button>
       </div>
     </div>
   );
