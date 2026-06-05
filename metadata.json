@@ -1,6 +1,0 @@
-{
-  "name": "Azuro Bet Automation Terminal",
-  "description": "Advanced command line automation builder and structural console for executing and monitoring Azuro sports bets on Polygon.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
