@@ -1,12 +1,21 @@
 import NumberFlow from "@number-flow/react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Crosshair, HelpCircle, Shield, Target, Zap } from "lucide-react";
+import { AlertCircle, Crosshair, Shield, Target, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
 
-interface Player { id: number; wallet: string; balance: number; isYou: boolean; hit?: boolean; }
-interface Tooltip { playerId: number; x: number; y: number; }
+interface Player {
+  id: number;
+  wallet: string;
+  balance: number;
+  isYou: boolean;
+  hit?: boolean;
+  levelId: number;   // each bot has a random level
+  isBounty?: boolean; // balance > 3 SOL = bounty
+}
+interface Tooltip { playerId: number; }
 
 const W = [
   "7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x",
@@ -15,12 +24,21 @@ const W = [
   "Lp2k...Mx7t","Dv5n...Qs9b","Cy4h...Tz8r","Ab6j...Wu3o",
 ];
 
-const rBal = () => parseFloat((Math.random() * 5 + 0.1).toFixed(3));
+const LEVEL_COLORS = ["#a0a0b0","#00d470","#a060ff","#ff4d00"];
+const LEVEL_NAMES  = ["ROOKIE","HUSTLER","PREDATOR","APEX"];
+const BOUNTY_THRESHOLD = 3.0; // SOL
+
+const rBal   = () => parseFloat((Math.random() * 5 + 0.1).toFixed(3));
+const rLevel = () => Math.floor(Math.random() * 3) + 1; // bots are levels 1-3
 let uid = 40;
 
-const SEED: Player[] = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1, wallet: W[i], balance: rBal(), isYou: false,
-}));
+function makePlayer(id: number, wallet: string): Player {
+  const bal = rBal();
+  const lvl = rLevel();
+  return { id, wallet, balance: bal, isYou: false, levelId: lvl, isBounty: bal >= BOUNTY_THRESHOLD };
+}
+
+const SEED: Player[] = Array.from({ length: 12 }, (_, i) => makePlayer(i + 1, W[i]));
 
 function fireCelebration() {
   const opts = { startVelocity: 35, spread: 360, ticks: 70, zIndex: 9999 };
@@ -28,7 +46,9 @@ function fireCelebration() {
   confetti({ ...opts, particleCount: 60, origin: { x: 0.65, y: 0.4 }, colors: ['#7000ff','#ff0066','#ffd200','#ffffff'] });
 }
 
-export default function YoinkGame() {
+interface Props { xp: number; onXPGain: (xp: number) => void; levelId: number; }
+
+export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
   const [players, setPlayers]     = useState<Player[]>(SEED);
   const [myBal, setMyBal]         = useState(0);
   const [target, setTarget]       = useState<number | null>(null);
@@ -39,6 +59,10 @@ export default function YoinkGame() {
   const [stolen, setStolen]       = useState(284.1);
   const [rounds, setRounds]       = useState(1847);
   const [livePlayers, setLive]    = useState(14);
+
+  // Pity system — tracks consecutive losses per target attempt
+  const pityCounts  = useRef<Record<number, number>>({});  // targetId → consecutive losses
+  const globalPity  = useRef(0); // overall consecutive losses
   const [tooltip, setTooltip]     = useState<Tooltip | null>(null);
   const tooltipTimer              = useRef<ReturnType<typeof setTimeout>>();
 
@@ -51,8 +75,9 @@ export default function YoinkGame() {
         const b = Math.floor(Math.random() * arr.length);
         if (a === b || arr[a].isYou || arr[b].isYou) return arr;
         const amt = parseFloat((arr[b].balance * (0.12 + Math.random() * 0.35)).toFixed(3));
-        arr[a] = { ...arr[a], balance: parseFloat((arr[a].balance + amt * 0.9).toFixed(3)) };
-        arr[b] = { ...arr[b], balance: Math.max(0.01, parseFloat((arr[b].balance - amt).toFixed(3))), hit: true };
+        const newBal = Math.max(0.01, parseFloat((arr[b].balance - amt).toFixed(3)));
+        arr[a] = { ...arr[a], balance: parseFloat((arr[a].balance + amt * 0.9).toFixed(3)), isBounty: (arr[a].balance + amt * 0.9) >= BOUNTY_THRESHOLD };
+        arr[b] = { ...arr[b], balance: newBal, hit: true, isBounty: newBal >= BOUNTY_THRESHOLD };
         setTimeout(() => setPlayers(p => p.map(pl => pl.id === arr[b].id ? { ...pl, hit: false } : pl)), 900);
         setStolen(s => parseFloat((s + amt).toFixed(2)));
         return arr;
@@ -61,7 +86,7 @@ export default function YoinkGame() {
         uid++;
         setPlayers(prev => {
           const n = prev.length >= 16 ? prev.slice(1) : prev;
-          return [...n, { id: uid, wallet: W[uid % W.length], balance: rBal(), isYou: false }];
+          return [...n, makePlayer(uid, W[uid % W.length])];
         });
         setLive(l => Math.max(8, l + (Math.random() > 0.5 ? 1 : -1)));
       }
@@ -72,13 +97,26 @@ export default function YoinkGame() {
 
   const tp = players.find(p => p.id === target);
 
-  const chance = (myB = myBal, theirB?: number) => {
+  // Level success bonus
+  const levelBonus = getLevelByXP(xp).successBonus;
+
+  // Pity-adjusted chance calculation
+  const chance = (myB = myBal, theirB?: number, targetId?: number): number => {
     const tb = theirB ?? tp?.balance ?? 1;
-    const r = myB / tb;
-    if (r > 2)   return 75;
-    if (r > 1)   return 60;
-    if (r > 0.5) return 45;
-    return 30;
+    const r  = myB / tb;
+    let base = r > 2 ? 75 : r > 1 ? 60 : r > 0.5 ? 45 : 30;
+
+    // Apply level bonus
+    base = Math.min(92, base + levelBonus);
+
+    // Apply pity: each consecutive loss adds 8% up to +24%
+    const pity = Math.min(3, globalPity.current);
+    base = Math.min(95, base + pity * 8);
+
+    // Small wallet shield: target under 0.5 SOL gets +20% defence
+    if (tb < 0.5) base = Math.max(10, base - 20);
+
+    return Math.round(base);
   };
 
   const chanceColor = (c: number) =>
@@ -90,7 +128,9 @@ export default function YoinkGame() {
     setJoined(true);
     setMyBal(v);
     uid++;
-    setPlayers(prev => [...prev, { id: uid, wallet: "You", balance: v, isYou: true }]);
+    const me: Player = { id: uid, wallet: "You", balance: v, isYou: true, levelId, isBounty: v >= BOUNTY_THRESHOLD };
+    setPlayers(prev => [...prev, me]);
+    onXPGain(XP_REWARDS.ENTER_ARENA);
     toast.success(`Entered arena with ${v} SOL`);
   };
 
@@ -98,6 +138,8 @@ export default function YoinkGame() {
     setJoined(false);
     setTarget(null);
     setMyBal(0);
+    globalPity.current = 0;
+    pityCounts.current = {};
     setPlayers(prev => prev.filter(p => !p.isYou));
   };
 
@@ -105,18 +147,29 @@ export default function YoinkGame() {
     if (!target || !tp || acting) return;
     setActing(true);
     const c = chance();
+    onXPGain(XP_REWARDS.YOINK_ATTEMPT);
     setTimeout(() => {
       const roll = Math.random() * 100;
       const fee  = parseFloat((tp.balance * 0.05).toFixed(3));
-      const gain = parseFloat((tp.balance * 0.5).toFixed(3));
+      // Bounty = double payout (90% instead of 50%)
+      const gainPct = tp.isBounty ? 0.9 : 0.5;
+      const gain = parseFloat((tp.balance * gainPct).toFixed(3));
       if (roll < c) {
+        // WIN — reset pity
+        globalPity.current = 0;
+        pityCounts.current[target] = 0;
         setMyBal(b => parseFloat((b + gain - fee).toFixed(3)));
+        const newBal = parseFloat((tp.balance - gain).toFixed(3));
         setPlayers(prev => prev.map(p => {
-          if (p.id === target) return { ...p, balance: parseFloat((p.balance - gain).toFixed(3)), hit: true };
-          if (p.isYou)         return { ...p, balance: parseFloat((p.balance + gain - fee).toFixed(3)) };
+          if (p.id === target) return { ...p, balance: newBal, hit: true, isBounty: newBal >= BOUNTY_THRESHOLD };
+          if (p.isYou) {
+            const nb = parseFloat((p.balance + gain - fee).toFixed(3));
+            return { ...p, balance: nb, isBounty: nb >= BOUNTY_THRESHOLD };
+          }
           return p;
         }));
         setTimeout(() => setPlayers(p => p.map(pl => pl.id === target ? { ...pl, hit: false } : pl)), 900);
+        onXPGain(XP_REWARDS.YOINK_SUCCESS);
         setStolen(s => parseFloat((s + gain).toFixed(2)));
         setRounds(r => r + 1);
         setFlash("win");
@@ -124,12 +177,16 @@ export default function YoinkGame() {
         fireCelebration();
         toast.success(`YOINKED! +${gain} SOL stolen from ${tp.wallet}`, { duration: 4000 });
       } else {
+        // LOSE — increment pity
+        globalPity.current += 1;
+        pityCounts.current[target] = (pityCounts.current[target] ?? 0) + 1;
         setMyBal(b => parseFloat((b - fee).toFixed(3)));
         setPlayers(prev => prev.map(p => p.isYou ? { ...p, balance: parseFloat((p.balance - fee).toFixed(3)) } : p));
         setRounds(r => r + 1);
         setFlash("lose");
         setTimeout(() => setFlash(null), 600);
-        toast.error(`Yoink failed — lost ${fee} SOL fee`, { duration: 3500 });
+        const pityMsg = globalPity.current >= 2 ? ` (${Math.min(95, chance() + 8)}% next attempt — pity active)` : "";
+        toast.error(`Yoink failed — lost ${fee} SOL fee${pityMsg}`, { duration: 3500 });
       }
       setTarget(null);
       setActing(false);
@@ -139,11 +196,12 @@ export default function YoinkGame() {
   const maxBal = Math.max(...players.map(p => p.balance), 1);
   const myPlayer = players.find(p => p.isYou);
   const isOut = joined && myPlayer && myPlayer.balance <= 0.01;
+  const { current: myLevel, progressPct, xpIntoLevel, xpNeeded, next: nextLevel } = getXPProgress(xp);
 
   // Tooltip show/hide
-  const showTooltip = (id: number, e: React.MouseEvent) => {
+  const showTooltip = (id: number) => {
     clearTimeout(tooltipTimer.current);
-    setTooltip({ playerId: id, x: 0, y: 0 });
+    setTooltip({ playerId: id });
   };
   const hideTooltip = () => {
     tooltipTimer.current = setTimeout(() => setTooltip(null), 200);
@@ -271,11 +329,17 @@ export default function YoinkGame() {
                 const pct = (p.balance / maxBal) * 100;
                 const isT = target === p.id;
                 const c   = chance(myBal, p.balance);
+                const lvlColor = LEVEL_COLORS[(p.levelId ?? 1) - 1];
+                const lvlName  = LEVEL_NAMES[(p.levelId ?? 1) - 1];
                 const barColor = p.isYou
                   ? 'linear-gradient(90deg,#00e5ff,#7000ff)'
-                  : p.balance > 3   ? 'linear-gradient(90deg,#00e87a,#00c8e8)'
-                  : p.balance > 1.5 ? 'linear-gradient(90deg,#ffd200,#ff4d00)'
-                  :                   'linear-gradient(90deg,#ff4d00,#cc0044)';
+                  : p.isBounty ? 'linear-gradient(90deg,#ffd200,#ff4d00)'
+                  : p.balance > 1.5 ? 'linear-gradient(90deg,#00e87a,#00c8e8)'
+                  : 'linear-gradient(90deg,#ff4d00,#cc0044)';
+
+                const stealAmt = p.isBounty
+                  ? parseFloat((p.balance * 0.9).toFixed(3))
+                  : parseFloat((p.balance * 0.5).toFixed(3));
 
                 return (
                   <motion.div
@@ -286,10 +350,24 @@ export default function YoinkGame() {
                     exit={{ opacity: 0, scale: 0.82 }}
                     transition={{ duration: 0.22 }}
                     onClick={() => !p.isYou && joined && setTarget(isT ? null : p.id)}
-                    onMouseEnter={e => !p.isYou && joined && showTooltip(p.id, e)}
+                    onMouseEnter={() => !p.isYou && joined && showTooltip(p.id)}
                     onMouseLeave={hideTooltip}
-                    className={`wallet-card relative ${isT ? "targeted" : ""} ${p.isYou ? "is-you" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou) ? "!cursor-default" : ""}`}
+                    className={`wallet-card relative ${isT ? "targeted" : ""} ${p.isYou ? "is-you" : ""} ${p.hit ? "hit" : ""} ${p.isBounty && !p.isYou ? "bounty" : ""} ${(!joined || p.isYou) ? "!cursor-default" : ""}`}
                   >
+                    {/* Bounty crown */}
+                    {p.isBounty && !p.isYou && (
+                      <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
+                        <motion.div
+                          animate={{ y: [0, -2, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                          className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold flex items-center gap-1"
+                          style={{ background: 'rgba(255,210,0,0.9)', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.5)' }}
+                        >
+                          👑 BOUNTY
+                        </motion.div>
+                      </div>
+                    )}
+
                     {/* Targeted icon */}
                     {isT && (
                       <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }}
@@ -298,29 +376,38 @@ export default function YoinkGame() {
                       </motion.div>
                     )}
 
-                    {/* Chance badge on hover (non-targeted) */}
+                    {/* Hover tooltip */}
                     {joined && !p.isYou && !isT && tooltip?.playerId === p.id && (
                       <motion.div
                         initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                        className="absolute -top-9 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 rounded-lg text-[11px] font-mono font-bold whitespace-nowrap"
+                        className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 px-3 py-2 rounded-lg text-[11px] font-mono font-bold whitespace-nowrap"
                         style={{
                           background: '#0c0c1a',
                           border: `1px solid ${chanceColor(c)}40`,
                           color: chanceColor(c),
-                          boxShadow: `0 4px 20px rgba(0,0,0,0.6)`,
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
                         }}
                       >
-                        {c}% chance · steal {(p.balance * 0.5).toFixed(3)} SOL
+                        {c}% · steal {stealAmt} SOL{p.isBounty ? " (2x BOUNTY!)" : ""}
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent" style={{ borderTopColor: '#0c0c1a' }} />
                       </motion.div>
                     )}
 
-                    <p className="font-mono text-[10px] mb-2 truncate" style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
-                      {p.isYou ? "● YOU" : p.wallet}
-                    </p>
+                    {/* Top row: wallet + level badge */}
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-mono text-[10px] truncate" style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
+                        {p.isYou ? "● YOU" : p.wallet}
+                      </p>
+                      {!p.isYou && (
+                        <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ml-1"
+                          style={{ background: `${lvlColor}18`, color: lvlColor, border: `1px solid ${lvlColor}30` }}>
+                          {lvlName[0]}
+                        </span>
+                      )}
+                    </div>
 
-                    <p className={`font-display leading-none ${p.balance > 3 ? "text-[30px]" : p.balance > 1.5 ? "text-[26px]" : "text-[22px]"} ${p.hit ? "glow-accent" : p.isYou ? "glow-cyan" : ""}`}
-                      style={{ color: p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : p.balance > 2.5 ? '#00d470' : p.balance > 1 ? '#eeeef8' : '#a0a0c0' }}
+                    <p className={`font-display leading-none ${p.balance > 3 ? "text-[30px]" : p.balance > 1.5 ? "text-[26px]" : "text-[22px]"} ${p.hit ? "glow-accent" : p.isYou ? "glow-cyan" : p.isBounty ? "glow-yellow" : ""}`}
+                      style={{ color: p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : p.isBounty ? '#ffd200' : p.balance > 2.5 ? '#00d470' : p.balance > 1 ? '#eeeef8' : '#a0a0c0' }}
                     >
                       {p.balance.toFixed(3)}
                     </p>
@@ -349,6 +436,42 @@ export default function YoinkGame() {
 
         {/* Action panel */}
         <div className="space-y-4">
+
+          {/* XP / Level bar — always visible when joined */}
+          {joined && (
+            <div className="card-sm space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-lg font-display text-[13px] tracking-[0.06em]"
+                    style={{ background: myLevel.badgeBg, color: myLevel.badgeColor, border: `1px solid ${myLevel.badgeColor}30` }}>
+                    {myLevel.name}
+                  </span>
+                  <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>+{myLevel.successBonus}% bonus</span>
+                </div>
+                {globalPity.current > 0 && (
+                  <motion.div
+                    initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+                    className="text-[10px] font-mono px-2 py-1 rounded-lg"
+                    style={{ background: 'rgba(255,210,0,0.1)', color: '#ffd200', border: '1px solid rgba(255,210,0,0.2)' }}
+                  >
+                    🔥 PITY x{Math.min(3, globalPity.current)} (+{Math.min(24, globalPity.current * 8)}%)
+                  </motion.div>
+                )}
+              </div>
+              {nextLevel && (
+                <>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <motion.div animate={{ width: `${progressPct}%` }} transition={{ duration: 0.6 }}
+                      className="h-full rounded-full"
+                      style={{ background: `linear-gradient(90deg, ${myLevel.badgeColor}, ${myLevel.badgeColor}aa)` }} />
+                  </div>
+                  <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>
+                    {xpIntoLevel} / {xpNeeded} XP → <span style={{ color: nextLevel.badgeColor }}>{nextLevel.name}</span>
+                  </p>
+                </>
+              )}
+            </div>
+          )}
 
           {/* OUT OF BALANCE — re-enter prompt */}
           {isOut && (
@@ -439,19 +562,35 @@ export default function YoinkGame() {
                       <p className="text-[10px] font-mono tracking-[0.1em]" style={{ color: '#6060a0' }}>TARGET LOCKED</p>
                       <p className="font-mono text-[13px] text-white mt-1">{tp.wallet}</p>
                     </div>
-                    <Target className="w-6 h-6" style={{ color: '#ff4d00' }} />
+                    <div className="flex items-center gap-2">
+                      {tp.isBounty && (
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(255,210,0,0.2)', color: '#ffd200', border: '1px solid rgba(255,210,0,0.4)' }}>
+                          👑 BOUNTY
+                        </span>
+                      )}
+                      <Target className="w-6 h-6" style={{ color: '#ff4d00' }} />
+                    </div>
                   </div>
                   <div>
-                    <p className="font-display text-[42px] leading-none glow-accent" style={{ color: '#ff7040' }}>
+                    <p className="font-display text-[42px] leading-none" style={{ color: tp.isBounty ? '#ffd200' : '#ff7040' }}>
                       {tp.balance.toFixed(3)}
                     </p>
                     <p className="text-[12px] font-mono" style={{ color: '#6060a0' }}>SOL in target wallet</p>
+                    {tp.isBounty && (
+                      <p className="text-[11px] font-semibold mt-1" style={{ color: '#ffd200' }}>
+                        Bounty target — steal 90% instead of 50%!
+                      </p>
+                    )}
                   </div>
                   <div className="divider" />
                   <div className="grid grid-cols-3 gap-3 text-center text-[11px]">
-                    <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,212,112,0.08)', border: '1px solid rgba(0,212,112,0.15)' }}>
+                    <div className="rounded-xl p-2.5"
+                      style={{ background: tp.isBounty ? 'rgba(255,210,0,0.08)' : 'rgba(0,212,112,0.08)', border: `1px solid ${tp.isBounty ? 'rgba(255,210,0,0.2)' : 'rgba(0,212,112,0.15)'}` }}>
                       <p style={{ color: '#6060a0' }}>You steal</p>
-                      <p className="font-mono font-bold mt-1" style={{ color: '#00d470' }}>+{(tp.balance * 0.5).toFixed(3)}</p>
+                      <p className="font-mono font-bold mt-1" style={{ color: tp.isBounty ? '#ffd200' : '#00d470' }}>
+                        +{(tp.balance * (tp.isBounty ? 0.9 : 0.5)).toFixed(3)}
+                      </p>
                     </div>
                     <div className="rounded-xl p-2.5" style={{ background: 'rgba(255,77,0,0.08)', border: '1px solid rgba(255,77,0,0.15)' }}>
                       <p style={{ color: '#6060a0' }}>Fee paid</p>

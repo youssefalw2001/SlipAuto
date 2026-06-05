@@ -534,3 +534,71 @@ number-flow-react {
   .card, .card-flat { padding: 18px; border-radius: 16px; }
   .card-hero { padding: 22px; border-radius: 18px; }
 }
+
+
+/* ============================================================
+   BOUNTY CARDS
+   ============================================================ */
+.wallet-card.bounty {
+  border-color: rgba(255,210,0,0.35) !important;
+  border-top-color: rgba(255,210,0,0.7) !important;
+  background: rgba(255,210,0,0.04) !important;
+}
+.wallet-card.bounty:hover {
+  border-color: rgba(255,210,0,0.6) !important;
+  box-shadow: 0 0 0 1px rgba(255,210,0,0.2), 0 12px 40px rgba(255,210,0,0.15) !important;
+}
+.wallet-card.bounty.targeted {
+  border-color: #ffd200 !important;
+  box-shadow: 0 0 0 2px rgba(255,210,0,0.3), 0 16px 48px rgba(255,210,0,0.2) !important;
+}
+
+/* ============================================================
+   GLOW YELLOW
+   ============================================================ */
+.glow-yellow { text-shadow: 0 0 24px rgba(255,210,0,0.7), 0 0 60px rgba(255,210,0,0.3); }
+
+/* ============================================================
+   CRATES NAV LINK
+   ============================================================ */
+.crates-link { position: relative; }
+
+/* ============================================================
+   LEVEL BADGE ANIMATIONS
+   ============================================================ */
+@keyframes apexGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(255,77,0,0.4); }
+  50%     { box-shadow: 0 0 20px rgba(255,77,0,0.8), 0 0 40px rgba(255,210,0,0.3); }
+}
+.apex-badge { animation: apexGlow 2s ease-in-out infinite; }
+
+/* ============================================================
+   CRATE CARD OPEN ANIMATION
+   ============================================================ */
+@keyframes crateShake {
+  0%,100% { transform: rotate(0deg) scale(1); }
+  20%     { transform: rotate(-8deg) scale(1.1); }
+  40%     { transform: rotate(8deg) scale(1.15); }
+  60%     { transform: rotate(-4deg) scale(1.1); }
+  80%     { transform: rotate(4deg) scale(1.05); }
+}
+.crate-opening { animation: crateShake 0.6s ease; }
+
+/* ============================================================
+   XP BAR
+   ============================================================ */
+.xp-bar {
+  height: 4px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.06);
+}
+
+/* ============================================================
+   PITY INDICATOR PULSE
+   ============================================================ */
+@keyframes pityPulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%     { opacity: 0.7; transform: scale(1.04); }
+}
+.pity-active { animation: pityPulse 1.2s ease-in-out infinite; }
