@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Crosshair, RotateCcw, Trophy, Users, X, Menu } from "lucide-react";
+import { Crosshair, Menu, RotateCcw, Trophy, Users, X } from "lucide-react";
 import { useState } from "react";
 import LiveFeed from "./components/LiveFeed";
 import Leaderboard from "./components/Leaderboard";
@@ -10,141 +10,157 @@ import YoinkGame from "./components/YoinkGame";
 export type Page = "yoink" | "wheel" | "leaderboard" | "referral";
 
 const pageAnim = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.25, 1, 0.5, 1] } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.15 } },
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.25, 1, 0.4, 1] } },
+  exit:    { opacity: 0, y: -8, transition: { duration: 0.16 } },
 };
 
-export default function App() {
-  const [page, setPage] = useState<Page>("yoink");
-  const [menuOpen, setMenuOpen] = useState(false);
+const NAV = [
+  { id: "yoink"       as Page, label: "Yoink",       icon: Crosshair  },
+  { id: "wheel"       as Page, label: "Swap Wheel",  icon: RotateCcw  },
+  { id: "leaderboard" as Page, label: "Leaderboard", icon: Trophy     },
+  { id: "referral"    as Page, label: "Referrals",   icon: Users      },
+];
 
-  const nav = [
-    { id: "yoink" as const, label: "Yoink", icon: <Crosshair className="w-3.5 h-3.5" /> },
-    { id: "wheel" as const, label: "Swap Wheel", icon: <RotateCcw className="w-3.5 h-3.5" /> },
-    { id: "leaderboard" as const, label: "Leaderboard", icon: <Trophy className="w-3.5 h-3.5" /> },
-    { id: "referral" as const, label: "Referrals", icon: <Users className="w-3.5 h-3.5" /> },
-  ];
+export default function App() {
+  const [page, setPage]     = useState<Page>("yoink");
+  const [open, setOpen]     = useState(false);
 
   return (
-    <div className="min-h-screen bg-y-bg text-y-text flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-y-border bg-y-bg/90 backdrop-blur-lg">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col">
+
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 border-b border-y-border bg-y-base/85 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-5 h-[56px] flex items-center justify-between gap-6">
+
           {/* Logo */}
           <button
             onClick={() => setPage("yoink")}
-            className="flex items-center gap-2.5 group"
+            className="flex items-center gap-3 group flex-shrink-0"
           >
-            {/* SVG Mark */}
-            <div className="w-7 h-7 rounded-lg bg-y-accent flex items-center justify-center">
-              <Crosshair className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+            {/* Icon mark */}
+            <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[#ff4d00] to-[#cc0044] flex items-center justify-center shadow-[0_0_16px_rgba(255,77,0,0.45)]">
+              <Crosshair className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-y-green blink border border-y-base" />
             </div>
-            <span className="text-[15px] font-bold tracking-tight text-white">
-              yoink<span className="text-y-accent">.gg</span>
-            </span>
-            <span className="hidden sm:inline-flex items-center gap-1.5 pill pill-green text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
-              live
-            </span>
+            {/* Wordmark */}
+            <div className="flex items-baseline gap-0.5">
+              <span className="font-display text-[22px] text-white tracking-[0.06em]">YOINK</span>
+              <span className="font-display text-[22px] text-y-accent tracking-[0.06em]">.GG</span>
+            </div>
           </button>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-0.5 bg-y-surface border border-y-border rounded-xl p-1">
-            {nav.map((n) => (
+          <nav className="hidden md:flex items-center gap-6">
+            {NAV.map(n => (
               <button
                 key={n.id}
                 onClick={() => setPage(n.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all ${
-                  page === n.id
-                    ? "bg-y-accent text-white shadow-sm"
-                    : "text-y-muted hover:text-white"
-                }`}
+                className={`nav-link ${page === n.id ? "active" : ""}`}
               >
-                {n.icon}
                 {n.label}
               </button>
             ))}
           </nav>
 
           {/* Right */}
-          <div className="flex items-center gap-3">
-            <div className="hidden lg:flex stat-box">
-              <span className="text-y-green font-semibold">2,841</span>
-              <span className="text-y-muted">SOL stolen</span>
+          <div className="hidden md:flex items-center gap-3">
+            <div className="stat-box text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
+              <span className="text-y-green font-semibold font-mono">2,841 SOL</span>
+              <span style={{ color: '#6060a0' }}>stolen today</span>
             </div>
-            <button className="btn-primary text-[12px] px-4 py-2">
-              Connect Wallet
-            </button>
-            {/* Mobile toggle */}
-            <button
-              className="md:hidden p-1.5 rounded-lg text-y-muted hover:text-white"
-              onClick={() => setMenuOpen(!menuOpen)}
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="btn-yoink text-[13px] py-2 px-5"
             >
-              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+              Connect Wallet
+            </motion.button>
           </div>
+
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+            style={{ color: '#6060a0' }}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Mobile Nav */}
         <AnimatePresence>
-          {menuOpen && (
+          {open && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="md:hidden overflow-hidden border-t border-y-border bg-y-bg"
+              transition={{ duration: 0.22 }}
+              className="overflow-hidden md:hidden border-t border-y-border bg-y-base/95 backdrop-blur-xl"
             >
-              <div className="px-4 py-2 flex flex-col gap-0.5">
-                {nav.map((n) => (
-                  <button
-                    key={n.id}
-                    onClick={() => { setPage(n.id); setMenuOpen(false); }}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
-                      page === n.id ? "bg-y-accent/10 text-y-accent" : "text-y-muted hover:text-white"
-                    }`}
-                  >
-                    {n.icon}
-                    {n.label}
-                  </button>
-                ))}
+              <div className="px-5 py-3 flex flex-col gap-1">
+                {NAV.map(n => {
+                  const Icon = n.icon;
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => { setPage(n.id); setOpen(false); }}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+                        page === n.id
+                          ? "bg-y-accent/10 text-y-accent"
+                          : "hover:bg-white/4 hover:text-white"
+                      }`}
+                      style={{ color: page === n.id ? undefined : '#6060a0' }}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {n.label}
+                    </button>
+                  );
+                })}
+                <button className="btn-yoink w-full mt-2">Connect Wallet</button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </header>
 
-      {/* Ticker */}
+      {/* ── Live Ticker ── */}
       <LiveFeed />
 
-      {/* Content */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
+      {/* ── Main ── */}
+      <main className="flex-1 max-w-6xl mx-auto w-full px-5 py-7">
         <AnimatePresence mode="wait">
-          <motion.div key={page} variants={pageAnim} initial="initial" animate="animate" exit="exit">
-            {page === "yoink" && <YoinkGame />}
-            {page === "wheel" && <SwapWheel />}
+          <motion.div
+            key={page}
+            variants={pageAnim}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            {page === "yoink"       && <YoinkGame />}
+            {page === "wheel"       && <SwapWheel />}
             {page === "leaderboard" && <Leaderboard />}
-            {page === "referral" && <ReferralDashboard />}
+            {page === "referral"    && <ReferralDashboard />}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-y-border py-5">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-y-muted">
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-white">yoink</span>
-            <span className="font-semibold text-y-accent">.gg</span>
-            <span className="mx-1 text-y-dim">—</span>
-            <span>Provably fair on Solana</span>
+      {/* ── Footer ── */}
+      <footer className="border-t border-y-border py-6 mt-4">
+        <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-[16px] text-white tracking-[0.06em]">YOINK</span>
+            <span className="font-display text-[16px] text-y-accent tracking-[0.06em]">.GG</span>
+            <span className="text-[11px] ml-1" style={{ color: '#6060a0' }}>— Provably fair on Solana</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span>18+</span>
-            <span className="text-y-dim">·</span>
-            <span>Gamble responsibly</span>
-            <span className="text-y-dim">·</span>
+          <div className="flex items-center gap-4 text-[11px]" style={{ color: '#6060a0' }}>
+            <span>18+ Only</span>
+            <span style={{ color: '#383855' }}>·</span>
+            <span>Gamble Responsibly</span>
+            <span style={{ color: '#383855' }}>·</span>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <span className="text-y-dim">·</span>
+            <span style={{ color: '#383855' }}>·</span>
             <a href="#" className="hover:text-white transition-colors">@YoinkGG</a>
           </div>
         </div>
