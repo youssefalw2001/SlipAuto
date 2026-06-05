@@ -6,11 +6,8 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, '.'),
-    },
+    alias: { '@': path.resolve(__dirname, './src') },
   },
-  // GitHub Pages serves from /SlipAuto/ when using a project repo
   base: '/SlipAuto/',
   build: {
     outDir: 'dist',
@@ -19,6 +16,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ['react', 'react-dom'],
+          motion: ['framer-motion'],
           lucide: ['lucide-react'],
         },
       },

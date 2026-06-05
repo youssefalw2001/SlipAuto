@@ -1,170 +1,155 @@
-import React, { useState } from "react";
-import { Trophy, Zap, Swords, TrendingUp, Crown } from "lucide-react";
+import { motion } from "framer-motion";
+import { Crown, Ghost, RotateCcw, TrendingUp, Trophy, Zap } from "lucide-react";
+import { useState } from "react";
 
 type Period = "daily" | "weekly" | "alltime";
-type GameFilter = "all" | "surge" | "wars";
+type GameFilter = "all" | "yoink" | "wheel";
 
 interface Player {
   rank: number;
   wallet: string;
-  won: number;
-  bets: number;
+  stolen: number;
+  attempts: number;
   winRate: number;
-  game: "surge" | "wars" | "both";
+  game: "yoink" | "wheel" | "both";
   streak: number;
+  badge?: string;
 }
 
-const LEADERBOARD_DATA: Record<Period, Player[]> = {
+const DATA: Record<Period, Player[]> = {
   daily: [
-    { rank: 1, wallet: "Ew7b...Ln0z", won: 12.44, bets: 18, winRate: 72, game: "surge", streak: 5 },
-    { rank: 2, wallet: "Rk5h...Oc2p", won: 9.21, bets: 24, winRate: 63, game: "wars", streak: 3 },
-    { rank: 3, wallet: "7xKp...3mNq", won: 7.83, bets: 12, winRate: 58, game: "both", streak: 2 },
-    { rank: 4, wallet: "Bz9r...Wf2j", won: 6.50, bets: 31, winRate: 55, game: "surge", streak: 1 },
-    { rank: 5, wallet: "Hn6d...Yp1x", won: 5.12, bets: 9, winRate: 78, game: "wars", streak: 4 },
-    { rank: 6, wallet: "Qm3a...Rt5u", won: 4.87, bets: 14, winRate: 50, game: "both", streak: 0 },
-    { rank: 7, wallet: "Jp8e...Ah9w", won: 3.44, bets: 7, winRate: 57, game: "surge", streak: 2 },
-    { rank: 8, wallet: "Fs2c...Vg4k", won: 2.91, bets: 22, winRate: 45, game: "wars", streak: 1 },
-    { rank: 9, wallet: "Nt4g...Sb7i", won: 2.30, bets: 11, winRate: 64, game: "surge", streak: 0 },
-    { rank: 10, wallet: "Ux1f...Dm6y", won: 1.88, bets: 5, winRate: 40, game: "wars", streak: 0 },
+    { rank:1,  wallet:"Ew7b...Ln0z", stolen:18.44, attempts:22, winRate:77, game:"yoink", streak:7,  badge:"👑" },
+    { rank:2,  wallet:"Rk5h...Oc2p", stolen:12.21, attempts:31, winRate:65, game:"wheel", streak:4,  badge:"🔥" },
+    { rank:3,  wallet:"7xKp...3mNq", stolen:9.83,  attempts:14, winRate:71, game:"both",  streak:3  },
+    { rank:4,  wallet:"Bz9r...Wf2j", stolen:7.50,  attempts:28, winRate:57, game:"yoink", streak:2  },
+    { rank:5,  wallet:"Hn6d...Yp1x", stolen:5.12,  attempts:9,  winRate:78, game:"wheel", streak:5  },
+    { rank:6,  wallet:"Qm3a...Rt5u", stolen:4.87,  attempts:17, winRate:53, game:"both",  streak:1  },
+    { rank:7,  wallet:"Jp8e...Ah9w", stolen:3.44,  attempts:8,  winRate:63, game:"yoink", streak:2  },
+    { rank:8,  wallet:"Fs2c...Vg4k", stolen:2.91,  attempts:24, winRate:46, game:"wheel", streak:0  },
+    { rank:9,  wallet:"Nt4g...Sb7i", stolen:2.30,  attempts:12, winRate:58, game:"yoink", streak:0  },
+    { rank:10, wallet:"Ux1f...Dm6y", stolen:1.88,  attempts:6,  winRate:42, game:"wheel", streak:0  },
   ],
   weekly: [
-    { rank: 1, wallet: "Rk5h...Oc2p", won: 88.32, bets: 142, winRate: 68, game: "wars", streak: 8 },
-    { rank: 2, wallet: "Ew7b...Ln0z", won: 71.14, bets: 89, winRate: 71, game: "surge", streak: 5 },
-    { rank: 3, wallet: "Jp8e...Ah9w", won: 54.20, bets: 201, winRate: 52, game: "both", streak: 3 },
-    { rank: 4, wallet: "7xKp...3mNq", won: 43.88, bets: 77, winRate: 61, game: "surge", streak: 2 },
-    { rank: 5, wallet: "Nt4g...Sb7i", won: 38.55, bets: 55, winRate: 67, game: "wars", streak: 6 },
-    { rank: 6, wallet: "Wj9i...Ef3n", won: 29.10, bets: 113, winRate: 48, game: "both", streak: 1 },
-    { rank: 7, wallet: "Bz9r...Wf2j", won: 22.40, bets: 44, winRate: 55, game: "surge", streak: 0 },
-    { rank: 8, wallet: "Qm3a...Rt5u", won: 18.75, bets: 88, winRate: 44, game: "wars", streak: 2 },
-    { rank: 9, wallet: "Hn6d...Yp1x", won: 14.22, bets: 31, winRate: 58, game: "both", streak: 1 },
-    { rank: 10, wallet: "Fs2c...Vg4k", won: 10.88, bets: 66, winRate: 41, game: "surge", streak: 0 },
+    { rank:1,  wallet:"Rk5h...Oc2p", stolen:88.32, attempts:142, winRate:68, game:"wheel", streak:9,  badge:"👑" },
+    { rank:2,  wallet:"Ew7b...Ln0z", stolen:71.14, attempts:89,  winRate:72, game:"yoink", streak:6,  badge:"🔥" },
+    { rank:3,  wallet:"Jp8e...Ah9w", stolen:54.20, attempts:201, winRate:55, game:"both",  streak:4  },
+    { rank:4,  wallet:"7xKp...3mNq", stolen:43.88, attempts:77,  winRate:62, game:"yoink", streak:2  },
+    { rank:5,  wallet:"Nt4g...Sb7i", stolen:38.55, attempts:55,  winRate:67, game:"wheel", streak:6  },
+    { rank:6,  wallet:"Wj9i...Ef3n", stolen:29.10, attempts:113, winRate:49, game:"both",  streak:1  },
+    { rank:7,  wallet:"Bz9r...Wf2j", stolen:22.40, attempts:44,  winRate:55, game:"yoink", streak:0  },
+    { rank:8,  wallet:"Qm3a...Rt5u", stolen:18.75, attempts:88,  winRate:44, game:"wheel", streak:2  },
+    { rank:9,  wallet:"Hn6d...Yp1x", stolen:14.22, attempts:31,  winRate:58, game:"both",  streak:1  },
+    { rank:10, wallet:"Fs2c...Vg4k", stolen:10.88, attempts:66,  winRate:41, game:"yoink", streak:0  },
   ],
   alltime: [
-    { rank: 1, wallet: "Jp8e...Ah9w", won: 441.20, bets: 1204, winRate: 61, game: "both", streak: 12 },
-    { rank: 2, wallet: "Rk5h...Oc2p", won: 388.44, bets: 892, winRate: 65, game: "wars", streak: 8 },
-    { rank: 3, wallet: "Ew7b...Ln0z", won: 312.80, bets: 677, winRate: 69, game: "surge", streak: 5 },
-    { rank: 4, wallet: "Nt4g...Sb7i", won: 244.10, bets: 504, winRate: 58, game: "wars", streak: 6 },
-    { rank: 5, wallet: "7xKp...3mNq", won: 198.60, bets: 431, winRate: 55, game: "surge", streak: 3 },
-    { rank: 6, wallet: "Wj9i...Ef3n", won: 166.35, bets: 788, winRate: 47, game: "both", streak: 1 },
-    { rank: 7, wallet: "Ux1f...Dm6y", won: 133.90, bets: 302, winRate: 53, game: "wars", streak: 2 },
-    { rank: 8, wallet: "Bz9r...Wf2j", won: 112.44, bets: 244, winRate: 51, game: "surge", streak: 4 },
-    { rank: 9, wallet: "Hn6d...Yp1x", won: 88.20, bets: 188, winRate: 49, game: "both", streak: 0 },
-    { rank: 10, wallet: "Qm3a...Rt5u", won: 71.55, bets: 411, winRate: 43, game: "wars", streak: 1 },
+    { rank:1,  wallet:"Jp8e...Ah9w", stolen:441.20, attempts:1204, winRate:61, game:"both",  streak:14, badge:"👑" },
+    { rank:2,  wallet:"Rk5h...Oc2p", stolen:388.44, attempts:892,  winRate:65, game:"wheel", streak:9,  badge:"💎" },
+    { rank:3,  wallet:"Ew7b...Ln0z", stolen:312.80, attempts:677,  winRate:70, game:"yoink", streak:6,  badge:"🔥" },
+    { rank:4,  wallet:"Nt4g...Sb7i", stolen:244.10, attempts:504,  winRate:58, game:"wheel", streak:6  },
+    { rank:5,  wallet:"7xKp...3mNq", stolen:198.60, attempts:431,  winRate:55, game:"yoink", streak:3  },
+    { rank:6,  wallet:"Wj9i...Ef3n", stolen:166.35, attempts:788,  winRate:47, game:"both",  streak:1  },
+    { rank:7,  wallet:"Ux1f...Dm6y", stolen:133.90, attempts:302,  winRate:53, game:"wheel", streak:2  },
+    { rank:8,  wallet:"Bz9r...Wf2j", stolen:112.44, attempts:244,  winRate:51, game:"yoink", streak:4  },
+    { rank:9,  wallet:"Hn6d...Yp1x", stolen:88.20,  attempts:188,  winRate:49, game:"both",  streak:0  },
+    { rank:10, wallet:"Qm3a...Rt5u", stolen:71.55,  attempts:411,  winRate:43, game:"wheel", streak:1  },
   ],
 };
 
-const PERIOD_PRIZES: Record<Period, { label: string; prizes: { place: string; amount: string }[] }> = {
-  daily: {
-    label: "Resets every 24h",
-    prizes: [
-      { place: "1st", amount: "1 SOL" },
-      { place: "2nd", amount: "0.5 SOL" },
-      { place: "3rd", amount: "0.25 SOL" },
-    ],
-  },
-  weekly: {
-    label: "Resets every Monday",
-    prizes: [
-      { place: "1st", amount: "5 SOL" },
-      { place: "2nd", amount: "2.5 SOL" },
-      { place: "3rd", amount: "1 SOL" },
-    ],
-  },
-  alltime: {
-    label: "Hall of Fame",
-    prizes: [
-      { place: "👑 Legend", amount: "Badge + 20 SOL" },
-      { place: "🥇 Elite", amount: "Badge + 10 SOL" },
-      { place: "🥈 Pro", amount: "Badge + 5 SOL" },
-    ],
-  },
+const PRIZES: Record<Period, { label: string; prizes: { place: string; reward: string }[] }> = {
+  daily:   { label:"Resets every 24h", prizes:[{place:"1st",reward:"2 SOL"},{place:"2nd",reward:"1 SOL"},{place:"3rd",reward:"0.5 SOL"}] },
+  weekly:  { label:"Resets every Monday", prizes:[{place:"1st",reward:"10 SOL"},{place:"2nd",reward:"5 SOL"},{place:"3rd",reward:"2 SOL"}] },
+  alltime: { label:"Hall of Fame", prizes:[{place:"👑 Legend",reward:"50 SOL + Badge"},{place:"💎 Elite",reward:"20 SOL + Badge"},{place:"🔥 Pro",reward:"10 SOL + Badge"}] },
 };
 
 export default function Leaderboard() {
-  const [period, setPeriod] = useState<Period>("weekly");
-  const [gameFilter, setGameFilter] = useState<GameFilter>("all");
+  const [period, setPeriod]     = useState<Period>("weekly");
+  const [filter, setFilter]     = useState<GameFilter>("all");
 
-  const data = LEADERBOARD_DATA[period].filter(
-    (p) => gameFilter === "all" || p.game === gameFilter || p.game === "both"
+  const data = DATA[period].filter(p =>
+    filter === "all" || p.game === filter || p.game === "both"
   );
+  const prizes = PRIZES[period];
 
-  const prizes = PERIOD_PRIZES[period];
-
-  const rankMedal = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `#${rank}`;
+  const medal = (r: number, badge?: string) => {
+    if (badge) return badge;
+    if (r === 1) return "🥇";
+    if (r === 2) return "🥈";
+    if (r === 3) return "🥉";
+    return `#${r}`;
   };
+
+  const rankColor = (r: number) =>
+    r === 1 ? "text-yoink-yellow" : r === 2 ? "text-slate-300" : r === 3 ? "text-amber-600" : "text-yoink-muted";
 
   return (
     <div className="space-y-6">
+
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center">
-          <Trophy className="w-5 h-5 text-yellow-400" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black text-white">Leaderboard</h1>
-          <p className="text-sm text-arena-muted">Top earners win SOL prizes from the house fee pool</p>
+      <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-gradient-to-br from-yoink-yellow/5 via-yoink-surface to-yoink-orange/5 p-6 sm:p-8">
+        <div className="absolute inset-0 bg-grid opacity-20" />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl animate-float">🏆</span>
+            <div>
+              <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">Leaderboard</h1>
+              <p className="text-yoink-muted text-sm mt-0.5">Top stealers win SOL from the prize pool</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Prize Banner */}
-      <div className="card bg-gradient-to-r from-yellow-400/5 to-amber-600/5 border-yellow-400/20">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card bg-gradient-to-r from-yoink-yellow/5 to-yoink-orange/5 border-yoink-yellow/15"
+      >
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Crown className="w-6 h-6 text-yellow-400" />
+            <Crown className="w-6 h-6 text-yoink-yellow" />
             <div>
-              <p className="text-sm font-bold text-white">{period.charAt(0).toUpperCase() + period.slice(1)} Prizes</p>
-              <p className="text-xs text-arena-muted">{prizes.label}</p>
+              <p className="font-display font-bold text-white">{period.charAt(0).toUpperCase() + period.slice(1)} Prize Pool</p>
+              <p className="text-xs text-yoink-muted">{prizes.label}</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {prizes.prizes.map((p, i) => (
               <div key={i} className="text-center">
-                <p className="text-xs text-arena-muted">{p.place}</p>
-                <p className="text-sm font-black text-yellow-400">{p.amount}</p>
+                <p className="text-xs text-yoink-muted">{p.place}</p>
+                <p className="font-display font-extrabold text-yoink-yellow">{p.reward}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
-        {/* Period */}
-        <div className="flex gap-1 bg-white/5 border border-white/10 rounded-xl p-1">
-          {(["daily", "weekly", "alltime"] as Period[]).map((p) => (
+        <div className="flex gap-1 bg-white/3 border border-white/6 rounded-2xl p-1">
+          {(["daily","weekly","alltime"] as Period[]).map(p => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                period === p
-                  ? "bg-arena-purple text-white"
-                  : "text-arena-muted hover:text-white"
+              className={`px-4 py-1.5 rounded-xl text-sm font-semibold transition-all ${
+                period === p ? "bg-yoink-pink text-white shadow-[0_0_15px_rgba(255,51,102,0.3)]" : "text-yoink-muted hover:text-white"
               }`}
             >
               {p === "alltime" ? "All Time" : p.charAt(0).toUpperCase() + p.slice(1)}
             </button>
           ))}
         </div>
-
-        {/* Game Filter */}
-        <div className="flex gap-1 bg-white/5 border border-white/10 rounded-xl p-1">
-          {(["all", "surge", "wars"] as GameFilter[]).map((g) => (
+        <div className="flex gap-1 bg-white/3 border border-white/6 rounded-2xl p-1">
+          {(["all","yoink","wheel"] as GameFilter[]).map(g => (
             <button
               key={g}
-              onClick={() => setGameFilter(g)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-all ${
-                gameFilter === g
-                  ? "bg-white/10 text-white"
-                  : "text-arena-muted hover:text-white"
+              onClick={() => setFilter(g)}
+              className={`px-3 py-1.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all ${
+                filter === g ? "bg-white/8 text-white" : "text-yoink-muted hover:text-white"
               }`}
             >
-              {g === "surge" && <Zap className="w-3 h-3 text-arena-purple" />}
-              {g === "wars" && <Swords className="w-3 h-3 text-arena-blue" />}
-              {g === "all" && <TrendingUp className="w-3 h-3" />}
+              {g === "yoink" && <Ghost className="w-3 h-3 text-yoink-pink" />}
+              {g === "wheel" && <RotateCcw className="w-3 h-3 text-yoink-purple" />}
+              {g === "all"   && <TrendingUp className="w-3 h-3" />}
               {g.charAt(0).toUpperCase() + g.slice(1)}
             </button>
           ))}
@@ -174,71 +159,61 @@ export default function Leaderboard() {
       {/* Table */}
       <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-white/5 bg-white/3">
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase text-arena-muted">Rank</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase text-arena-muted">Player</th>
-                <th className="text-left px-4 py-3 text-xs font-mono uppercase text-arena-muted hidden sm:table-cell">Game</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase text-arena-muted">Won</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase text-arena-muted hidden md:table-cell">Bets</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase text-arena-muted hidden md:table-cell">Win Rate</th>
-                <th className="text-right px-4 py-3 text-xs font-mono uppercase text-arena-muted hidden sm:table-cell">Streak</th>
+              <tr className="border-b border-white/5 bg-white/2">
+                {["Rank","Player","Game","SOL Stolen","Attempts","Win Rate","Streak"].map(h => (
+                  <th key={h} className={`px-4 py-3 text-left text-xs font-mono uppercase text-yoink-muted ${
+                    ["Attempts","Win Rate","Streak"].includes(h) ? "hidden md:table-cell" : ""
+                  }`}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {data.map((p) => (
-                <tr
+              {data.map((p, i) => (
+                <motion.tr
                   key={p.rank}
-                  className={`border-b border-white/3 transition-colors hover:bg-white/3 ${
-                    p.rank <= 3 ? "bg-yellow-400/3" : ""
-                  }`}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className={`border-b border-white/3 hover:bg-white/2 transition-colors ${p.rank <= 3 ? "bg-yoink-yellow/2" : ""}`}
                 >
                   <td className="px-4 py-3.5">
-                    <span className={`text-base font-black ${
-                      p.rank === 1 ? "text-yellow-400" : p.rank === 2 ? "text-slate-300" : p.rank === 3 ? "text-amber-600" : "text-arena-muted"
-                    }`}>
-                      {rankMedal(p.rank)}
+                    <span className={`font-display text-base font-extrabold ${rankColor(p.rank)}`}>
+                      {medal(p.rank, p.badge)}
                     </span>
                   </td>
                   <td className="px-4 py-3.5">
                     <span className="font-mono font-bold text-white text-sm">{p.wallet}</span>
                   </td>
-                  <td className="px-4 py-3.5 hidden sm:table-cell">
-                    <div className="flex items-center gap-1">
-                      {(p.game === "surge" || p.game === "both") && (
-                        <span className="flex items-center gap-1 text-xs bg-arena-purple/10 text-arena-purple px-2 py-0.5 rounded border border-arena-purple/20">
-                          <Zap className="w-3 h-3" /> Surge
-                        </span>
+                  <td className="px-4 py-3.5">
+                    <div className="flex gap-1">
+                      {(p.game === "yoink" || p.game === "both") && (
+                        <span className="tag tag-pink flex items-center gap-1"><Ghost className="w-3 h-3" />YOINK</span>
                       )}
-                      {(p.game === "wars" || p.game === "both") && (
-                        <span className="flex items-center gap-1 text-xs bg-arena-blue/10 text-arena-blue px-2 py-0.5 rounded border border-arena-blue/20">
-                          <Swords className="w-3 h-3" /> Wars
-                        </span>
+                      {(p.game === "wheel" || p.game === "both") && (
+                        <span className="tag tag-purple flex items-center gap-1"><RotateCcw className="w-3 h-3" />WHEEL</span>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3.5 text-right">
-                    <span className="text-arena-green font-bold font-mono">{p.won.toFixed(2)} SOL</span>
+                  <td className="px-4 py-3.5">
+                    <span className="font-mono font-bold text-yoink-green">{p.stolen.toFixed(2)} SOL</span>
                   </td>
-                  <td className="px-4 py-3.5 text-right hidden md:table-cell">
-                    <span className="text-arena-muted text-sm">{p.bets}</span>
+                  <td className="px-4 py-3.5 hidden md:table-cell">
+                    <span className="text-yoink-muted text-sm">{p.attempts}</span>
                   </td>
-                  <td className="px-4 py-3.5 text-right hidden md:table-cell">
-                    <span className={`text-sm font-bold ${p.winRate >= 60 ? "text-arena-green" : p.winRate >= 50 ? "text-yellow-400" : "text-arena-muted"}`}>
+                  <td className="px-4 py-3.5 hidden md:table-cell">
+                    <span className={`font-bold text-sm ${p.winRate >= 65 ? "text-yoink-green" : p.winRate >= 50 ? "text-yoink-yellow" : "text-yoink-muted"}`}>
                       {p.winRate}%
                     </span>
                   </td>
-                  <td className="px-4 py-3.5 text-right hidden sm:table-cell">
-                    {p.streak > 0 ? (
-                      <span className="text-xs font-bold text-orange-400 bg-orange-400/10 border border-orange-400/20 px-2 py-0.5 rounded">
-                        🔥 {p.streak}
-                      </span>
-                    ) : (
-                      <span className="text-arena-muted text-xs">—</span>
-                    )}
+                  <td className="px-4 py-3.5 hidden md:table-cell">
+                    {p.streak > 0
+                      ? <span className="tag tag-orange">🔥 {p.streak}W</span>
+                      : <span className="text-yoink-muted text-xs">—</span>
+                    }
                   </td>
-                </tr>
+                </motion.tr>
               ))}
             </tbody>
           </table>
@@ -246,12 +221,17 @@ export default function Leaderboard() {
       </div>
 
       {/* Your Position */}
-      <div className="card bg-arena-purple/5 border-arena-purple/20 flex items-center justify-between">
-        <div>
-          <p className="text-xs text-arena-muted">Your Position</p>
-          <p className="text-white font-bold">Connect wallet to see your rank</p>
+      <div className="card border-yoink-pink/15 bg-yoink-pink/3 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Trophy className="w-5 h-5 text-yoink-pink" />
+          <div>
+            <p className="font-bold text-white">Your Ranking</p>
+            <p className="text-xs text-yoink-muted">Connect wallet to see where you stand</p>
+          </div>
         </div>
-        <button className="btn-primary text-sm">Connect Wallet</button>
+        <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="btn-yoink text-sm">
+          Connect Wallet
+        </motion.button>
       </div>
     </div>
   );

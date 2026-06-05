@@ -1,301 +1,387 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
-   SOL ARENA — Design System
+   YOINK.gg — Premium Design System
    ============================================================ */
 
 @theme {
-  /* Colors */
-  --color-arena-bg:       #05050f;
-  --color-arena-card:     #0d0d1a;
-  --color-arena-border:   rgba(255,255,255,0.06);
-  --color-arena-text:     #c8c8e0;
-  --color-arena-muted:    #5a5a7a;
+  /* Core Brand */
+  --color-yoink-bg:        #080810;
+  --color-yoink-surface:   #0f0f1e;
+  --color-yoink-card:      #12121f;
+  --color-yoink-border:    rgba(255,255,255,0.07);
 
-  --color-arena-purple:   #7c3aed;
-  --color-arena-blue:     #3b82f6;
-  --color-arena-green:    #00ffa3;
-  --color-arena-red:      #ef4444;
-  --color-arena-yellow:   #facc15;
+  /* Text */
+  --color-yoink-text:      #e2e2f0;
+  --color-yoink-muted:     #52527a;
+  --color-yoink-subtle:    #2a2a45;
+
+  /* Brand Colors */
+  --color-yoink-pink:      #ff3366;
+  --color-yoink-pink-glow: rgba(255,51,102,0.25);
+  --color-yoink-purple:    #9b5de5;
+  --color-yoink-cyan:      #00f5ff;
+  --color-yoink-green:     #00ff88;
+  --color-yoink-yellow:    #ffe600;
+  --color-yoink-orange:    #ff6b35;
 
   /* Fonts */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-display: 'Syne', sans-serif;
+  --font-sans:    'Space Grotesk', system-ui, sans-serif;
+  --font-mono:    'Space Mono', monospace;
 }
 
 /* ============================================================
-   Base Reset
+   Reset
    ============================================================ */
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background-color: #05050f;
-  color: #c8c8e0;
-  font-family: 'Inter', system-ui, sans-serif;
+  background: #080810;
+  color: #e2e2f0;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-}
-
-#root {
-  min-height: 100vh;
 }
 
 /* ============================================================
    Scrollbar
    ============================================================ */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a45; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #ff3366; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #2a2a3d;
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+/* ============================================================
+   Typography
+   ============================================================ */
+.font-display { font-family: 'Syne', sans-serif; }
+.font-mono    { font-family: 'Space Mono', monospace; }
+
+/* ============================================================
+   Cards
+   ============================================================ */
+.card {
+  background: #12121f;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+.card-glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 24px;
 }
 
 /* ============================================================
-   Component Classes
+   Buttons
    ============================================================ */
-
-.card {
-  background: #0d0d1a;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.btn-primary {
+.btn-yoink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b35 100%);
   color: white;
-  font-weight: 700;
-  font-size: 0.875rem;
-  padding: 10px 20px;
-  border-radius: 12px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  padding: 12px 24px;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 0 30px rgba(255,51,102,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
 }
+.btn-yoink::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-yoink:hover::before { opacity: 1; }
+.btn-yoink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(255,51,102,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-yoink:active { transform: translateY(0); }
+.btn-yoink:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-  box-shadow: 0 0 30px rgba(124, 58, 237, 0.45);
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.05);
+  color: #e2e2f0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
   transform: translateY(-1px);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-primary:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
 /* ============================================================
-   Glow Shadows
+   Glow Effects
    ============================================================ */
+.glow-pink   { box-shadow: 0 0 40px rgba(255,51,102,0.4); }
+.glow-purple { box-shadow: 0 0 40px rgba(155,93,229,0.4); }
+.glow-cyan   { box-shadow: 0 0 40px rgba(0,245,255,0.4); }
+.glow-green  { box-shadow: 0 0 40px rgba(0,255,136,0.4); }
 
-.shadow-glow-purple {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
-}
-
-.shadow-glow-green {
-  box-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
-}
-
-.shadow-glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-}
-
-.shadow-glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-/* ============================================================
-   Ticker Animation
-   ============================================================ */
-
-@keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.animate-ticker {
-  animation: ticker 40s linear infinite;
-  will-change: transform;
-}
-
-.animate-ticker:hover {
-  animation-play-state: paused;
-}
-
-/* ============================================================
-   Pulse Ring
-   ============================================================ */
-
-@keyframes pulse-ring {
-  0%   { transform: scale(0.8); opacity: 1; }
-  100% { transform: scale(2);   opacity: 0; }
-}
-
-.animate-pulse-ring::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
-  background: currentColor;
-  opacity: 0.3;
-  animation: pulse-ring 1.5s ease-out infinite;
-}
-
-/* ============================================================
-   Number Flip (win animations)
-   ============================================================ */
-
-@keyframes countUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-.animate-count-up {
-  animation: countUp 0.3s ease-out forwards;
-}
+.text-glow-pink   { text-shadow: 0 0 30px rgba(255,51,102,0.8); }
+.text-glow-cyan   { text-shadow: 0 0 30px rgba(0,245,255,0.8); }
+.text-glow-green  { text-shadow: 0 0 30px rgba(0,255,136,0.8); }
 
 /* ============================================================
    Gradient Text
    ============================================================ */
-
-.gradient-text-purple {
-  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+.gradient-yoink {
+  background: linear-gradient(135deg, #ff3366 0%, #ff6b35 50%, #ffe600 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-cool {
+  background: linear-gradient(135deg, #9b5de5 0%, #00f5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.gradient-text-arena {
-  background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 50%, #00ffa3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* ============================================================
+   Noise Texture Overlay
+   ============================================================ */
+.noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 /* ============================================================
-   War Bar Transition
+   Live Ticker
    ============================================================ */
-
-.war-bar-red {
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(90deg, #ef4444, #f87171);
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
+.animate-ticker {
+  animation: ticker 35s linear infinite;
+  will-change: transform;
+}
+.animate-ticker:hover { animation-play-state: paused; }
 
-.war-bar-blue {
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  background: linear-gradient(270deg, #3b82f6, #60a5fa);
+/* ============================================================
+   Spin Animation (Swap Wheel)
+   ============================================================ */
+@keyframes wheelSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(var(--spin-degrees, 1800deg)); }
+}
+.wheel-spinning {
+  animation: wheelSpin var(--spin-duration, 4s) cubic-bezier(0.17, 0.67, 0.12, 1) forwards;
 }
 
 /* ============================================================
-   Card Hover Effects
+   Float Animation
    ============================================================ */
-
-.card-hover {
-  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
 }
+.animate-float { animation: float 3s ease-in-out infinite; }
 
-.card-hover:hover {
-  border-color: rgba(124, 58, 237, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.1);
+/* ============================================================
+   Pulse Ring
+   ============================================================ */
+@keyframes pulseRing {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid currentColor;
+  animation: pulseRing 1.4s ease-out infinite;
 }
 
 /* ============================================================
-   Input Styles
+   Shake (on steal fail)
    ============================================================ */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+.animate-shake { animation: shake 0.5s ease; }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* ============================================================
+   Slide Up (entry)
+   ============================================================ */
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-up { animation: slideUp 0.4s ease forwards; }
+
+/* ============================================================
+   Scanline Effect
+   ============================================================ */
+@keyframes scanline {
+  0%   { top: -10%; }
+  100% { top: 110%; }
+}
+.scanline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,51,102,0.3), transparent);
+  animation: scanline 3s linear infinite;
+  pointer-events: none;
 }
 
-input[type="number"] {
-  -moz-appearance: textfield;
+/* ============================================================
+   Grid Background
+   ============================================================ */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(255,51,102,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,51,102,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
+/* ============================================================
+   Wallet Card (YOINK game)
+   ============================================================ */
+.wallet-card {
+  background: #12121f;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 16px;
   cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #7c3aed;
-  box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
-  cursor: pointer;
+.wallet-card:hover {
+  border-color: rgba(255,51,102,0.4);
+  background: rgba(255,51,102,0.05);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(255,51,102,0.15);
+}
+.wallet-card.targeted {
+  border-color: #ff3366;
+  background: rgba(255,51,102,0.08);
+  box-shadow: 0 0 30px rgba(255,51,102,0.3);
+}
+.wallet-card.is-you {
+  border-color: rgba(0,245,255,0.4);
+  background: rgba(0,245,255,0.05);
+}
+.wallet-card.is-you:hover {
+  border-color: rgba(0,245,255,0.6);
+  box-shadow: 0 8px 32px rgba(0,245,255,0.15);
 }
 
 /* ============================================================
-   Table Styles
+   Stat Badge
    ============================================================ */
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.75rem;
+}
 
-table {
-  border-collapse: collapse;
+/* ============================================================
+   Input
+   ============================================================ */
+.input-yoink {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #e2e2f0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
   width: 100%;
+  transition: border-color 0.2s;
+  outline: none;
 }
+.input-yoink:focus { border-color: rgba(255,51,102,0.5); }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
 /* ============================================================
-   Selection Color
+   Tag/Badge
    ============================================================ */
-
-::selection {
-  background: rgba(124, 58, 237, 0.4);
-  color: white;
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
 }
+.tag-pink   { background: rgba(255,51,102,0.15); color: #ff3366; border: 1px solid rgba(255,51,102,0.25); }
+.tag-green  { background: rgba(0,255,136,0.12);  color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
+.tag-cyan   { background: rgba(0,245,255,0.12);  color: #00f5ff; border: 1px solid rgba(0,245,255,0.25); }
+.tag-purple { background: rgba(155,93,229,0.15); color: #9b5de5; border: 1px solid rgba(155,93,229,0.25); }
+.tag-orange { background: rgba(255,107,53,0.15); color: #ff6b35; border: 1px solid rgba(255,107,53,0.25); }
 
 /* ============================================================
-   Responsive Utilities
+   Selection
    ============================================================ */
+::selection { background: rgba(255,51,102,0.35); color: white; }
 
+/* ============================================================
+   Mobile
+   ============================================================ */
 @media (max-width: 640px) {
-  .card {
-    padding: 16px;
-    border-radius: 12px;
-  }
+  .card { padding: 16px; border-radius: 16px; }
 }
