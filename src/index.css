@@ -1,387 +1,242 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
-   YOINK.gg — Premium Design System
+   YOINK.gg — Premium Design System v2
+   Clean. Tight. No fluff.
    ============================================================ */
 
 @theme {
-  /* Core Brand */
-  --color-yoink-bg:        #080810;
-  --color-yoink-surface:   #0f0f1e;
-  --color-yoink-card:      #12121f;
-  --color-yoink-border:    rgba(255,255,255,0.07);
+  --color-y-bg:       #06060e;
+  --color-y-surface:  #0c0c18;
+  --color-y-card:     #101020;
+  --color-y-elevated: #161630;
+  --color-y-border:   rgba(255,255,255,0.06);
 
-  /* Text */
-  --color-yoink-text:      #e2e2f0;
-  --color-yoink-muted:     #52527a;
-  --color-yoink-subtle:    #2a2a45;
+  --color-y-text:     #dcdcef;
+  --color-y-muted:    #6b6b8a;
+  --color-y-dim:      #3a3a55;
 
-  /* Brand Colors */
-  --color-yoink-pink:      #ff3366;
-  --color-yoink-pink-glow: rgba(255,51,102,0.25);
-  --color-yoink-purple:    #9b5de5;
-  --color-yoink-cyan:      #00f5ff;
-  --color-yoink-green:     #00ff88;
-  --color-yoink-yellow:    #ffe600;
-  --color-yoink-orange:    #ff6b35;
+  --color-y-accent:   #e63956;
+  --color-y-accent2:  #c026d3;
+  --color-y-cyan:     #22d3ee;
+  --color-y-green:    #34d399;
+  --color-y-orange:   #f97316;
+  --color-y-yellow:   #eab308;
+  --color-y-blue:     #3b82f6;
 
-  /* Fonts */
-  --font-display: 'Syne', sans-serif;
-  --font-sans:    'Space Grotesk', system-ui, sans-serif;
-  --font-mono:    'Space Mono', monospace;
+  --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 }
 
-/* ============================================================
-   Reset
-   ============================================================ */
+/* ── Base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: #080810;
-  color: #e2e2f0;
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: var(--color-y-bg);
+  color: var(--color-y-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
   min-height: 100vh;
   overflow-x: hidden;
+  letter-spacing: -0.01em;
 }
 
-/* ============================================================
-   Scrollbar
-   ============================================================ */
-::-webkit-scrollbar { width: 3px; }
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2a2a45; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #ff3366; }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+::-webkit-scrollbar-thumb { background: #2a2a3d; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-y-accent); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ============================================================
-   Typography
-   ============================================================ */
-.font-display { font-family: 'Syne', sans-serif; }
-.font-mono    { font-family: 'Space Mono', monospace; }
-
-/* ============================================================
-   Cards
-   ============================================================ */
+/* ── Cards ── */
 .card {
-  background: #12121f;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
+  background: var(--color-y-card);
+  border: 1px solid var(--color-y-border);
+  border-radius: 14px;
+  padding: 20px;
+}
+.card-sm {
+  background: var(--color-y-card);
+  border: 1px solid var(--color-y-border);
+  border-radius: 12px;
+  padding: 14px;
 }
 
-.card-glass {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
-  padding: 24px;
-}
-
-/* ============================================================
-   Buttons
-   ============================================================ */
-.btn-yoink {
+/* ── Buttons ── */
+.btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #ff3366 0%, #ff6b35 100%);
-  color: white;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  padding: 12px 24px;
-  border-radius: 14px;
+  background: var(--color-y-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 30px rgba(255,51,102,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
-  white-space: nowrap;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 12px rgba(230,57,86,0.25);
+  letter-spacing: 0;
 }
-.btn-yoink::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.2s;
+.btn-primary:hover {
+  background: #d42f4a;
+  box-shadow: 0 4px 20px rgba(230,57,86,0.4);
+  transform: translateY(-1px);
 }
-.btn-yoink:hover::before { opacity: 1; }
-.btn-yoink:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 50px rgba(255,51,102,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
-}
-.btn-yoink:active { transform: translateY(0); }
-.btn-yoink:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.btn-ghost {
+.btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.05);
-  color: #e2e2f0;
-  font-family: 'Space Grotesk', sans-serif;
+  gap: 6px;
+  background: var(--color-y-elevated);
+  color: var(--color-y-text);
   font-weight: 600;
-  font-size: 0.875rem;
-  padding: 10px 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-y-border);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
-.btn-ghost:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.2);
-  transform: translateY(-1px);
-}
-
-/* ============================================================
-   Glow Effects
-   ============================================================ */
-.glow-pink   { box-shadow: 0 0 40px rgba(255,51,102,0.4); }
-.glow-purple { box-shadow: 0 0 40px rgba(155,93,229,0.4); }
-.glow-cyan   { box-shadow: 0 0 40px rgba(0,245,255,0.4); }
-.glow-green  { box-shadow: 0 0 40px rgba(0,255,136,0.4); }
-
-.text-glow-pink   { text-shadow: 0 0 30px rgba(255,51,102,0.8); }
-.text-glow-cyan   { text-shadow: 0 0 30px rgba(0,245,255,0.8); }
-.text-glow-green  { text-shadow: 0 0 30px rgba(0,255,136,0.8); }
-
-/* ============================================================
-   Gradient Text
-   ============================================================ */
-.gradient-yoink {
-  background: linear-gradient(135deg, #ff3366 0%, #ff6b35 50%, #ffe600 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.gradient-cool {
-  background: linear-gradient(135deg, #9b5de5 0%, #00f5ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
 }
 
-/* ============================================================
-   Noise Texture Overlay
-   ============================================================ */
-.noise::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  opacity: 0.4;
-  pointer-events: none;
-  border-radius: inherit;
+/* ── Pill/Badge ── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+.pill-accent  { background: rgba(230,57,86,0.12); color: var(--color-y-accent); }
+.pill-green   { background: rgba(52,211,153,0.12); color: var(--color-y-green); }
+.pill-cyan    { background: rgba(34,211,238,0.12); color: var(--color-y-cyan); }
+.pill-orange  { background: rgba(249,115,22,0.12); color: var(--color-y-orange); }
+.pill-purple  { background: rgba(192,38,211,0.12); color: var(--color-y-accent2); }
+.pill-dim     { background: rgba(255,255,255,0.04); color: var(--color-y-muted); border: 1px solid var(--color-y-border); }
+
+/* ── Stat Box ── */
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--color-y-border);
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: var(--font-mono);
 }
 
-/* ============================================================
-   Live Ticker
-   ============================================================ */
-@keyframes ticker {
+/* ── Input ── */
+.input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--color-y-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--color-y-text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus { border-color: rgba(230,57,86,0.4); }
+.input::placeholder { color: var(--color-y-dim); }
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ── Wallet Card ── */
+.wallet-target {
+  background: var(--color-y-card);
+  border: 1px solid var(--color-y-border);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+.wallet-target:hover {
+  border-color: rgba(230,57,86,0.35);
+  background: rgba(230,57,86,0.03);
+}
+.wallet-target.active {
+  border-color: var(--color-y-accent);
+  background: rgba(230,57,86,0.06);
+  box-shadow: 0 0 0 1px var(--color-y-accent), 0 4px 16px rgba(230,57,86,0.12);
+}
+.wallet-target.is-self {
+  border-color: rgba(34,211,238,0.3);
+  background: rgba(34,211,238,0.03);
+}
+.wallet-target.hit {
+  border-color: var(--color-y-accent);
+  background: rgba(230,57,86,0.08);
+}
+
+/* ── Ticker ── */
+@keyframes scroll-left {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-.animate-ticker {
-  animation: ticker 35s linear infinite;
-  will-change: transform;
+.ticker-scroll {
+  animation: scroll-left 45s linear infinite;
 }
-.animate-ticker:hover { animation-play-state: paused; }
+.ticker-scroll:hover { animation-play-state: paused; }
 
-/* ============================================================
-   Spin Animation (Swap Wheel)
-   ============================================================ */
-@keyframes wheelSpin {
+/* ── Spin ── */
+@keyframes spin-wheel {
   0%   { transform: rotate(0deg); }
-  100% { transform: rotate(var(--spin-degrees, 1800deg)); }
+  100% { transform: rotate(var(--deg, 1800deg)); }
 }
-.wheel-spinning {
-  animation: wheelSpin var(--spin-duration, 4s) cubic-bezier(0.17, 0.67, 0.12, 1) forwards;
-}
-
-/* ============================================================
-   Float Animation
-   ============================================================ */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
-}
-.animate-float { animation: float 3s ease-in-out infinite; }
-
-/* ============================================================
-   Pulse Ring
-   ============================================================ */
-@keyframes pulseRing {
-  0%   { transform: scale(1);   opacity: 0.6; }
-  100% { transform: scale(1.8); opacity: 0; }
-}
-.pulse-ring::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  border: 2px solid currentColor;
-  animation: pulseRing 1.4s ease-out infinite;
+.spinning {
+  animation: spin-wheel var(--dur, 4s) cubic-bezier(0.12, 0.8, 0.1, 1) forwards;
 }
 
-/* ============================================================
-   Shake (on steal fail)
-   ============================================================ */
+/* ── Shake ── */
 @keyframes shake {
   0%,100% { transform: translateX(0); }
-  20%      { transform: translateX(-8px); }
-  40%      { transform: translateX(8px); }
-  60%      { transform: translateX(-5px); }
-  80%      { transform: translateX(5px); }
+  20%     { transform: translateX(-5px); }
+  40%     { transform: translateX(5px); }
+  60%     { transform: translateX(-3px); }
+  80%     { transform: translateX(3px); }
 }
-.animate-shake { animation: shake 0.5s ease; }
+.shake { animation: shake 0.4s ease; }
 
-/* ============================================================
-   Slide Up (entry)
-   ============================================================ */
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+/* ── Pulse dot ── */
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.3; }
 }
-.animate-slide-up { animation: slideUp 0.4s ease forwards; }
+.blink { animation: blink 1.5s ease-in-out infinite; }
 
-/* ============================================================
-   Scanline Effect
-   ============================================================ */
-@keyframes scanline {
-  0%   { top: -10%; }
-  100% { top: 110%; }
-}
-.scanline::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,51,102,0.3), transparent);
-  animation: scanline 3s linear infinite;
-  pointer-events: none;
-}
+/* ── Selection ── */
+::selection { background: rgba(230,57,86,0.3); color: #fff; }
 
-/* ============================================================
-   Grid Background
-   ============================================================ */
-.bg-grid {
-  background-image:
-    linear-gradient(rgba(255,51,102,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,51,102,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* ============================================================
-   Wallet Card (YOINK game)
-   ============================================================ */
-.wallet-card {
-  background: #12121f;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px;
-  padding: 16px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
-}
-.wallet-card:hover {
-  border-color: rgba(255,51,102,0.4);
-  background: rgba(255,51,102,0.05);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(255,51,102,0.15);
-}
-.wallet-card.targeted {
-  border-color: #ff3366;
-  background: rgba(255,51,102,0.08);
-  box-shadow: 0 0 30px rgba(255,51,102,0.3);
-}
-.wallet-card.is-you {
-  border-color: rgba(0,245,255,0.4);
-  background: rgba(0,245,255,0.05);
-}
-.wallet-card.is-you:hover {
-  border-color: rgba(0,245,255,0.6);
-  box-shadow: 0 8px 32px rgba(0,245,255,0.15);
-}
-
-/* ============================================================
-   Stat Badge
-   ============================================================ */
-.stat-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-family: 'Space Mono', monospace;
-  font-size: 0.75rem;
-}
-
-/* ============================================================
-   Input
-   ============================================================ */
-.input-yoink {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: #e2e2f0;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.9rem;
-  width: 100%;
-  transition: border-color 0.2s;
-  outline: none;
-}
-.input-yoink:focus { border-color: rgba(255,51,102,0.5); }
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-
-/* ============================================================
-   Tag/Badge
-   ============================================================ */
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  font-family: 'Space Mono', monospace;
-  letter-spacing: 0.05em;
-  padding: 3px 8px;
-  border-radius: 6px;
-  text-transform: uppercase;
-}
-.tag-pink   { background: rgba(255,51,102,0.15); color: #ff3366; border: 1px solid rgba(255,51,102,0.25); }
-.tag-green  { background: rgba(0,255,136,0.12);  color: #00ff88; border: 1px solid rgba(0,255,136,0.25); }
-.tag-cyan   { background: rgba(0,245,255,0.12);  color: #00f5ff; border: 1px solid rgba(0,245,255,0.25); }
-.tag-purple { background: rgba(155,93,229,0.15); color: #9b5de5; border: 1px solid rgba(155,93,229,0.25); }
-.tag-orange { background: rgba(255,107,53,0.15); color: #ff6b35; border: 1px solid rgba(255,107,53,0.25); }
-
-/* ============================================================
-   Selection
-   ============================================================ */
-::selection { background: rgba(255,51,102,0.35); color: white; }
-
-/* ============================================================
-   Mobile
-   ============================================================ */
+/* ── Mobile ── */
 @media (max-width: 640px) {
-  .card { padding: 16px; border-radius: 16px; }
+  .card { padding: 16px; border-radius: 12px; }
+  .card-sm { padding: 12px; border-radius: 10px; }
 }
