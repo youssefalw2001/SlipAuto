@@ -11,16 +11,16 @@ interface Props {
   potSOL: number;
 }
 
-const ARENA_NAMES = ["", "Rookie Arena", "Hustler Arena", "Predator Arena", "APEX Arena"];
+const ARENA_NAMES  = ["", "Rookie Arena", "Hustler Arena", "Predator Arena", "APEX Arena"];
 const ARENA_COLORS = ["", "#a0a0b0", "#00d470", "#a060ff", "#ff4d00"];
 
-// Generate a realistic room id based on level
+// Cap at 500 rooms max — keeps things clean and non-laggy
 function roomForLevel(level: number): number {
   const ranges: Record<number, [number, number]> = {
-    1: [4000, 5100],
-    2: [2000, 3999],
-    3: [500,  1999],
-    4: [1,    499],
+    1: [301, 500],
+    2: [151, 300],
+    3: [51,  150],
+    4: [1,   50 ],
   };
   const [min, max] = ranges[level] ?? [4000, 5100];
   return Math.floor(Math.random() * (max - min + 1)) + min;

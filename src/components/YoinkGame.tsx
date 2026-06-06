@@ -62,7 +62,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
   const [livePlayers, setLive]    = useState(14);
 
   // Room system
-  const [roomId, setRoomId]       = useState(() => Math.floor(Math.random() * 1100) + 3800);
+  const [roomId, setRoomId] = useState(() => Math.floor(Math.random() * 200) + 300);
 
   // Pity system — tracks consecutive losses per target attempt
   const pityCounts  = useRef<Record<number, number>>({});  // targetId → consecutive losses
@@ -426,7 +426,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                           className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold whitespace-nowrap"
                           style={{ background: 'rgba(255,210,0,0.92)', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.6)' }}
                         >
-                          👑 BOUNTY
+                          BOUNTY
                         </motion.div>
                       </div>
                     )}
@@ -498,9 +498,12 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                       />
                     </div>
 
-                    {/* Tier icon */}
+                    {/* Tier icon — text label, no emoji */}
                     {!p.isYou && (
-                      <span className="tier-icon">{tierIcon}</span>
+                      <span className="tier-icon text-[9px] font-mono"
+                        style={{ color: isKing ? '#ffd200' : isPredator ? '#a060ff' : isCommon ? '#00d470' : '#60608a' }}>
+                        {isKing ? "KING" : isPredator ? "PRED" : isCommon ? "COM" : "DUST"}
+                      </span>
                     )}
 
                     {/* Targeted chance */}
@@ -653,7 +656,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
                       {tp.isBounty && (
                         <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full"
                           style={{ background: 'rgba(255,210,0,0.2)', color: '#ffd200', border: '1px solid rgba(255,210,0,0.4)' }}>
-                          👑 BOUNTY
+                          BOUNTY
                         </span>
                       )}
                       <Target className="w-6 h-6" style={{ color: '#ff4d00' }} />
@@ -759,6 +762,69 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── Sticky Mobile Attack Bar ── */}
+      {/* Shows at bottom on mobile so button is always reachable without scrolling */}
+      {joined && !isOut && (
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-y-border"
+          style={{ background: 'rgba(7,7,16,0.97)', backdropFilter: 'blur(20px)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
+          <div className="px-4 py-3 flex items-center gap-3">
+            {/* Target info or prompt */}
+            <div className="flex-1 min-w-0">
+              {tp ? (
+                <div>
+                  <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>TARGET LOCKED</p>
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-[20px] leading-none" style={{ color: tp.isBounty ? '#ffd200' : '#ff7040' }}>
+                      {tp.balance.toFixed(3)}
+                    </span>
+                    <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>SOL</span>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: `${chanceColor(chance())}18`, color: chanceColor(chance()) }}>
+                      {chance()}%
+                    </span>
+                    {tp.isBounty && (
+                      <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full"
+                        style={{ background: 'rgba(255,210,0,0.2)', color: '#ffd200' }}>
+                        BOUNTY
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-[11px] font-semibold text-white">No target selected</p>
+                  <p className="text-[10px]" style={{ color: '#6060a0' }}>Tap a wallet card above</p>
+                </div>
+              )}
+            </div>
+
+            {/* YOINK button — always at thumb reach */}
+            <motion.button
+              whileTap={target ? { scale: 0.95 } : {}}
+              onClick={yoink}
+              disabled={!target || acting}
+              className={`btn-yoink flex-shrink-0 ${target && !acting ? "pulsing" : ""}`}
+              style={{ fontSize: '15px', padding: '12px 24px', letterSpacing: '2px' }}
+            >
+              {acting ? (
+                <><div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />STEALING...</>
+              ) : target && tp ? (
+                `YOINK — ${chance()}%`
+              ) : (
+                "YOINK"
+              )}
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Bottom padding on mobile so sticky bar doesn't cover content */}
+      {joined && !isOut && <div className="lg:hidden h-24" />}
     </div>
   );
 }

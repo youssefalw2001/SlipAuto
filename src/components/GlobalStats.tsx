@@ -9,9 +9,9 @@ function seededRand(seed: number, min: number, max: number) {
 }
 
 const BASE_PLAYERS   = 61284;
-const BASE_ROOMS     = 5107;
-const BASE_STOLEN_PM = 48.2; // SOL per minute
-const BASE_WAGERED   = 4841209; // USD all time
+const BASE_ROOMS     = 487;
+const BASE_STOLEN_PM = 48.2;
+const BASE_WAGERED   = 4841209;
 
 export default function GlobalStats() {
   const [players, setPlayers]     = useState(BASE_PLAYERS);
@@ -26,7 +26,7 @@ export default function GlobalStats() {
       setTick(t => t + 1);
       const delta = seededRand(Date.now() % 9999, 1, 4);
       setPlayers(p => p + delta);
-      setRooms(r => r + (Math.random() > 0.6 ? 1 : 0));
+      setRooms(r => Math.min(500, r + (Math.random() > 0.6 ? 1 : 0)));
       setStolenPm(s => parseFloat((s + (Math.random() * 2 - 0.5)).toFixed(1)));
       setWagered(w => w + seededRand(Date.now() % 777, 200, 900));
     }, 8000 + Math.random() * 4000);

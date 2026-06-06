@@ -9,7 +9,7 @@ interface JoinEvent {
   color: string;
 }
 
-const FLAGS = ["🇺🇸","🇧🇷","🇬🇧","🇩🇪","🇯🇵","🇰🇷","🇦🇺","🇨🇦","🇫🇷","🇸🇬","🇳🇱","🇸🇪","🇦🇪","🇲🇽","🇮🇳","🇿🇦","🇵🇭","🇹🇷","🇦🇷","🇨🇭"];
+const FLAGS = ["US","BR","GB","DE","JP","KR","AU","CA","FR","SG","NL","SE","AE","MX","IN","ZA","PH","TR","AR","CH"];
 
 const WALLETS = [
   "7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x",
@@ -84,7 +84,8 @@ export default function JoinToast() {
               boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
             }}
           >
-            <span className="text-[16px] flex-shrink-0">{e.flag}</span>
+            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.08)', color: '#a0a0c0' }}>{e.flag}</span>
             <div className="min-w-0">
               <span className="font-mono text-[10px] font-bold text-white">{e.wallet}</span>
               <p className="text-[11px] leading-tight mt-0.5" style={{ color: e.color }}>
