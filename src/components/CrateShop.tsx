@@ -78,6 +78,7 @@ function CrateCard({
   const solRewards = crate.rewards.filter(r => r.type === "sol");
   const maxWin     = Math.max(...solRewards.map(r => r.value as number));
   const reqLevel   = getLevelById(crate.minLevel);
+  const isLegendary = crate.id === "legendary";
 
   /* Shimmer animation when not locked */
   const shimmerStyle = !locked ? {
@@ -98,8 +99,17 @@ function CrateCard({
         borderTop: `2px solid ${locked ? 'rgba(255,255,255,0.06)' : crate.color}`,
         boxShadow: locked ? 'none' : `0 8px 40px ${crate.glowColor}, 0 2px 0 ${crate.color}20 inset`,
         opacity: locked ? 0.55 : 1,
+        backdropFilter: !locked ? 'blur(12px)' : undefined,
       }}
     >
+      {/* God Ray for legendary */}
+      {isLegendary && !locked && <div className="god-ray" />}
+
+      {/* Glassmorphism overlay */}
+      {!locked && (
+        <div className="absolute inset-0 pointer-events-none rounded-2xl"
+          style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)' }} />
+      )}
       {/* Shimmer sweep on hover */}
       {!locked && (
         <motion.div
@@ -129,8 +139,8 @@ function CrateCard({
             </span>
           </div>
           {crate.id === "legendary" && !locked && (
-            <span className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-full"
-              style={{ background: `${crate.color}20`, color: crate.color, border: `1px solid ${crate.color}40` }}>
+            <span className="text-[8px] font-mono font-bold px-2 py-0.5 rounded-full shimmer-text"
+              style={{ background: `${crate.color}20`, border: `1px solid ${crate.color}40` }}>
               BEST VALUE
             </span>
           )}
@@ -253,21 +263,22 @@ function CrateCard({
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="px-5 pb-4 space-y-2">
+              <div className="px-5 pb-4 space-y-1.5">
                 {crate.rewards.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between">
+                  <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded-lg"
+                    style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)' }}>
                     <div className="flex items-center gap-2">
                       {r.rare && <Sparkles className="w-3 h-3 flex-shrink-0" style={{ color: '#ffd200' }} />}
-                      <span className="text-[11px]" style={{ color: r.rare ? '#ffd200' : r.color }}>
+                      <span className="text-[11px] font-mono" style={{ color: r.rare ? '#ffd200' : r.color }}>
                         {r.label}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {/* Mini probability bar */}
-                      <div className="w-16 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         <div className="h-full rounded-full" style={{ width: `${r.chance}%`, background: r.rare ? '#ffd200' : r.color }} />
                       </div>
-                      <span className="text-[10px] font-mono w-8 text-right" style={{ color: '#6060a0' }}>
+                      <span className="text-[10px] font-mono w-8 text-right font-bold" style={{ color: r.rare ? '#ffd200' : '#6060a0' }}>
                         {r.chance}%
                       </span>
                     </div>
@@ -326,6 +337,9 @@ function ResultModal({ result, onClose }: { result: OpenResult; onClose: () => v
         {/* Rainbow top line */}
         <div className="absolute top-0 left-0 right-0 h-px"
           style={{ background: `linear-gradient(90deg, transparent, ${result.crate.color}, #ffd200, ${result.crate.color}, transparent)` }} />
+
+        {/* God ray for legendary wins */}
+        {result.crate.id === "legendary" && <div className="god-ray" style={{ opacity: 0.15 }} />}
 
         <button
           onClick={onClose}

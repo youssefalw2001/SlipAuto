@@ -142,7 +142,8 @@ export default function App() {
       </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-y-border bg-y-base/88 backdrop-blur-2xl">
+      <header className="sticky top-0 z-40 border-b border-y-border bg-y-base/88 backdrop-blur-2xl"
+        style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset' }}>
         <div className="max-w-6xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
 
           {/* Logo */}
@@ -154,8 +155,8 @@ export default function App() {
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-y-green border-2 border-y-base blink" />
             </div>
             <div className="flex items-baseline gap-0">
-              <span className="font-display text-[24px] text-white tracking-[0.08em]">YOINK</span>
-              <span className="font-display text-[24px] tracking-[0.08em]" style={{ color: '#ff4d00' }}>.GG</span>
+              <span className="font-display text-[24px] text-white tracking-[0.08em]" style={{ textShadow: '0 0 20px rgba(255,255,255,0.15)' }}>YOINK</span>
+              <span className="font-display text-[24px] tracking-[0.08em]" style={{ color: '#ff4d00', textShadow: '0 0 20px rgba(255,77,0,0.4)' }}>.GG</span>
             </div>
           </motion.button>
 
@@ -166,11 +167,12 @@ export default function App() {
                 key={n.id}
                 onClick={() => setPage(n.id)}
                 className={`nav-link relative ${page === n.id ? "active" : ""}`}
+                style={page === n.id ? { textShadow: '0 0 12px rgba(255,77,0,0.4)' } : undefined}
               >
                 {n.label}
                 {n.id === "crates" && (
                   <span className="absolute -top-2.5 -right-4 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: '#ff4d00', color: 'white', lineHeight: 1 }}>
+                    style={{ background: '#ff4d00', color: 'white', lineHeight: 1, boxShadow: '0 0 8px rgba(255,77,0,0.5)' }}>
                     NEW
                   </span>
                 )}
@@ -214,6 +216,7 @@ export default function App() {
                 onClick={connectWallet}
                 disabled={connecting}
                 className="btn-yoink text-[14px] py-2.5 px-6 disabled:opacity-60"
+                style={{ boxShadow: '0 4px 24px rgba(255,77,0,0.4), 0 0 40px rgba(255,77,0,0.15)' }}
               >
                 <Wallet className="w-4 h-4" />
                 {connecting ? "Connecting..." : "Connect Wallet"}
@@ -285,11 +288,11 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="border-t border-y-border py-6">
+      <footer className="border-t border-y-border py-6" style={{ background: 'linear-gradient(180deg, transparent, rgba(3,3,8,0.5))' }}>
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-display text-[18px] text-white tracking-[0.06em]">YOINK</span>
-            <span className="font-display text-[18px] tracking-[0.06em]" style={{ color: '#ff4d00' }}>.GG</span>
+            <span className="font-display text-[18px] text-white tracking-[0.06em]" style={{ textShadow: '0 0 10px rgba(255,255,255,0.1)' }}>YOINK</span>
+            <span className="font-display text-[18px] tracking-[0.06em]" style={{ color: '#ff4d00', textShadow: '0 0 12px rgba(255,77,0,0.3)' }}>.GG</span>
             <span className="text-[11px] ml-1.5" style={{ color: '#6060a0' }}>— Provably fair on Solana</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]" style={{ color: '#6060a0' }}>
