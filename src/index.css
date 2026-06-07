@@ -15,11 +15,11 @@
 @theme {
   --color-y-base:     #030308;
   --color-y-bg:       #070710;
-  --color-y-card:     #0c0c1a;
+  --color-y-card:     #0d0d1c;
   --color-y-elevated: #111126;
   --color-y-hover:    #16163a;
-  --color-y-border:   rgba(255,255,255,0.05);
-  --color-y-border2:  rgba(255,255,255,0.10);
+  --color-y-border:   rgba(255,255,255,0.08);
+  --color-y-border2:  rgba(255,255,255,0.12);
   --color-y-text:     #eeeef8;
   --color-y-muted:    #60608a;
   --color-y-dim:      #30304a;
@@ -41,7 +41,7 @@ body {
   background: var(--color-y-base);
   color: var(--color-y-text);
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.55;
   min-height: 100vh;
   overflow-x: hidden;
@@ -53,9 +53,9 @@ body::before {
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   will-change: auto;
   background:
-    radial-gradient(ellipse 70% 55% at 50% -5%,  rgba(112,0,255,0.10) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 40% at 95% 85%,  rgba(255,77,0,0.07)  0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 5%  65%,  rgba(0,229,255,0.04) 0%, transparent 60%);
+    radial-gradient(ellipse 70% 55% at 50% -5%,  rgba(112,0,255,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 95% 85%,  rgba(255,77,0,0.12)  0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 5%  65%,  rgba(0,229,255,0.08) 0%, transparent 60%);
 }
 /* Removed dot grid body::after — was causing repaint on every scroll */
 #root { position: relative; z-index: 1; }
@@ -76,8 +76,8 @@ body::before {
    ============================================================ */
 .card {
   background: var(--color-y-card);
-  border: 1px solid var(--color-y-border);
-  border-top: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.13);
   border-radius: 18px;
   padding: 22px;
   position: relative;
@@ -88,19 +88,19 @@ body::before {
   content: '';
   position: absolute;
   top: 0; left: 20%; right: 20%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
   pointer-events: none;
 }
 .card:hover {
-  border-color: rgba(255,77,0,0.18);
-  border-top-color: rgba(255,77,0,0.4);
-  box-shadow: 0 0 0 1px rgba(255,77,0,0.06), 0 8px 32px rgba(255,77,0,0.07);
+  border-color: rgba(255,77,0,0.22);
+  border-top-color: rgba(255,77,0,0.45);
+  box-shadow: 0 0 0 1px rgba(255,77,0,0.07), 0 8px 32px rgba(255,77,0,0.09);
 }
 
 .card-flat {
   background: var(--color-y-card);
-  border: 1px solid var(--color-y-border);
-  border-top: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.13);
   border-radius: 18px;
   padding: 22px;
   position: relative;
@@ -110,14 +110,14 @@ body::before {
   content: '';
   position: absolute;
   top: 0; left: 20%; right: 20%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
   pointer-events: none;
 }
 
 .card-sm {
   background: var(--color-y-card);
-  border: 1px solid var(--color-y-border);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.11);
   border-radius: 14px;
   padding: 16px;
   position: relative;
@@ -169,8 +169,8 @@ body::before {
    ============================================================ */
 .wallet-card {
   background: var(--color-y-card);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-top: 1px solid rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.13);
   border-radius: 16px;
   padding: 18px 16px 14px;
   cursor: pointer;
@@ -320,7 +320,7 @@ input[type="number"] { -moz-appearance: textfield; }
   align-items: center;
   gap: 5px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 6px;
@@ -341,8 +341,8 @@ input[type="number"] { -moz-appearance: textfield; }
   align-items: center;
   gap: 8px;
   background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-top: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.10);
   border-radius: 10px;
   padding: 8px 14px;
   font-family: 'Geist Mono', monospace;
@@ -355,7 +355,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .nav-link {
   position: relative;
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #6060a0;
   padding: 4px 2px;

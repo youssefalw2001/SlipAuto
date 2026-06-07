@@ -230,20 +230,33 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               <span className="pill pill-live"><span className="w-1.5 h-1.5 rounded-full bg-y-green blink" /> LIVE</span>
               <span className="text-[12px] font-mono" style={{ color: '#6060a0' }}>{livePlayers} in arena</span>
             </div>
-            <h1 className="font-display text-[48px] leading-none text-white tracking-[0.06em] mb-1.5">
+            <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-2">
               YOINK<span style={{ color: '#ff4d00' }}>.GG</span>
             </h1>
-            <p className="text-[13px]" style={{ color: '#6060a0' }}>Target a wallet. Pay a small fee. Steal their SOL.</p>
+            {/* Power sentence — the hook */}
+            <p className="text-[15px] font-semibold mb-1" style={{ color: '#eeeef8' }}>
+              The only Solana game where you steal real SOL from other players.
+            </p>
+            <p className="text-[13px]" style={{ color: '#6060a0' }}>
+              Lock SOL. Pick a target. Pay a small fee. Walk away richer.
+            </p>
           </div>
-          <div className="flex items-center gap-5">
+
+          {/* Big stats — pulled from GlobalStats into hero */}
+          <div className="flex items-start gap-5 flex-shrink-0">
             <div className="text-center">
               <div className="font-display text-[38px] leading-none" style={{ color: '#ff7040' }}>{stolen.toFixed(1)}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>SOL Stolen</div>
+              <div className="text-[11px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>SOL Stolen Today</div>
             </div>
-            <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="w-px h-12 self-center" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="text-center">
               <div className="font-display text-[38px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>Rounds</div>
+              <div className="text-[11px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>Rounds Played</div>
+            </div>
+            <div className="w-px h-12 self-center hidden sm:block" style={{ background: 'rgba(255,255,255,0.07)' }} />
+            <div className="text-center hidden sm:block">
+              <div className="font-display text-[38px] leading-none" style={{ color: '#00d470' }}>{livePlayers}</div>
+              <div className="text-[11px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>Playing Now</div>
             </div>
           </div>
         </div>
@@ -252,17 +265,17 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       {/* How it works — clear and honest */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
-          { n:"01", c:"#ff4d00", t:"Lock SOL to enter", d:"Your SOL stays locked in the arena. You can leave and get it back anytime.", earn: null },
-          { n:"02", c:"#a060ff", t:"Pick any target",   d:"See everyone's real locked balance. Hover to see your exact steal odds.", earn: "Steal 50% of target's balance" },
-          { n:"03", c:"#40d8f0", t:"Pay a small fee",   d:"Win = steal 50% of their balance. Lose = only lose the 5% fee. Your balance never disappears in one hit.", earn: "Max loss per attempt: 5% of target" },
-          { n:"04", c:"#00d470", t:"Win & compound",    d:"Every win grows your balance. Bigger balance = better odds on next attack.", earn: "Stack wins to dominate" },
+          { n:"01", c:"#ff4d00", t:"Lock SOL to enter", d:"Your SOL stays locked. You can leave and get it back anytime.", earn: null },
+          { n:"02", c:"#a060ff", t:"Pick any target",   d:"See everyone's real locked balance. Hover for exact steal odds.", earn: "Steal 50% of target's balance" },
+          { n:"03", c:"#40d8f0", t:"Pay a small fee",   d:"Win = steal 50% of theirs. Lose = only lose the 5% fee.", earn: "Max loss per attempt: 5% of target" },
+          { n:"04", c:"#00d470", t:"Win & compound",    d:"Every win grows your balance. Bigger = better odds on next attack.", earn: "Stack wins to dominate" },
         ].map(s => (
           <div key={s.n} className="card-sm">
-            <div className="text-[10px] font-mono tracking-widest mb-1.5" style={{ color: '#30304a' }}>{s.n}</div>
-            <div className="text-[12px] font-bold text-white mb-1">{s.t}</div>
-            <div className="text-[11px] leading-snug" style={{ color: '#6060a0' }}>{s.d}</div>
+            <div className="text-[11px] font-mono tracking-widest mb-1.5" style={{ color: '#30304a' }}>{s.n}</div>
+            <div className="text-[13px] font-bold text-white mb-1">{s.t}</div>
+            <div className="text-[12px] leading-snug" style={{ color: '#6060a0' }}>{s.d}</div>
             {s.earn && (
-              <div className="mt-2 text-[10px] font-mono px-2 py-1 rounded-lg"
+              <div className="mt-2 text-[11px] font-mono px-2 py-1 rounded-lg"
                 style={{ background: `rgba(${s.c === "#ff4d00" ? "255,77,0" : s.c === "#a060ff" ? "112,0,255" : s.c === "#40d8f0" ? "0,229,255" : "0,232,122"},0.08)`, color: s.c }}>
                 {s.earn}
               </div>

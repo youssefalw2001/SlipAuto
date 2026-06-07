@@ -41,7 +41,7 @@ export default function LiveFeed() {
         <div className="flex-1 overflow-hidden flex items-center">
           <div className="ticker flex items-center gap-8 whitespace-nowrap px-5">
             {[...items,...items].map((e,i)=>(
-              <span key={`${e.id}-${i}`} className="inline-flex items-center gap-2 text-[11px]">
+              <span key={`${e.id}-${i}`} className="inline-flex items-center gap-2 text-[12px]">
                 {e.game==="yoink"
                   ?<Crosshair className="w-3 h-3 flex-shrink-0" style={{color:'#ff4d00'}}/>
                   :<RotateCcw className="w-3 h-3 flex-shrink-0" style={{color:'#7000ff'}}/>

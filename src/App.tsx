@@ -31,9 +31,13 @@ const NAV = [
   { id: "referral"    as Page, label: "Referrals",   icon: Users     },
 ];
 
-// ── Demo wallet (until real wallet adapter is wired) ──
-// In production this becomes the user's Phantom/Backpack address
-const DEMO_WALLET = "demo_" + Math.random().toString(36).slice(2, 10);
+// ── Demo wallet persisted in localStorage so XP survives refresh ──
+const STORED_DEMO = localStorage.getItem("yoink_demo_wallet");
+const DEMO_WALLET = STORED_DEMO ?? (() => {
+  const w = "demo_" + Math.random().toString(36).slice(2, 10);
+  localStorage.setItem("yoink_demo_wallet", w);
+  return w;
+})();
 
 export default function App() {
   const [page, setPage]               = useState<Page>("yoink");
@@ -168,12 +172,6 @@ export default function App() {
                 className={`nav-link relative ${page === n.id ? "active" : ""}`}
               >
                 {n.label}
-                {n.id === "crates" && (
-                  <span className="absolute -top-2.5 -right-4 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: '#ff4d00', color: 'white', lineHeight: 1 }}>
-                    NEW
-                  </span>
-                )}
               </button>
             ))}
           </nav>
@@ -247,7 +245,6 @@ export default function App() {
                       className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all"
                       style={{ color: page === n.id ? '#ff7040' : '#6060a0', background: page === n.id ? 'rgba(255,77,0,0.08)' : 'transparent' }}>
                       <Icon className="w-4 h-4" />{n.label}
-                      {n.id === "crates" && <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#ff4d00', color: 'white' }}>NEW</span>}
                     </button>
                   );
                 })}
@@ -272,6 +269,25 @@ export default function App() {
 
       <LiveFeed />
       <GlobalStats />
+
+      {/* Demo mode banner */}
+      {wallet?.startsWith("demo_") && (
+        <div className="border-b border-y-border py-2 px-5"
+          style={{ background: 'rgba(255,210,0,0.04)' }}>
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+            <p className="text-[12px] font-mono" style={{ color: '#e8c000' }}>
+              Demo mode — your progress is saved locally. Connect Phantom to play with real SOL.
+            </p>
+            <button
+              onClick={connectWallet}
+              className="text-[11px] font-semibold px-3 py-1 rounded-lg flex-shrink-0 transition-all hover:opacity-90"
+              style={{ background: 'rgba(255,210,0,0.15)', color: '#e8c000', border: '1px solid rgba(255,210,0,0.25)' }}
+            >
+              Connect Phantom →
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-5 py-8">
         <AnimatePresence mode="wait">
