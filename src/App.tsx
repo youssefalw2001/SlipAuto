@@ -128,11 +128,14 @@ export default function App() {
         theme="dark"
         toastOptions={{
           style: {
-            background: "#0c0c1a",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(10,10,24,0.95)",
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderTop: "1px solid rgba(255,255,255,0.10)",
             color: "#eeeef8",
             fontFamily: "'DM Sans', sans-serif",
             fontSize: "13px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 60px rgba(112,0,255,0.05)",
           },
         }}
       />
@@ -142,9 +145,9 @@ export default function App() {
       </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-y-border bg-y-base/88 backdrop-blur-2xl"
-        style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03) inset' }}>
-        <div className="max-w-6xl mx-auto px-5 h-[58px] flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 border-b border-y-border"
+        style={{ background: 'rgba(4,4,10,0.92)', backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: '0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(112,0,255,0.03), 0 1px 0 rgba(255,255,255,0.04) inset' }}>
+        <div className="max-w-6xl mx-auto px-5 h-[60px] flex items-center justify-between gap-4">
 
           {/* Logo */}
           <motion.button onClick={() => setPage("yoink")}
@@ -155,8 +158,8 @@ export default function App() {
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-y-green border-2 border-y-base blink" />
             </div>
             <div className="flex items-baseline gap-0">
-              <span className="font-display text-[24px] text-white tracking-[0.08em]" style={{ textShadow: '0 0 20px rgba(255,255,255,0.15)' }}>YOINK</span>
-              <span className="font-display text-[24px] tracking-[0.08em]" style={{ color: '#ff4d00', textShadow: '0 0 20px rgba(255,77,0,0.4)' }}>.GG</span>
+              <span className="font-display text-[26px] text-white tracking-[0.08em]" style={{ textShadow: '0 0 24px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.05)' }}>YOINK</span>
+              <span className="font-display text-[26px] tracking-[0.08em]" style={{ color: '#ff4d00', textShadow: '0 0 24px rgba(255,77,0,0.5), 0 0 60px rgba(255,77,0,0.2)' }}>.GG</span>
             </div>
           </motion.button>
 
@@ -201,8 +204,8 @@ export default function App() {
             {wallet ? (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-mono"
-                  style={{ background: 'rgba(0,232,122,0.08)', border: '1px solid rgba(0,232,122,0.2)', color: '#00d470' }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
+                  style={{ background: 'rgba(0,232,122,0.06)', border: '1px solid rgba(0,232,122,0.25)', color: '#00d470', boxShadow: '0 0 20px rgba(0,232,122,0.08)' }}>
+                  <span className="w-2 h-2 rounded-full bg-y-green blink" />
                   {walletShort}
                 </div>
                 <button onClick={disconnectWallet} className="btn-ghost text-[11px] py-2 px-3"
@@ -216,7 +219,6 @@ export default function App() {
                 onClick={connectWallet}
                 disabled={connecting}
                 className="btn-yoink text-[14px] py-2.5 px-6 disabled:opacity-60"
-                style={{ boxShadow: '0 4px 24px rgba(255,77,0,0.4), 0 0 40px rgba(255,77,0,0.15)' }}
               >
                 <Wallet className="w-4 h-4" />
                 {connecting ? "Connecting..." : "Connect Wallet"}
@@ -288,12 +290,16 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <footer className="border-t border-y-border py-6" style={{ background: 'linear-gradient(180deg, transparent, rgba(3,3,8,0.5))' }}>
+      <footer className="border-t border-y-border py-8 relative overflow-hidden"
+        style={{ background: 'linear-gradient(180deg, rgba(4,4,10,0.3) 0%, rgba(4,4,10,0.95) 100%)' }}>
+        {/* Subtle gradient line at top */}
+        <div className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(112,0,255,0.3), rgba(255,77,0,0.2), transparent)' }} />
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-display text-[18px] text-white tracking-[0.06em]" style={{ textShadow: '0 0 10px rgba(255,255,255,0.1)' }}>YOINK</span>
-            <span className="font-display text-[18px] tracking-[0.06em]" style={{ color: '#ff4d00', textShadow: '0 0 12px rgba(255,77,0,0.3)' }}>.GG</span>
-            <span className="text-[11px] ml-1.5" style={{ color: '#6060a0' }}>— Provably fair on Solana</span>
+            <span className="font-display text-[20px] text-white tracking-[0.06em]" style={{ textShadow: '0 0 16px rgba(255,255,255,0.1)' }}>YOINK</span>
+            <span className="font-display text-[20px] tracking-[0.06em]" style={{ color: '#ff4d00', textShadow: '0 0 16px rgba(255,77,0,0.4)' }}>.GG</span>
+            <span className="text-[11px] ml-2 font-mono" style={{ color: '#5a5a8a' }}>Predatory by design.</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]" style={{ color: '#6060a0' }}>
             <span>18+ Only</span>
