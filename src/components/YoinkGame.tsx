@@ -44,9 +44,9 @@ function fireCelebration() {
   confetti({ ...o, particleCount: 50, origin: { x: 0.65, y: 0.4 }, colors: ['#7000ff','#ff0066','#ffd200'] });
 }
 
-interface Props { xp: number; onXPGain: (xp: number) => void; levelId: number; }
+interface Props { xp: number; onXPGain: (xp: number, reason?: string) => void; levelId: number; wallet: string | null; }
 
-export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
+export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const [players, setPlayers]   = useState<Player[]>(SEED);
   const [myBal, setMyBal]       = useState(0);
   const [target, setTarget]     = useState<number | null>(null);
@@ -117,7 +117,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
     setMyBal(v);
     uid++;
     setPlayers(prev => [...prev, { id: uid, wallet: "You", balance: v, isYou: true, levelId, isBounty: v >= BOUNTY_THRESHOLD }]);
-    onXPGain(XP_REWARDS.ENTER_ARENA);
+    onXPGain(XP_REWARDS.ENTER_ARENA, "enter_arena");
     toast.success(`Entered arena with ${v} SOL`);
   };
 
@@ -131,7 +131,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
     if (!target || !tp || acting) return;
     setActing(true);
     const c = chance();
-    onXPGain(XP_REWARDS.YOINK_ATTEMPT);
+    onXPGain(XP_REWARDS.YOINK_ATTEMPT, "yoink_attempt");
     setTimeout(() => {
       const roll = Math.random() * 100;
       const fee  = parseFloat((tp.balance * 0.05).toFixed(3));
@@ -145,7 +145,7 @@ export default function YoinkGame({ xp, onXPGain, levelId }: Props) {
           return p;
         }));
         setTimeout(() => setPlayers(p => p.map(pl => pl.id === target ? { ...pl, hit: false } : pl)), 800);
-        onXPGain(XP_REWARDS.YOINK_SUCCESS);
+        onXPGain(XP_REWARDS.YOINK_SUCCESS, "yoink_win");
         setStolen(s => parseFloat((s + gain).toFixed(2)));
         setRounds(r => r + 1);
         setFlash("win"); setTimeout(() => setFlash(null), 600);

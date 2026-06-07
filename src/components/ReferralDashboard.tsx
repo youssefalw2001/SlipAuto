@@ -1,11 +1,14 @@
 import NumberFlow from "@number-flow/react";
 import { motion } from "framer-motion";
 import { Check, Copy, TrendingUp, Users } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { type PlayerRow, getMyReferrals } from "../lib/supabase";
 
 interface Ref{wallet:string;joined:string;vol:number;earned:number;active:boolean;}
-const REFS:Ref[]=[
+
+// Demo fallback refs (shown when no wallet connected)
+const DEMO_REFS:Ref[]=[
   {wallet:"Bz9r...Wf2j",joined:"2d ago",vol:14.4,earned:0.144,active:true},
   {wallet:"4tLs...Ck8v",joined:"5d ago",vol:8.2,earned:0.082,active:true},
   {wallet:"Hn6d...Yp1x",joined:"1w ago",vol:22.1,earned:0.221,active:true},
@@ -13,18 +16,44 @@ const REFS:Ref[]=[
   {wallet:"Jp8e...Ah9w",joined:"3w ago",vol:31.8,earned:0.318,active:true},
 ];
 
-export default function ReferralDashboard(){
+interface Props { wallet: string | null; player: PlayerRow | null; }
+
+export default function ReferralDashboard({ wallet, player }: Props){
   const[copied,setCopied]=useState(false);
-  const link="https://yoink.gg/ref/7xKp3mNq";
-  const totalEarned=REFS.reduce((a,r)=>a+r.earned,0);
-  const totalVol=REFS.reduce((a,r)=>a+r.vol,0);
-  const active=REFS.filter(r=>r.active).length;
+  const[refs,setRefs]=useState<Ref[]>(DEMO_REFS);
+  const[loading,setLoading]=useState(false);
+
+  // Load real referrals from Supabase when wallet connected
+  useEffect(()=>{
+    if(!wallet)return;
+    setLoading(true);
+    getMyReferrals(wallet).then(rows=>{
+      if(rows.length>0){
+        const mapped:Ref[]=rows.map((r:any)=>({
+          wallet: r.referee.length>12 ? r.referee.slice(0,4)+"..."+r.referee.slice(-4) : r.referee,
+          joined: new Date(r.created_at).toLocaleDateString(),
+          vol:    parseFloat(r.volume_sol)||0,
+          earned: parseFloat(r.earned_sol)||0,
+          active: (parseFloat(r.volume_sol)||0)>0,
+        }));
+        setRefs(mapped);
+      }
+      setLoading(false);
+    });
+  },[wallet]);
+
+  // Use player's real referral code if available
+  const refCode = player?.referral_code ?? "7xKp3mNq";
+  const link = `https://yoink.gg/ref/${refCode}`;
+  const totalEarned=refs.reduce((a,r)=>a+r.earned,0);
+  const totalVol=refs.reduce((a,r)=>a+r.vol,0);
+  const active=refs.filter(r=>r.active).length;
   const copy=()=>{navigator.clipboard.writeText(link);setCopied(true);toast.success("Referral link copied!");setTimeout(()=>setCopied(false),2000);};
-  const tweet=encodeURIComponent(`Just stole SOL on yoink.gg 😈\n\nTarget wallets. Steal their SOL. Most addictive game on Solana.\n\nJoin: ${link}`);
+  const tweet=encodeURIComponent(`Just stole SOL on yoink.gg\n\nTarget wallets. Steal their SOL. Most addictive game on Solana.\n\nJoin: ${link}`);
 
   const stats=[
     {label:"EARNED",val:totalEarned,fmt:{minimumFractionDigits:3,maximumFractionDigits:3},unit:"SOL",color:"#00d470"},
-    {label:"REFERRALS",val:REFS.length,fmt:{},unit:"total",color:"#ff7040"},
+    {label:"REFERRALS",val:refs.length,fmt:{},unit:"total",color:"#ff7040"},
     {label:"VOLUME",val:totalVol,fmt:{minimumFractionDigits:1,maximumFractionDigits:1},unit:"SOL",color:"#40d8f0"},
     {label:"ACTIVE",val:active,fmt:{},unit:"players",color:"#a060ff"},
   ];
@@ -82,7 +111,7 @@ export default function ReferralDashboard(){
 
       <div className="card-flat overflow-hidden p-0">
         <div className="px-5 py-4 flex items-center justify-between" style={{borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
-          <h3 className="text-[13px] font-semibold text-white">Your Referrals ({REFS.length})</h3>
+          <h3 className="text-[13px] font-semibold text-white">Your Referrals ({refs.length}){loading && <span className="text-[11px] font-normal ml-2" style={{color:'#6060a0'}}>loading...</span>}</h3>
           <span className="text-[11px]" style={{color:'#30304a'}}>Connect wallet for live data</span>
         </div>
         <div className="overflow-x-auto">
@@ -96,7 +125,7 @@ export default function ReferralDashboard(){
               </tr>
             </thead>
             <tbody>
-              {REFS.map((r,i)=>(
+              {refs.map((r,i)=>(
                 <motion.tr key={i} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*0.05}}
                   style={{borderBottom:'1px solid rgba(255,255,255,0.03)'}} className="hover:bg-white/1 transition-colors">
                   <td className="px-4 py-3 font-mono font-medium text-white">{r.wallet}</td>

@@ -2,14 +2,15 @@ import NumberFlow from "@number-flow/react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Lock, Shield, Sparkles, X, Zap } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   CRATE_TIERS, CrateReward, CrateTier,
   getLevelById, getXPProgress, spinCrate, XP_REWARDS
 } from "../lib/levels";
+import { getAllCrateOpensToday, recordCrateOpen } from "../lib/supabase";
 
-interface Props { xp: number; levelId: number; onXPGain: (xp: number) => void; }
+interface Props { xp: number; levelId: number; onXPGain: (xp: number) => void; wallet: string | null; }
 interface OpenResult { reward: CrateReward; crate: CrateTier; }
 
 /* ── Jackpot confetti ── */
@@ -435,19 +436,39 @@ function ResultModal({ result, onClose }: { result: OpenResult; onClose: () => v
 }
 
 /* ── Main CrateShop page ── */
-export default function CrateShop({ xp, levelId, onXPGain }: Props) {
+export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
   const [dailyOpened, setDailyOpened] = useState<Record<string, number>>({});
   const [opening, setOpening]         = useState<string | null>(null);
   const [result, setResult]           = useState<OpenResult | null>(null);
   const { current: level, next, progressPct, xpIntoLevel, xpNeeded } = getXPProgress(xp);
 
-  const handleOpen = (crate: CrateTier) => {
+  // Load today's opens from Supabase on mount (if wallet connected)
+  useEffect(() => {
+    if (!wallet) return;
+    getAllCrateOpensToday(wallet).then(counts => {
+      setDailyOpened(counts);
+    });
+  }, [wallet]);
+
+  const handleOpen = async (crate: CrateTier) => {
     setOpening(crate.id);
-    setTimeout(() => {
+    setTimeout(async () => {
       const reward = spinCrate(crate);
-      setDailyOpened(prev => ({ ...prev, [crate.id]: (prev[crate.id] ?? 0) + 1 }));
+      const newOpened = { ...dailyOpened, [crate.id]: (dailyOpened[crate.id] ?? 0) + 1 };
+      setDailyOpened(newOpened);
       onXPGain(XP_REWARDS.OPEN_CRATE);
       if (reward.type === "xp") onXPGain(reward.value as number);
+
+      // Persist to Supabase if wallet connected
+      if (wallet) {
+        await recordCrateOpen(
+          wallet,
+          crate.id,
+          reward.label,
+          reward.type,
+          reward.type === "sol" ? (reward.value as number) : undefined,
+        );
+      }
 
       const isJackpot = reward.type === "sol" && (reward.value as number) >= 1.0;
       if (isJackpot) {
