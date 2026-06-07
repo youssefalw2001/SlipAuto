@@ -1,19 +1,14 @@
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Crosshair, Shield, Target, Zap } from "lucide-react";
+import { AlertCircle, ArrowUpRight, DoorOpen, Shield, Target, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
 import RoomSystem from "./RoomSystem";
 
 interface Player {
-  id: number;
-  wallet: string;
-  balance: number;
-  isYou: boolean;
-  hit?: boolean;
-  levelId: number;
-  isBounty?: boolean;
+  id: number; wallet: string; balance: number;
+  isYou: boolean; hit?: boolean; levelId: number; isBounty?: boolean;
 }
 
 const W = [
@@ -26,6 +21,8 @@ const W = [
 const LEVEL_COLORS = ["#a0a0b0","#00d470","#a060ff","#ff4d00"];
 const LEVEL_NAMES  = ["ROOKIE","HUSTLER","PREDATOR","APEX"];
 const BOUNTY_THRESHOLD = 3.0;
+const MAX_DAILY_LOSS   = 10; // SOL — protection cap
+const MIN_BALANCE_PROTECTION = 0.05; // can't be yoinked below this
 
 const rBal   = () => parseFloat((Math.random() * 5 + 0.1).toFixed(3));
 const rLevel = () => Math.floor(Math.random() * 3) + 1;
@@ -47,22 +44,27 @@ function fireCelebration() {
 interface Props { xp: number; onXPGain: (xp: number, reason?: string) => void; levelId: number; wallet: string | null; }
 
 export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
-  const [players, setPlayers]   = useState<Player[]>(SEED);
-  const [myBal, setMyBal]       = useState(0);
-  const [target, setTarget]     = useState<number | null>(null);
-  const [stake, setStake]       = useState("0.25");
-  const [acting, setActing]     = useState(false);
-  const [joined, setJoined]     = useState(false);
-  const [flash, setFlash]       = useState<"win"|"lose"|null>(null);
-  const [stolen, setStolen]     = useState(284.1);
-  const [rounds, setRounds]     = useState(1847);
-  const [livePlayers, setLive]  = useState(14);
-  const [tooltip, setTooltip]   = useState<number | null>(null);
-  const [roomId, setRoomId]     = useState(() => Math.floor(Math.random() * 200) + 300);
-  const globalPity              = useRef(0);
-  const tooltipTimer            = useRef<ReturnType<typeof setTimeout>>();
+  const [players, setPlayers]       = useState<Player[]>(SEED);
+  const [myBal, setMyBal]           = useState(0);
+  const [entryAmount, setEntryAmount] = useState(0); // what they entered with
+  const [target, setTarget]         = useState<number | null>(null);
+  const [stake, setStake]           = useState("0.25");
+  const [acting, setActing]         = useState(false);
+  const [joined, setJoined]         = useState(false);
+  const [flash, setFlash]           = useState<"win"|"lose"|null>(null);
+  const [stolen, setStolen]         = useState(284.1);
+  const [rounds, setRounds]         = useState(1847);
+  const [livePlayers, setLive]      = useState(14);
+  const [tooltip, setTooltip]       = useState<number | null>(null);
+  const [roomId, setRoomId]         = useState(() => Math.floor(Math.random() * 200) + 300);
+  // Session P&L tracking
+  const [sessionWins, setSessionWins]   = useState(0);
+  const [sessionLosses, setSessionLosses] = useState(0);
+  const [dailyLoss, setDailyLoss]       = useState(0);
+  const globalPity    = useRef(0);
+  const tooltipTimer  = useRef<ReturnType<typeof setTimeout>>();
 
-  // ── Slower simulation — 6s interval, no layout thrashing ──
+  // Simulation
   useEffect(() => {
     const iv = setInterval(() => {
       setPlayers(prev => {
@@ -70,17 +72,16 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         const a = Math.floor(Math.random() * arr.length);
         const b = Math.floor(Math.random() * arr.length);
         if (a === b || arr[a].isYou || arr[b].isYou) return arr;
+        if (arr[b].balance <= MIN_BALANCE_PROTECTION) return arr;
         const amt = parseFloat((arr[b].balance * (0.15 + Math.random() * 0.3)).toFixed(3));
-        const nb = Math.max(0.05, parseFloat((arr[b].balance - amt).toFixed(3)));
+        const nb = Math.max(MIN_BALANCE_PROTECTION, parseFloat((arr[b].balance - amt).toFixed(3)));
         const na = parseFloat((arr[a].balance + amt * 0.9).toFixed(3));
         arr[a] = { ...arr[a], balance: na, isBounty: na >= BOUNTY_THRESHOLD };
         arr[b] = { ...arr[b], balance: nb, hit: true, isBounty: nb >= BOUNTY_THRESHOLD };
-        // clear hit flag after delay — separate update
         setTimeout(() => setPlayers(p => p.map(pl => pl.id === arr[b].id ? { ...pl, hit: false } : pl)), 800);
         setStolen(s => parseFloat((s + amt).toFixed(2)));
         return arr;
       });
-      // Occasionally replace a player — less frequent
       if (Math.random() > 0.85) {
         uid++;
         setPlayers(prev => {
@@ -90,7 +91,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         setLive(l => Math.max(8, l + (Math.random() > 0.5 ? 1 : -1)));
       }
       setRounds(r => r + (Math.random() > 0.7 ? 1 : 0));
-    }, 6000); // slowed from 3200ms to 6000ms
+    }, 6000);
     return () => clearInterval(iv);
   }, []);
 
@@ -110,25 +111,52 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
   const chanceColor = (c: number) => c >= 60 ? "#00d470" : c >= 45 ? "#ffd200" : "#ff7040";
 
+  const sessionPnL = sessionWins - sessionLosses;
+  const sessionPnLColor = sessionPnL > 0 ? "#00d470" : sessionPnL < 0 ? "#ff7040" : "#6060a0";
+
   const join = () => {
     const v = parseFloat(stake);
     if (isNaN(v) || v < 0.05) return;
     setJoined(true);
     setMyBal(v);
+    setEntryAmount(v);
+    setSessionWins(0);
+    setSessionLosses(0);
     uid++;
     setPlayers(prev => [...prev, { id: uid, wallet: "You", balance: v, isYou: true, levelId, isBounty: v >= BOUNTY_THRESHOLD }]);
     onXPGain(XP_REWARDS.ENTER_ARENA, "enter_arena");
     toast.success(`Entered arena with ${v} SOL`);
   };
 
+  const leaveArena = () => {
+    const myPlayer = players.find(p => p.isYou);
+    const remaining = myPlayer?.balance ?? 0;
+    if (remaining > 0.01) {
+      toast.success(`Left arena. ${remaining.toFixed(3)} SOL returned to your wallet.`);
+    } else {
+      toast(`Left arena.`);
+    }
+    setJoined(false);
+    setTarget(null);
+    setMyBal(0);
+    setEntryAmount(0);
+    globalPity.current = 0;
+    setPlayers(prev => prev.filter(p => !p.isYou));
+  };
+
   const reEnter = () => {
-    setJoined(false); setTarget(null); setMyBal(0);
+    setJoined(false); setTarget(null); setMyBal(0); setEntryAmount(0);
     globalPity.current = 0;
     setPlayers(prev => prev.filter(p => !p.isYou));
   };
 
   const yoink = () => {
     if (!target || !tp || acting) return;
+    // Daily loss cap protection
+    if (dailyLoss >= MAX_DAILY_LOSS) {
+      toast.error(`Daily loss limit reached (${MAX_DAILY_LOSS} SOL). Come back tomorrow.`);
+      return;
+    }
     setActing(true);
     const c = chance();
     onXPGain(XP_REWARDS.YOINK_ATTEMPT, "yoink_attempt");
@@ -139,9 +167,16 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       if (roll < c) {
         globalPity.current = 0;
         setMyBal(b => parseFloat((b + gain - fee).toFixed(3)));
+        setSessionWins(w => parseFloat((w + gain - fee).toFixed(3)));
         setPlayers(prev => prev.map(p => {
-          if (p.id === target) { const nb = parseFloat((p.balance - gain).toFixed(3)); return { ...p, balance: nb, hit: true, isBounty: nb >= BOUNTY_THRESHOLD }; }
-          if (p.isYou) { const nb = parseFloat((p.balance + gain - fee).toFixed(3)); return { ...p, balance: nb, isBounty: nb >= BOUNTY_THRESHOLD }; }
+          if (p.id === target) {
+            const nb = parseFloat((p.balance - gain).toFixed(3));
+            return { ...p, balance: nb, hit: true, isBounty: nb >= BOUNTY_THRESHOLD };
+          }
+          if (p.isYou) {
+            const nb = parseFloat((p.balance + gain - fee).toFixed(3));
+            return { ...p, balance: nb, isBounty: nb >= BOUNTY_THRESHOLD };
+          }
           return p;
         }));
         setTimeout(() => setPlayers(p => p.map(pl => pl.id === target ? { ...pl, hit: false } : pl)), 800);
@@ -154,10 +189,14 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       } else {
         globalPity.current += 1;
         setMyBal(b => parseFloat((b - fee).toFixed(3)));
-        setPlayers(prev => prev.map(p => p.isYou ? { ...p, balance: parseFloat((p.balance - fee).toFixed(3)) } : p));
+        setSessionLosses(l => parseFloat((l + fee).toFixed(3)));
+        setDailyLoss(d => parseFloat((d + fee).toFixed(3)));
+        setPlayers(prev => prev.map(p =>
+          p.isYou ? { ...p, balance: parseFloat((p.balance - fee).toFixed(3)) } : p
+        ));
         setRounds(r => r + 1);
         setFlash("lose"); setTimeout(() => setFlash(null), 500);
-        const pityMsg = globalPity.current >= 2 ? ` — odds improving` : "";
+        const pityMsg = globalPity.current >= 2 ? ` — odds improving (${Math.min(95, chance() + 8)}% next)` : "";
         toast.error(`Yoink failed — ${fee} SOL fee${pityMsg}`, { duration: 3000 });
       }
       setTarget(null);
@@ -169,18 +208,13 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const myPlayer = players.find(p => p.isYou);
   const isOut = joined && myPlayer && myPlayer.balance <= 0.01;
   const { current: myLevel, progressPct, xpIntoLevel, xpNeeded, next: nextLevel } = getXPProgress(xp);
+  const maxFeeThisAttempt = tp ? parseFloat((tp.balance * 0.05).toFixed(3)) : 0;
 
-  const showTooltip = (id: number) => {
-    clearTimeout(tooltipTimer.current);
-    setTooltip(id);
-  };
-  const hideTooltip = () => {
-    tooltipTimer.current = setTimeout(() => setTooltip(null), 150);
-  };
+  const showTooltip = (id: number) => { clearTimeout(tooltipTimer.current); setTooltip(id); };
+  const hideTooltip = () => { tooltipTimer.current = setTimeout(() => setTooltip(null), 150); };
 
   return (
     <div className="space-y-5">
-      {/* Flash overlays */}
       <AnimatePresence>
         {flash && (
           <motion.div key={flash} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -199,41 +233,56 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             <h1 className="font-display text-[48px] leading-none text-white tracking-[0.06em] mb-1.5">
               YOINK<span style={{ color: '#ff4d00' }}>.GG</span>
             </h1>
-            <p className="text-[13px]" style={{ color: '#6060a0' }}>Target a wallet. Pay the fee. Steal their SOL.</p>
+            <p className="text-[13px]" style={{ color: '#6060a0' }}>Target a wallet. Pay a small fee. Steal their SOL.</p>
           </div>
           <div className="flex items-center gap-5">
             <div className="text-center">
-              <div className="font-display text-[38px] leading-none" style={{ color: '#ff7040' }}>
-                {stolen.toFixed(1)}
-              </div>
+              <div className="font-display text-[38px] leading-none" style={{ color: '#ff7040' }}>{stolen.toFixed(1)}</div>
               <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>SOL Stolen</div>
             </div>
             <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="text-center">
-              <div className="font-display text-[38px] leading-none" style={{ color: '#a060ff' }}>
-                {rounds.toLocaleString()}
-              </div>
+              <div className="font-display text-[38px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
               <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>Rounds</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* How it works */}
+      {/* How it works — clear and honest */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
-          { n:"01", c:"#ff4d00", t:"Lock SOL",      d:"Your entry = your live balance in the arena" },
-          { n:"02", c:"#a060ff", t:"Pick Target",    d:"See everyone's balance. Hover for steal odds" },
-          { n:"03", c:"#40d8f0", t:"Pay Fee",        d:"5% fee. Win 50% of their balance. Lose = fee only" },
-          { n:"04", c:"#00d470", t:"Compound Wins",  d:"Grow your balance. Better odds. Bigger steals" },
+          { n:"01", c:"#ff4d00", t:"Lock SOL to enter", d:"Your SOL stays locked in the arena. You can leave and get it back anytime.", earn: null },
+          { n:"02", c:"#a060ff", t:"Pick any target",   d:"See everyone's real locked balance. Hover to see your exact steal odds.", earn: "Steal 50% of target's balance" },
+          { n:"03", c:"#40d8f0", t:"Pay a small fee",   d:"Win = steal 50% of their balance. Lose = only lose the 5% fee. Your balance never disappears in one hit.", earn: "Max loss per attempt: 5% of target" },
+          { n:"04", c:"#00d470", t:"Win & compound",    d:"Every win grows your balance. Bigger balance = better odds on next attack.", earn: "Stack wins to dominate" },
         ].map(s => (
           <div key={s.n} className="card-sm">
             <div className="text-[10px] font-mono tracking-widest mb-1.5" style={{ color: '#30304a' }}>{s.n}</div>
             <div className="text-[12px] font-bold text-white mb-1">{s.t}</div>
             <div className="text-[11px] leading-snug" style={{ color: '#6060a0' }}>{s.d}</div>
+            {s.earn && (
+              <div className="mt-2 text-[10px] font-mono px-2 py-1 rounded-lg"
+                style={{ background: `rgba(${s.c === "#ff4d00" ? "255,77,0" : s.c === "#a060ff" ? "112,0,255" : s.c === "#40d8f0" ? "0,229,255" : "0,232,122"},0.08)`, color: s.c }}>
+                {s.earn}
+              </div>
+            )}
           </div>
         ))}
       </div>
+
+      {/* Daily protection banner — only show if near limit */}
+      {dailyLoss > MAX_DAILY_LOSS * 0.7 && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: 'rgba(255,77,0,0.06)', border: '1px solid rgba(255,77,0,0.2)' }}>
+          <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#ff7040' }} />
+          <p className="text-[12px]" style={{ color: '#ff7040' }}>
+            Daily loss protection: {dailyLoss.toFixed(3)} / {MAX_DAILY_LOSS} SOL used today.
+            {dailyLoss >= MAX_DAILY_LOSS ? " Limit reached — come back tomorrow." : " Getting close to your daily limit."}
+          </p>
+        </motion.div>
+      )}
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -256,66 +305,72 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               Live Arena
               <span className="pill pill-dim text-[10px]">{players.length} wallets</span>
             </h2>
-            {joined && <span className="text-[11px]" style={{ color: '#6060a0' }}>Hover wallet to see odds</span>}
+            <div className="flex items-center gap-3">
+              {joined && <span className="text-[11px]" style={{ color: '#6060a0' }}>Hover to see steal odds</span>}
+              {/* Leave Arena button */}
+              {joined && (
+                <button onClick={leaveArena}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all hover:bg-white/5"
+                  style={{ color: '#6060a0', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <DoorOpen className="w-3.5 h-3.5" />
+                  Leave Arena
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Wallet grid — no AnimatePresence/layout for perf */}
+          {/* Wallet grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {players.map(p => {
-              const pct       = (p.balance / maxBal) * 100;
-              const isT       = target === p.id;
-              const c         = chance(myBal, p.balance);
-              const lvlColor  = LEVEL_COLORS[(p.levelId ?? 1) - 1];
-              const isKing    = p.isBounty && !p.isYou;
-              const isPred    = !isKing && p.balance >= 1.5 && !p.isYou;
-              const isCommon  = !isKing && !isPred && p.balance >= 0.5 && !p.isYou;
-
-              // Tier CSS — clean, no infinite animations on base state
-              const tierClass = p.isYou ? "is-you"
-                : isKing    ? "wc-king"
-                : isPred    ? "wc-predator"
-                : isCommon  ? "wc-common"
-                : "wc-dust";
-
-              const balColor = p.hit ? '#ff4d00'
-                : p.isYou   ? '#00e5ff'
-                : isKing    ? '#ffd200'
-                : isPred    ? '#a060ff'
-                : isCommon  ? '#00d470'
-                : '#a0a0c0';
-
-              const barColor = p.isYou   ? 'linear-gradient(90deg,#00e5ff,#7000ff)'
-                : isKing    ? 'linear-gradient(90deg,#ffd200,#ff4d00)'
-                : isPred    ? 'linear-gradient(90deg,#a060ff,#00e5ff)'
-                : isCommon  ? 'linear-gradient(90deg,#00e87a,#00c8e8)'
-                : '#30304a';
-
-              const stealAmt = isKing
-                ? parseFloat((p.balance * 0.9).toFixed(3))
-                : parseFloat((p.balance * 0.5).toFixed(3));
+              const pct      = (p.balance / maxBal) * 100;
+              const isT      = target === p.id;
+              const c        = chance(myBal, p.balance);
+              const lvlColor = LEVEL_COLORS[(p.levelId ?? 1) - 1];
+              const isKing   = p.isBounty && !p.isYou;
+              const isPred   = !isKing && p.balance >= 1.5 && !p.isYou;
+              const isCommon = !isKing && !isPred && p.balance >= 0.5 && !p.isYou;
+              const tierClass = p.isYou ? "is-you" : isKing ? "wc-king" : isPred ? "wc-predator" : isCommon ? "wc-common" : "wc-dust";
+              const balColor  = p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#a0a0c0';
+              const barColor  = p.isYou ? 'linear-gradient(90deg,#00e5ff,#7000ff)' : isKing ? 'linear-gradient(90deg,#ffd200,#ff4d00)' : isPred ? 'linear-gradient(90deg,#a060ff,#00e5ff)' : isCommon ? 'linear-gradient(90deg,#00e87a,#00c8e8)' : '#30304a';
+              const stealAmt  = isKing ? parseFloat((p.balance * 0.9).toFixed(3)) : parseFloat((p.balance * 0.5).toFixed(3));
+              // Protection badge
+              const isProtected = !p.isYou && p.balance <= MIN_BALANCE_PROTECTION;
 
               return (
-                <div
-                  key={p.id}
-                  onClick={() => !p.isYou && joined && setTarget(isT ? null : p.id)}
+                <div key={p.id}
+                  onClick={() => !p.isYou && !isProtected && joined && setTarget(isT ? null : p.id)}
                   onMouseEnter={() => !p.isYou && joined && showTooltip(p.id)}
                   onMouseLeave={hideTooltip}
-                  className={`wallet-card relative ${tierClass} ${isT ? "targeted" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou) ? "!cursor-default" : ""}`}
+                  className={`wallet-card relative ${tierClass} ${isT ? "targeted" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou || isProtected) ? "!cursor-default" : ""}`}
                   style={{ marginTop: isKing ? '12px' : undefined }}
                 >
-                  {/* Tier particles — only on hover, CSS-only */}
-                  {isPred && (
-                    <>
-                      <span className="spark" />
-                      <span className="spark" />
-                    </>
-                  )}
+                  {/* SVG tier background — GPU safe, no layout impact */}
                   {isKing && (
-                    <>
-                      <span className="flame" />
-                      <span className="flame" />
-                    </>
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }}>
+                      <defs>
+                        <linearGradient id={`kg-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ff4d00" />
+                          <stop offset="100%" stopColor="#ffd200" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#kg-${p.id})`} rx="14" />
+                    </svg>
                   )}
+                  {isPred && (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }}>
+                      <defs>
+                        <linearGradient id={`pd-${p.id}`} x1="0%" y1="100%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#7000ff" />
+                          <stop offset="100%" stopColor="#00e5ff" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
+                    </svg>
+                  )}
+
+                  {/* Tier particles */}
+                  {isPred && <><span className="spark" /><span className="spark" /></>}
+                  {isKing && <><span className="flame" /><span className="flame" /></>}
 
                   {/* Bounty label */}
                   {isKing && (
@@ -325,32 +380,36 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     </div>
                   )}
 
-                  {/* Target icon */}
+                  {/* Protected badge */}
+                  {isProtected && (
+                    <div className="absolute top-1.5 right-1.5 z-10">
+                      <Shield className="w-3 h-3" style={{ color: '#40d8f0' }} />
+                    </div>
+                  )}
+
                   {isT && (
                     <div className="absolute top-2.5 right-2.5 z-10">
                       <Target className="w-3.5 h-3.5" style={{ color: '#ff4d00' }} />
                     </div>
                   )}
 
-                  {/* Hover tooltip — CSS transition, not motion.div */}
-                  {joined && !p.isYou && tooltip === p.id && (
-                    <div
-                      className="absolute -top-10 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 rounded-lg text-[11px] font-mono font-bold whitespace-nowrap pointer-events-none"
-                      style={{
-                        background: '#0c0c1a',
-                        border: `1px solid ${chanceColor(c)}40`,
-                        color: chanceColor(c),
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-                      }}
-                    >
-                      {c}% · steal {stealAmt} SOL{isKing ? " ×BOUNTY" : ""}
+                  {/* Tooltip */}
+                  {joined && !p.isYou && tooltip === p.id && !isProtected && (
+                    <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-30 px-3 py-2 rounded-xl text-[11px] font-mono font-bold whitespace-nowrap pointer-events-none"
+                      style={{ background: '#0c0c1a', border: `1px solid ${chanceColor(c)}40`, color: chanceColor(c), boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }}>
+                      {c}% · steal {stealAmt} SOL · fee {(p.balance * 0.05).toFixed(3)}{isKing ? " ×BOUNTY" : ""}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent" style={{ borderTopColor: '#0c0c1a' }} />
+                    </div>
+                  )}
+                  {joined && !p.isYou && tooltip === p.id && isProtected && (
+                    <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-30 px-3 py-1.5 rounded-lg text-[10px] font-mono whitespace-nowrap pointer-events-none"
+                      style={{ background: '#0c0c1a', border: '1px solid rgba(0,229,255,0.3)', color: '#40d8f0' }}>
+                      Protected — balance too low to steal
                     </div>
                   )}
 
-                  {/* Wallet + level badge */}
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="font-mono text-[10px] truncate flex-1"
-                      style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
+                    <p className="font-mono text-[10px] truncate flex-1" style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
                       {p.isYou ? "YOU" : p.wallet}
                     </p>
                     {!p.isYou && (
@@ -361,23 +420,16 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     )}
                   </div>
 
-                  {/* Balance */}
-                  <p className={`font-display leading-none ${
-                    isKing   ? "text-[30px]"
-                    : isPred ? "text-[26px]"
-                    : isCommon ? "text-[23px]"
-                    : "text-[21px]"
-                  }`} style={{ color: balColor }}>
+                  <p className={`font-display leading-none ${isKing ? "text-[30px]" : isPred ? "text-[26px]" : isCommon ? "text-[23px]" : "text-[21px]"}`}
+                    style={{ color: balColor }}>
                     {p.balance.toFixed(3)}
                   </p>
                   <p className="text-[10px] font-mono mt-0.5" style={{ color: '#30304a' }}>SOL</p>
 
-                  {/* Balance bar */}
                   <div className="wallet-bar mt-2">
                     <div className="wallet-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
                   </div>
 
-                  {/* Tier text label */}
                   {!p.isYou && (
                     <span className="absolute bottom-2 right-2.5 text-[8px] font-mono"
                       style={{ color: isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#40405a' }}>
@@ -385,10 +437,8 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     </span>
                   )}
 
-                  {/* Targeted success % */}
                   {isT && (
-                    <p className="text-[10px] font-mono font-bold mt-1.5"
-                      style={{ color: chanceColor(c) }}>
+                    <p className="text-[10px] font-mono font-bold mt-1.5" style={{ color: chanceColor(c) }}>
                       {c}% chance
                     </p>
                   )}
@@ -400,6 +450,40 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
         {/* Action panel */}
         <div className="space-y-3">
+
+          {/* Session P&L — shown when in arena */}
+          {joined && (
+            <div className="card-sm space-y-3">
+              <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>This Session</h3>
+              <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div className="rounded-lg p-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <p style={{ color: '#6060a0' }}>Entered</p>
+                  <p className="font-mono font-bold mt-0.5 text-white">{entryAmount.toFixed(3)}</p>
+                </div>
+                <div className="rounded-lg p-2.5" style={{ background: sessionPnL >= 0 ? 'rgba(0,212,112,0.07)' : 'rgba(255,77,0,0.07)', border: `1px solid ${sessionPnL >= 0 ? 'rgba(0,212,112,0.15)' : 'rgba(255,77,0,0.15)'}` }}>
+                  <p style={{ color: '#6060a0' }}>P&L</p>
+                  <p className="font-mono font-bold mt-0.5" style={{ color: sessionPnLColor }}>
+                    {sessionPnL >= 0 ? "+" : ""}{sessionPnL.toFixed(3)}
+                  </p>
+                </div>
+                <div className="rounded-lg p-2.5" style={{ background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.12)' }}>
+                  <p style={{ color: '#6060a0' }}>Balance</p>
+                  <p className="font-mono font-bold mt-0.5" style={{ color: '#00e5ff' }}>{myBal.toFixed(3)}</p>
+                </div>
+              </div>
+              {/* Trend indicator */}
+              <div className="flex items-center justify-between text-[11px]">
+                <div className="flex items-center gap-1.5" style={{ color: '#00d470' }}>
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span className="font-mono">+{sessionWins.toFixed(3)} won</span>
+                </div>
+                <div className="flex items-center gap-1.5" style={{ color: '#ff7040' }}>
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  <span className="font-mono">-{sessionLosses.toFixed(3)} lost</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Level / XP bar */}
           {joined && (
@@ -461,7 +545,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             <div className="card-flat space-y-4">
               <div>
                 <h3 className="font-display text-[24px] text-white leading-none tracking-[0.06em] mb-1">ENTER ARENA</h3>
-                <p className="text-[12px]" style={{ color: '#6060a0' }}>Lock SOL to start stealing</p>
+                <p className="text-[12px]" style={{ color: '#6060a0' }}>Lock SOL to start. You can leave anytime and get your remaining balance back.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {["0.1","0.25","0.5","1.0","2.0"].map(v => (
@@ -475,16 +559,39 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                 ))}
               </div>
               <input type="number" value={stake} onChange={e => setStake(e.target.value)} className="input" placeholder="Custom..." />
+
+              {/* Transparent risk breakdown */}
               <div className="rounded-xl p-3.5 space-y-2 text-[11px]"
                 style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="flex justify-between"><span style={{ color: '#6060a0' }}>Entry</span><span className="font-mono text-white">{stake} SOL</span></div>
-                <div className="flex justify-between"><span style={{ color: '#6060a0' }}>Fee per yoink</span><span className="font-mono" style={{ color: '#ff7040' }}>5% of target</span></div>
-                <div className="flex justify-between"><span style={{ color: '#6060a0' }}>Win payout</span><span className="font-mono" style={{ color: '#00d470' }}>50% of target</span></div>
-                <div className="flex justify-between"><span style={{ color: '#6060a0' }}>Fee charged</span><span className="font-mono" style={{ color: '#a060ff' }}>Win OR lose</span></div>
+                <p className="text-[11px] font-semibold text-white mb-2">How your SOL is protected:</p>
+                <div className="flex justify-between">
+                  <span style={{ color: '#6060a0' }}>Your entry</span>
+                  <span className="font-mono text-white">{stake} SOL</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: '#6060a0' }}>Max loss per yoink</span>
+                  <span className="font-mono" style={{ color: '#ff7040' }}>5% of target's balance</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: '#6060a0' }}>Win payout</span>
+                  <span className="font-mono" style={{ color: '#00d470' }}>50% of target's balance</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: '#6060a0' }}>Daily loss limit</span>
+                  <span className="font-mono" style={{ color: '#a060ff' }}>{MAX_DAILY_LOSS} SOL max</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: '#6060a0' }}>Leave anytime</span>
+                  <span className="font-mono" style={{ color: '#00d470' }}>Remaining SOL returned</span>
+                </div>
               </div>
+
               <button onClick={join} className="btn-yoink w-full">
                 <Zap className="w-4 h-4" /> ENTER — {stake} SOL
               </button>
+              <p className="text-[10px] text-center" style={{ color: '#30304a' }}>
+                You can leave the arena at any time to recover your remaining balance.
+              </p>
             </div>
           )}
 
@@ -519,56 +626,67 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                   </p>
                   <div className="grid grid-cols-3 gap-2 text-[11px] text-center">
                     <div className="rounded-lg p-2" style={{ background: 'rgba(0,212,112,0.07)', border: '1px solid rgba(0,212,112,0.12)' }}>
-                      <p style={{ color: '#6060a0' }}>Steal</p>
+                      <p style={{ color: '#6060a0' }}>If you win</p>
                       <p className="font-mono font-bold mt-0.5" style={{ color: '#00d470' }}>+{(tp.balance*(tp.isBounty?0.9:0.5)).toFixed(3)}</p>
                     </div>
                     <div className="rounded-lg p-2" style={{ background: 'rgba(255,77,0,0.07)', border: '1px solid rgba(255,77,0,0.12)' }}>
-                      <p style={{ color: '#6060a0' }}>Fee</p>
-                      <p className="font-mono font-bold mt-0.5" style={{ color: '#ff7040' }}>-{(tp.balance*0.05).toFixed(3)}</p>
+                      <p style={{ color: '#6060a0' }}>If you lose</p>
+                      <p className="font-mono font-bold mt-0.5" style={{ color: '#ff7040' }}>-{maxFeeThisAttempt.toFixed(3)}</p>
                     </div>
                     <div className="rounded-lg p-2"
                       style={{ background: `${chanceColor(chance())}12`, border: `1px solid ${chanceColor(chance())}25` }}>
-                      <p style={{ color: '#6060a0' }}>Chance</p>
+                      <p style={{ color: '#6060a0' }}>Your odds</p>
                       <p className="font-mono font-bold mt-0.5" style={{ color: chanceColor(chance()) }}>{chance()}%</p>
                     </div>
+                  </div>
+                  {/* Expected value indicator */}
+                  <div className="flex items-center justify-between text-[10px] font-mono pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <span style={{ color: '#6060a0' }}>Expected value this yoink</span>
+                    <span style={{ color: (() => {
+                      const ev = (chance() / 100) * (tp.balance*(tp.isBounty?0.9:0.5) - maxFeeThisAttempt) - ((100 - chance()) / 100) * maxFeeThisAttempt;
+                      return ev >= 0 ? '#00d470' : '#ff7040';
+                    })() }}>
+                      {(() => {
+                        const ev = (chance() / 100) * (tp.balance*(tp.isBounty?0.9:0.5) - maxFeeThisAttempt) - ((100 - chance()) / 100) * maxFeeThisAttempt;
+                        return `${ev >= 0 ? '+' : ''}${ev.toFixed(3)} SOL`;
+                      })()}
+                    </span>
                   </div>
                 </div>
               ) : (
                 <div className="rounded-xl p-6 text-center border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
                   <Target className="w-8 h-8 mx-auto mb-2" style={{ color: '#30304a' }} />
                   <p className="text-[12px]" style={{ color: '#6060a0' }}>Tap a wallet to lock your target</p>
+                  <p className="text-[11px] mt-1" style={{ color: '#30304a' }}>Hover first to preview your odds</p>
                 </div>
               )}
 
-              <button
-                onClick={yoink}
-                disabled={!target || acting}
+              <button onClick={yoink} disabled={!target || acting || dailyLoss >= MAX_DAILY_LOSS}
                 className={`btn-yoink w-full ${target && !acting ? "pulsing" : ""}`}
-                style={{ fontSize: '18px', padding: '14px' }}
-              >
+                style={{ fontSize: '18px', padding: '14px' }}>
                 {acting
                   ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />STEALING...</>
                   : target && tp
-                  ? `YOINK IT — ${chance()}%`
+                  ? `YOINK IT — ${chance()}% CHANCE`
                   : "SELECT A TARGET"
                 }
               </button>
 
               <p className="text-[10px] flex items-center justify-center gap-1.5" style={{ color: '#30304a' }}>
                 <AlertCircle className="w-3 h-3" />
-                Fee charged win or lose.
+                Max loss this attempt: {maxFeeThisAttempt.toFixed(3)} SOL (5% fee only).
               </p>
             </div>
           )}
 
           {/* Success rates */}
           <div className="card-sm space-y-2.5">
-            <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>Success Rates</h3>
+            <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>Your Odds By Balance Ratio</h3>
             {[
-              { l: "2x+ their balance",   pct: 75, c: "#00d470" },
-              { l: "~1x their balance",   pct: 60, c: "#40d8f0" },
-              { l: "~0.5x their balance", pct: 45, c: "#ffd200" },
-              { l: "Under 0.5x",          pct: 30, c: "#ff7040" },
+              { l: "You have 2x+ theirs",   pct: 75, c: "#00d470" },
+              { l: "You have ~1x theirs",   pct: 60, c: "#40d8f0" },
+              { l: "You have ~0.5x theirs", pct: 45, c: "#ffd200" },
+              { l: "You have under 0.5x",   pct: 30, c: "#ff7040" },
             ].map(r => (
               <div key={r.l}>
                 <div className="flex justify-between text-[11px] mb-1">
@@ -582,12 +700,13 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             ))}
           </div>
 
-          {/* Shield */}
           <div className="card-sm flex items-start gap-3" style={{ background: 'rgba(0,229,255,0.025)', borderColor: 'rgba(0,229,255,0.08)' }}>
             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#40d8f0' }} />
             <div>
-              <p className="text-[12px] font-semibold text-white">Provably Fair</p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>On-chain via Switchboard VRF. Zero manipulation.</p>
+              <p className="text-[12px] font-semibold text-white">Player Protections</p>
+              <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>
+                Min balance shield at 0.05 SOL · Daily loss cap at {MAX_DAILY_LOSS} SOL · Leave arena anytime · Pity system improves odds after losses.
+              </p>
             </div>
           </div>
         </div>
@@ -595,12 +714,9 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
       {/* Sticky mobile attack bar */}
       {joined && !isOut && (
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
+        <motion.div initial={{ y: 100 }} animate={{ y: 0 }}
           className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-y-border"
-          style={{ background: 'rgba(7,7,16,0.97)', backdropFilter: 'blur(20px)', paddingBottom: 'env(safe-area-inset-bottom)' }}
-        >
+          style={{ background: 'rgba(7,7,16,0.97)', backdropFilter: 'blur(20px)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
           <div className="px-4 py-3 flex items-center gap-3">
             <div className="flex-1 min-w-0">
               {tp ? (
@@ -614,6 +730,9 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                       style={{ background: `${chanceColor(chance())}15`, color: chanceColor(chance()) }}>
                       {chance()}%
                     </span>
+                    <span className="text-[10px] font-mono" style={{ color: '#ff7040' }}>
+                      -{maxFeeThisAttempt.toFixed(3)} if fail
+                    </span>
                   </div>
                 </div>
               ) : (
@@ -623,12 +742,9 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                 </div>
               )}
             </div>
-            <button
-              onClick={yoink}
-              disabled={!target || acting}
+            <button onClick={yoink} disabled={!target || acting}
               className={`btn-yoink flex-shrink-0 ${target && !acting ? "pulsing" : ""}`}
-              style={{ fontSize: '15px', padding: '11px 22px', letterSpacing: '2px' }}
-            >
+              style={{ fontSize: '15px', padding: '11px 22px', letterSpacing: '2px' }}>
               {acting
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />...</>
                 : target ? `YOINK — ${chance()}%` : "YOINK"
