@@ -1,10 +1,9 @@
-@import '@fontsource/bebas-neue';
-@import '@fontsource/dm-sans/400.css';
-@import '@fontsource/dm-sans/500.css';
-@import '@fontsource/dm-sans/600.css';
-@import '@fontsource/dm-sans/700.css';
-@import '@fontsource/geist-mono/400.css';
-@import '@fontsource/geist-mono/600.css';
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+@import '@fontsource/jetbrains-mono/800.css';
 @import "tailwindcss";
 
 /* ============================================================
@@ -14,49 +13,52 @@
    ============================================================ */
 
 @theme {
-  --color-y-base:     #04040a;
-  --color-y-bg:       #060610;
-  --color-y-card:     #0a0a18;
-  --color-y-elevated: #0e0e22;
-  --color-y-hover:    #14143a;
-  --color-y-border:   rgba(255,255,255,0.04);
-  --color-y-border2:  rgba(255,255,255,0.08);
-  --color-y-text:     #eeeef8;
-  --color-y-muted:    #5a5a8a;
-  --color-y-dim:      #28284a;
-  --color-y-accent:   #ff4d00;
+  --color-y-base:     #0a0a0f;
+  --color-y-bg:       #06070d;
+  --color-y-card:     #0f1117;
+  --color-y-elevated: #12141d;
+  --color-y-hover:    #181a26;
+  --color-y-border:   rgba(255,255,255,0.06);
+  --color-y-border2:  rgba(255,255,255,0.10);
+  --color-y-text:     #ffffff;
+  --color-y-muted:    #8892a4;
+  --color-y-dim:      #3a3f4f;
+  --color-y-accent:   #ffd700;
+  --color-y-gold:     #ffd700;
+  --color-y-emerald:  #00e676;
   --color-y-violet:   #7000ff;
-  --color-y-cyan:     #00e5ff;
-  --color-y-green:    #00e87a;
+  --color-y-cyan:     #00f5ff;
+  --color-y-blue:     #4da3ff;
+  --color-y-green:    #00e676;
   --color-y-yellow:   #ffd200;
-  --color-y-pink:     #ff0066;
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-sans:    'DM Sans', system-ui, sans-serif;
-  --font-mono:    'Geist Mono', monospace;
+  --color-y-pink:     #ff1744;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans:    'Space Grotesk', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Geist Mono', monospace;
 }
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 body {
-  background: #04040a;
+  background: #0a0a0f;
   color: var(--color-y-text);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.55;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* ── Deep Obsidian Scene — HEAVY radial gradients ── */
+/* ── Premium scene — Koinara gold + blue depth ── */
 body::before {
   content: '';
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(112,0,255,0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 45% at 100% 90%, rgba(255,77,0,0.10) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 35% at 0% 70%,  rgba(0,229,255,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 120% 80% at 50% 50%, #000a1a 0%, #04040a 70%);
+    radial-gradient(900px 480px at 50% -12%, rgba(77,163,255,0.18) 0%, transparent 60%),
+    radial-gradient(620px 420px at 95% 6%, rgba(255,215,0,0.12) 0%, transparent 58%),
+    radial-gradient(640px 420px at 5% 72%, rgba(0,245,255,0.05) 0%, transparent 55%),
+    linear-gradient(180deg, #090911 0%, #06070d 50%, #030409 100%);
 }
 #root { position: relative; z-index: 1; }
 
@@ -82,27 +84,29 @@ body::before {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: #04040a; }
-::-webkit-scrollbar-thumb { background: rgba(255,77,0,0.4); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,77,0,0.7); }
+::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.35); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,215,0,0.6); }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
 
 /* ── Typography ── */
-.font-display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.05em; }
-.font-mono    { font-family: 'Geist Mono', monospace; }
+.font-display { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
 
 /* ============================================================
    GLASSMORPHISM CARDS — the signature look
    ============================================================ */
 .card {
-  background: rgba(10,10,24,0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-top: 1px solid rgba(255,255,255,0.10);
-  border-radius: 20px;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)),
+    rgba(8,10,17,0.80);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 24px;
   padding: 24px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 18px 48px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
   transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
 }
 .card::before {
@@ -113,21 +117,22 @@ body::before {
   pointer-events: none;
 }
 .card:hover {
-  border-color: rgba(255,77,0,0.2);
-  border-top-color: rgba(255,77,0,0.5);
-  box-shadow: 0 0 0 1px rgba(255,77,0,0.08), 0 12px 48px rgba(255,77,0,0.1), 0 0 80px rgba(255,77,0,0.04);
+  border-color: rgba(255,215,0,0.28);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 28px rgba(255,215,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
   transform: translateY(-2px);
 }
 
 .card-flat {
-  background: rgba(10,10,24,0.8);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+    rgba(8,10,17,0.80);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-top: 1px solid rgba(255,255,255,0.10);
-  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
   padding: 24px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .card-flat::before {
   content: '';
@@ -138,24 +143,30 @@ body::before {
 }
 
 .card-sm {
-  background: rgba(10,10,24,0.75);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.018)),
+    rgba(8,10,17,0.75);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.05);
-  border-top: 1px solid rgba(255,255,255,0.09);
-  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
   padding: 18px;
   position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 /* Hero card — massive presence */
 .card-hero {
-  background: linear-gradient(155deg, rgba(112,0,255,0.08) 0%, rgba(10,10,24,0.95) 40%, rgba(255,77,0,0.05) 100%);
+  background:
+    radial-gradient(520px 240px at 90% -10%, rgba(255,215,0,0.10), transparent 60%),
+    radial-gradient(520px 260px at 8% 0%, rgba(77,163,255,0.14), transparent 60%),
+    linear-gradient(160deg, rgba(15,24,42,0.86), rgba(5,8,16,0.94));
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 24px;
+  border: 1px solid rgba(255,215,0,0.18);
+  border-radius: 28px;
   padding: 36px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 22px 60px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .card-hero::before {
   content: '';
@@ -163,9 +174,9 @@ body::before {
   top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg,
     transparent 0%,
-    rgba(255,77,0,0.7) 20%,
-    rgba(112,0,255,0.9) 50%,
-    rgba(0,229,255,0.7) 80%,
+    rgba(255,215,0,0.8) 20%,
+    rgba(77,163,255,0.9) 50%,
+    rgba(0,245,255,0.7) 80%,
     transparent 100%
   );
 }
@@ -175,7 +186,7 @@ body::before {
   top: -100px; right: -100px;
   width: 250px; height: 250px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(112,0,255,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,215,0,0.13) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -389,11 +400,13 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 9px;
-  background: linear-gradient(135deg, #ff4d00 0%, #cc0044 100%);
-  color: #fff;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px;
-  letter-spacing: 3px;
+  background: linear-gradient(135deg, #ffe266 0%, #ffd700 42%, #f5b700 100%);
+  color: #0a0a0f;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
   padding: 14px 34px;
   border-radius: 14px;
   border: none;
@@ -402,10 +415,9 @@ body::before {
   overflow: hidden;
   transition: all 0.2s ease;
   box-shadow:
-    0 4px 28px rgba(255,77,0,0.5),
-    0 0 60px rgba(255,77,0,0.15),
-    0 1px 0 rgba(255,255,255,0.15) inset,
-    0 -1px 0 rgba(0,0,0,0.2) inset;
+    0 0 24px rgba(255,215,0,0.45),
+    0 8px 28px rgba(0,0,0,0.35),
+    0 1px 0 rgba(255,255,255,0.4) inset;
   white-space: nowrap;
 }
 .btn-yoink::before {
@@ -417,7 +429,7 @@ body::before {
 }
 .btn-yoink:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 48px rgba(255,77,0,0.7), 0 0 100px rgba(255,77,0,0.2), 0 1px 0 rgba(255,255,255,0.2) inset;
+  box-shadow: 0 0 40px rgba(255,215,0,0.65), 0 12px 36px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.5) inset;
 }
 .btn-yoink:hover::before { opacity: 1; }
 .btn-yoink:active { transform: translateY(0); }
@@ -426,8 +438,8 @@ body::before {
   animation: btnPulse 1.2s ease-in-out infinite;
 }
 @keyframes btnPulse {
-  0%,100% { box-shadow: 0 4px 28px rgba(255,77,0,0.5), 0 0 60px rgba(255,77,0,0.15); }
-  50%     { box-shadow: 0 4px 48px rgba(255,77,0,0.8), 0 0 100px rgba(255,77,0,0.3), 0 0 0 8px rgba(255,77,0,0.08); }
+  0%,100% { box-shadow: 0 0 24px rgba(255,215,0,0.45), 0 8px 28px rgba(0,0,0,0.35); }
+  50%     { box-shadow: 0 0 44px rgba(255,215,0,0.75), 0 0 0 8px rgba(255,215,0,0.10); }
 }
 
 .btn-ghost {
@@ -528,13 +540,13 @@ input[type="number"] { -moz-appearance: textfield; }
   content: '';
   position: absolute;
   bottom: -20px; left: 0; width: 0; height: 2px;
-  background: linear-gradient(90deg, #ff4d00, #cc0044);
+  background: linear-gradient(90deg, #ffd700, #f5b700);
   border-radius: 99px;
   transition: width 0.25s ease;
-  box-shadow: 0 0 8px rgba(255,77,0,0.5);
+  box-shadow: 0 0 8px rgba(255,215,0,0.5);
 }
-.nav-link:hover { color: rgba(238,238,248,0.85); text-shadow: 0 0 12px rgba(255,255,255,0.1); }
-.nav-link.active { color: #eeeef8; text-shadow: 0 0 16px rgba(255,77,0,0.3); }
+.nav-link:hover { color: rgba(255,255,255,0.85); text-shadow: 0 0 12px rgba(255,255,255,0.1); }
+.nav-link.active { color: #fff; text-shadow: 0 0 16px rgba(255,215,0,0.35); }
 .nav-link.active::after { width: 100%; }
 
 /* ============================================================
@@ -578,7 +590,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ============================================================
    GLOW TEXT
    ============================================================ */
-.glow-accent { text-shadow: 0 0 24px rgba(255,77,0,0.8), 0 0 60px rgba(255,77,0,0.4), 0 0 100px rgba(255,77,0,0.15); }
+.glow-accent { text-shadow: 0 0 24px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.4), 0 0 100px rgba(255,215,0,0.15); }
 .glow-cyan   { text-shadow: 0 0 24px rgba(0,229,255,0.7), 0 0 60px rgba(0,229,255,0.3); }
 .glow-green  { text-shadow: 0 0 24px rgba(0,232,122,0.7), 0 0 60px rgba(0,232,122,0.3); }
 .glow-violet { text-shadow: 0 0 24px rgba(112,0,255,0.8), 0 0 60px rgba(112,0,255,0.4); }
@@ -591,9 +603,9 @@ input[type="number"] { -moz-appearance: textfield; }
   position: relative;
   width: 34px; height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #ff4d00, #cc0044);
+  background: linear-gradient(135deg, #ffe266, #ffd700 45%, #f5b700);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 24px rgba(255,77,0,0.6), 0 0 60px rgba(255,77,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow: 0 0 24px rgba(255,215,0,0.55), 0 0 60px rgba(255,215,0,0.18), inset 0 1px 0 rgba(255,255,255,0.4);
   flex-shrink: 0;
 }
 .logo-mark::before {
@@ -601,7 +613,7 @@ input[type="number"] { -moz-appearance: textfield; }
   position: absolute;
   inset: -4px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(255,77,0,0.4), rgba(204,0,68,0.3));
+  background: linear-gradient(135deg, rgba(255,215,0,0.4), rgba(245,183,0,0.3));
   z-index: -1;
   filter: blur(8px);
 }
@@ -630,7 +642,7 @@ input[type="number"] { -moz-appearance: textfield; }
   100% { background-position:  200% center; }
 }
 .shimmer-text {
-  background: linear-gradient(90deg, #ff4d00, #ffd200, #ff0066, #ff4d00);
+  background: linear-gradient(90deg, #fff5bf, #ffd700, #b8860b, #fff5bf);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -717,3 +729,75 @@ number-flow-react {
   .card-hero { padding: 24px; border-radius: 20px; }
   .wallet-card { padding: 14px 12px 12px; }
 }
+
+
+/* ============================================================
+   KOINARA DESIGN-SYSTEM UTILITIES (ported)
+   Premium glass cards, gold accents, progress bars, chips.
+   Use these on new/restyled components for the pro look.
+   ============================================================ */
+.premium-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 480px at 50% -12%, rgba(77,163,255,0.18), transparent 60%),
+    radial-gradient(620px 420px at 95% 6%, rgba(255,215,0,0.12), transparent 58%),
+    linear-gradient(180deg, #090911 0%, #06070d 50%, #030409 100%);
+}
+.premium-card {
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)),
+    rgba(8,10,17,0.78);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+}
+.premium-card-gold {
+  border-color: rgba(255,215,0,0.24);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 28px rgba(255,215,0,0.10), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.premium-card-cyan {
+  border-color: rgba(99,211,255,0.24);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.42), 0 0 28px rgba(99,211,255,0.10), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.gold-text-gradient {
+  background: linear-gradient(135deg, #fff5bf 0%, #ffd700 48%, #b8860b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 18px rgba(255,215,0,0.10);
+}
+.gold-button {
+  background: linear-gradient(135deg, #ffe266, #ffd700 42%, #f5b700 100%);
+  color: #0a0a0f;
+  box-shadow: 0 0 24px rgba(255,215,0,0.45);
+}
+.gold-glow { box-shadow: 0 0 22px rgba(255,215,0,0.4), inset 0 0 12px rgba(255,215,0,0.16); }
+.win-glow  { box-shadow: 0 0 20px rgba(0,230,118,0.35); }
+.loss-glow { box-shadow: 0 0 20px rgba(255,23,68,0.35); }
+
+.trust-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,215,0,0.22);
+  background: rgba(255,215,0,0.08);
+  color: #ffe266;
+  padding: 0.28rem 0.55rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.label-caps { letter-spacing: 0.14em; text-transform: uppercase; }
+.pressable { transition: transform 140ms ease, filter 180ms ease; }
+.pressable:active { transform: scale(0.97); }
+
+.progress-track { height: 8px; width: 100%; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,0.08); }
+.progress-fill-gold { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd700, #ffb800); box-shadow: 0 0 14px rgba(255,215,0,0.42); }
+.progress-fill-cyan { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #63d3ff, #00f5ff); box-shadow: 0 0 14px rgba(99,211,255,0.34); }
+
+.text-glow-gold { text-shadow: 0 0 8px rgba(255,215,0,0.9); }
+.text-glow-cyan { text-shadow: 0 0 8px rgba(0,245,255,0.8); }
