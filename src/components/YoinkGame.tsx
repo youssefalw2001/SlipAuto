@@ -20,6 +20,27 @@ const W = [
 
 const LEVEL_COLORS = ["#a0a0b0","#00d470","#a060ff","#ff4d00"];
 const LEVEL_NAMES  = ["ROOKIE","HUSTLER","PREDATOR","APEX"];
+
+// ── Deterministic animal avatar mapped from wallet-address hash (Shark / Wolf / Bear) ──
+const ANIMALS = ["🦈", "🐺", "🐻"];
+function hashWallet(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function animalFor(wallet: string): string {
+  return ANIMALS[hashWallet(wallet) % ANIMALS.length];
+}
+
+// ── Arena grid entrance — cards pop in one by one (staggerChildren) ──
+const arenaGrid = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.045, delayChildren: 0.05 } },
+};
+const arenaCard = {
+  hidden: { opacity: 0, y: 14, scale: 0.95 },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.32, ease: "easeOut" as const } },
+};
 const BOUNTY_THRESHOLD = 3.0;
 const MAX_DAILY_LOSS   = 10; // SOL — protection cap
 const MIN_BALANCE_PROTECTION = 0.05; // can't be yoinked below this
@@ -220,7 +241,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       <AnimatePresence>
         {flash && (
           <motion.div key={flash} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className={flash === "win" ? "win-flash" : "lose-flash"} />
+            className={flash === "win" ? "yoink-win-flash" : "lose-flash"} />
         )}
       </AnimatePresence>
 
@@ -322,7 +343,12 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           </div>
 
           {/* Wallet grid */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 ${shaking ? 'screen-shake' : ''}`}>
+          <motion.div
+            variants={arenaGrid}
+            initial="hidden"
+            animate="show"
+            className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 ${shaking ? 'screen-shake' : ''}`}
+          >
             {players.map(p => {
               const pct      = (p.balance / maxBal) * 100;
               const isT      = target === p.id;
@@ -339,7 +365,8 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               const isProtected = !p.isYou && p.balance <= MIN_BALANCE_PROTECTION;
 
               return (
-                <div key={p.id}
+                <motion.div key={p.id}
+                  variants={arenaCard}
                   onClick={() => !p.isYou && !isProtected && joined && setTarget(isT ? null : p.id)}
                   onMouseEnter={() => !p.isYou && joined && showTooltip(p.id)}
                   onMouseLeave={hideTooltip}
@@ -369,9 +396,9 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                         </defs>
                         <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
                       </svg>
-                      {/* Floating predator icon */}
+                      {/* Floating predator icon — mapped from wallet-address hash */}
                       <span className="absolute top-2 right-2 text-[22px] opacity-20 pointer-events-none float" style={{ filter: 'drop-shadow(0 0 4px rgba(160,96,255,0.4))' }}>
-                        {p.id % 3 === 0 ? '🦈' : p.id % 3 === 1 ? '🐺' : '🐻'}
+                        {animalFor(p.wallet)}
                       </span>
                     </>
                   )}
@@ -455,10 +482,10 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                       {c}% chance
                     </p>
                   )}
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
 
         {/* Action panel */}
