@@ -13,7 +13,7 @@ import ReferralDashboard from "./components/ReferralDashboard";
 import SwapWheel from "./components/SwapWheel";
 import YoinkGame from "./components/YoinkGame";
 import { getLevelByXP } from "./lib/levels";
-import { getPlayer, upsertPlayer, saveXP, type PlayerRow } from "./lib/supabase";
+import { getPlayer, upsertPlayer, saveXP, initDatabase, type PlayerRow } from "./lib/supabase";
 
 export type Page = "yoink" | "wheel" | "crates" | "leaderboard" | "referral";
 
@@ -61,6 +61,11 @@ export default function App() {
       }
     })();
   }, [wallet]);
+
+  // ── Init database on first load ──
+  useEffect(() => {
+    initDatabase();
+  }, []);
 
   // ── First visit onboarding ──
   useEffect(() => {
