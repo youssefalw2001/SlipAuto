@@ -43,34 +43,34 @@ export default function GlobalStats() {
           {/* Players online */}
           <div className="flex items-center gap-2 pr-5 border-r border-y-border flex-shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-y-green blink" />
-            <span className="font-mono text-[11px] font-bold" style={{ color: '#00d470' }}>
+            <span className="font-mono text-[12px] font-bold" style={{ color: '#00d470' }}>
               <NumberFlow value={players} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>online</span>
+            <span className="text-[12px]" style={{ color: '#6060a0' }}>online</span>
           </div>
 
           {/* Active rooms */}
           <div className="flex items-center gap-2 px-5 border-r border-y-border flex-shrink-0">
-            <span className="text-[11px] font-mono font-bold text-white">
+            <span className="text-[12px] font-mono font-bold text-white">
               <NumberFlow value={rooms} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>active rooms</span>
+            <span className="text-[12px]" style={{ color: '#6060a0' }}>active rooms</span>
           </div>
 
           {/* SOL stolen/min */}
           <div className="flex items-center gap-2 px-5 border-r border-y-border flex-shrink-0">
-            <span className="font-mono text-[11px] font-bold" style={{ color: '#ff7040' }}>
+            <span className="font-mono text-[12px] font-bold" style={{ color: '#ff7040' }}>
               <NumberFlow value={stolenPm} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>SOL stolen/min</span>
+            <span className="text-[12px]" style={{ color: '#6060a0' }}>SOL stolen/min</span>
           </div>
 
           {/* All-time wagered */}
           <div className="flex items-center gap-2 px-5 flex-shrink-0">
-            <span className="font-mono text-[11px] font-bold text-white">
-              ${<NumberFlow value={wagered} />}
+            <span className="font-mono text-[12px] font-bold text-white">
+              $<NumberFlow value={wagered} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>wagered all time</span>
+            <span className="text-[12px]" style={{ color: '#6060a0' }}>wagered all time</span>
           </div>
         </div>
       </div>
