@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
 import RoomSystem from "./RoomSystem";
+import YoinkResult, { type YoinkResultData } from "./YoinkResult";
 
 interface Player {
   id: number; wallet: string; balance: number;
@@ -74,6 +75,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const [joined, setJoined]         = useState(false);
   const [flash, setFlash]           = useState<"win"|"lose"|null>(null);
   const [shaking, setShaking]       = useState(false);
+  const [result, setResult]         = useState<YoinkResultData | null>(null);
   const [stolen, setStolen]         = useState(284.1);
   const [rounds, setRounds]         = useState(1847);
   const [livePlayers, setLive]      = useState(14);
@@ -208,6 +210,15 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         setFlash("win"); setTimeout(() => setFlash(null), 600);
         setShaking(true); setTimeout(() => setShaking(false), 400);
         fireCelebration();
+        setResult({
+          type: "win",
+          amount: gain,
+          fee,
+          net: parseFloat((gain - fee).toFixed(3)),
+          victim: tp.wallet,
+          newBalance: parseFloat((myBal + gain - fee).toFixed(3)),
+          isBounty: tp.isBounty,
+        });
         toast.success(`+${gain} SOL stolen from ${tp.wallet}`, { duration: 3500 });
       } else {
         globalPity.current += 1;
@@ -220,6 +231,15 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         setRounds(r => r + 1);
         setFlash("lose"); setTimeout(() => setFlash(null), 500);
         const pityMsg = globalPity.current >= 2 ? ` — odds improving (${Math.min(95, chance() + 8)}% next)` : "";
+        setResult({
+          type: "lose",
+          amount: 0,
+          fee,
+          net: parseFloat((-fee).toFixed(3)),
+          victim: tp.wallet,
+          newBalance: parseFloat((myBal - fee).toFixed(3)),
+          pityNext: globalPity.current >= 2 ? Math.min(95, chance() + 8) : null,
+        });
         toast.error(`Yoink failed — ${fee} SOL fee${pityMsg}`, { duration: 3000 });
       }
       setTarget(null);
@@ -244,6 +264,9 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             className={flash === "win" ? "yoink-win-flash" : "lose-flash"} />
         )}
       </AnimatePresence>
+
+      {/* Cinematic win/lose reveal — the dopamine payoff moment */}
+      <YoinkResult data={result} onClose={() => setResult(null)} />
 
       {/* Hero */}
       <div className="card-hero">

@@ -123,6 +123,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Cinematic FX — vignette (depth) + film grain (texture). Pure CSS, zero assets. */}
+      <div className="fx-vignette" aria-hidden />
+      <div className="fx-grain" aria-hidden />
+
       <Toaster
         position="top-right"
         theme="dark"
