@@ -154,6 +154,7 @@ export default function SwapWheel() {
   };
 
   const cdColor = cd <= 5 ? "#ff4d00" : cd <= 10 ? "#ffd200" : "#00d470";
+  const cdClass = cd <= 5 ? "glitch-text countdown-pulse" : "";
   const myChance = total > 0 ? (parseFloat(joinAmt || "0") / (total + parseFloat(joinAmt || "0"))) * 100 : 0;
   const amtVal = parseFloat(joinAmt || "0");
   const sessionPnL = sessionWins - sessionLosses;
@@ -222,10 +223,10 @@ export default function SwapWheel() {
               { val: players.length, label: "PLAYERS", color: "#a060ff" },
               { val: parseFloat(total.toFixed(2)), label: "SOL POT",  color: "#40d8f0",
                 fmt: { minimumFractionDigits: 2, maximumFractionDigits: 2 } },
-              { val: cd, label: "TO SPIN", color: cdColor },
+              { val: cd, label: "TO SPIN", color: cdColor, cls: cdClass },
             ].map((s, i) => (
               <div key={i} className="text-center">
-                <div className="font-display text-[32px] leading-none" style={{ color: s.color }}>
+                <div className={`font-display text-[32px] leading-none ${(s as any).cls || ''}`} style={{ color: s.color }}>
                   <NumberFlow value={s.val} format={(s as any).fmt} />
                   {s.label === "TO SPIN" && "s"}
                 </div>
@@ -307,17 +308,32 @@ export default function SwapWheel() {
 
             {/* Pointer */}
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
-              <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[18px] border-l-transparent border-r-transparent border-t-white/90" />
+              <div className="relative">
+                <div className="w-0 h-0 border-l-[11px] border-r-[11px] border-t-[20px] border-l-transparent border-r-transparent border-t-white/90"
+                  style={{ filter: 'drop-shadow(0 2px 6px rgba(255,77,0,0.5))' }} />
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
+                  style={{ background: '#ff4d00', boxShadow: '0 0 8px #ff4d00' }} />
+              </div>
             </div>
 
             {/* Wheel */}
             <motion.div
               animate={{ rotate: rotation }}
               transition={{ duration: spinning ? 4.5 : 0, ease: [0.06, 0.9, 0.07, 1] }}
-              style={{ filter: spinning ? 'drop-shadow(0 0 28px rgba(255,77,0,0.4))' : 'none' }}
+              className="relative"
+              style={{ filter: spinning ? 'drop-shadow(0 0 28px rgba(255,77,0,0.4)) drop-shadow(0 0 56px rgba(112,0,255,0.2))' : 'drop-shadow(0 0 16px rgba(112,0,255,0.15))' }}
             >
+              {/* Outer ring glow */}
+              <div className="wheel-ring-outer" />
+              {/* Inner ring */}
+              <div className="wheel-ring-inner" />
+
               <svg width="300" height="300" viewBox="0 0 300 300">
+                {/* Multi-ring outer decoration */}
                 <circle cx="150" cy="150" r="148" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                <circle cx="150" cy="150" r="145" fill="none" stroke="rgba(112,0,255,0.12)" strokeWidth="0.5" strokeDasharray="4 8" />
+                <circle cx="150" cy="150" r="142" fill="none" stroke="rgba(255,77,0,0.08)" strokeWidth="0.5" />
+
                 {segs.map(seg => (
                   <g key={seg.id}>
                     <path d={arc(150, 150, 138, seg.start, seg.end)} fill={seg.color} opacity={0.82} stroke="#030308" strokeWidth="2.5" />
@@ -332,25 +348,34 @@ export default function SwapWheel() {
                         </text>
                       );
                     })()}
-                    {/* Mark smallest with ring */}
+                    {/* Mark smallest with glowing ring */}
                     {seg.id === smallestDepositor?.id && !seg.isYou && (() => {
                       const mid = (seg.start + seg.end) / 2;
                       const pos = polar(150, 150, 115, mid);
                       return (
-                        <circle cx={pos.x} cy={pos.y} r="5" fill="none" stroke="#ff4d00" strokeWidth="1.5" opacity="0.8" />
+                        <g>
+                          <circle cx={pos.x} cy={pos.y} r="6" fill="none" stroke="#ff4d00" strokeWidth="1.5" opacity="0.9" />
+                          <circle cx={pos.x} cy={pos.y} r="3" fill="#ff4d00" opacity="0.6" />
+                        </g>
                       );
                     })()}
                   </g>
                 ))}
-                <circle cx="150" cy="150" r="34" fill="#030308" stroke="rgba(255,255,255,0.07)" strokeWidth="1.5" />
-                <circle cx="150" cy="150" r="26" fill="rgba(112,0,255,0.1)" stroke="rgba(112,0,255,0.35)" strokeWidth="1" />
+                {/* Inner circle — multi-layer center */}
+                <circle cx="150" cy="150" r="38" fill="#030308" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+                <circle cx="150" cy="150" r="34" fill="rgba(7,7,16,0.95)" stroke="rgba(112,0,255,0.4)" strokeWidth="1.5" />
+                <circle cx="150" cy="150" r="28" fill="rgba(112,0,255,0.08)" stroke="rgba(112,0,255,0.25)" strokeWidth="1" />
                 <text x="150" y="152" textAnchor="middle" dominantBaseline="middle"
-                  fill="white" fontSize="12" fontFamily="Bebas Neue" letterSpacing="3">SOL</text>
+                  fill="white" fontSize="13" fontFamily="Bebas Neue" letterSpacing="3">SOL</text>
               </svg>
+
+              {/* Violet center aura (behind wheel center) */}
+              <div className="wheel-center-aura aura-pulse" />
             </motion.div>
 
-            <p className="text-[10px] font-mono mt-3" style={{ color: '#6060a0' }}>
-              Red dot = smallest depositor (most at risk)
+            <p className="text-[10px] font-mono mt-3 flex items-center gap-2 justify-center" style={{ color: '#6060a0' }}>
+              <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: '#ff4d00', boxShadow: '0 0 6px #ff4d00' }} />
+              Glowing dot = smallest depositor (most at risk)
             </p>
 
             <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={spin}
@@ -505,7 +530,7 @@ export default function SwapWheel() {
               style={{ background: 'rgba(0,232,122,0.04)', border: '1px solid rgba(0,232,122,0.15)' }}>
               <p className="text-[13px] font-bold" style={{ color: '#00d470' }}>You're in this round</p>
               <div>
-                <p className="font-display text-[30px] leading-none" style={{ color: cdColor }}>
+                <p className={`font-display text-[30px] leading-none ${cdClass}`} style={{ color: cdColor }}>
                   <NumberFlow value={cd} />s
                 </p>
                 <p className="text-[11px] font-mono mt-1" style={{ color: '#6060a0' }}>until the wheel spins</p>

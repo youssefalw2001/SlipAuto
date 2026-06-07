@@ -52,6 +52,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const [acting, setActing]         = useState(false);
   const [joined, setJoined]         = useState(false);
   const [flash, setFlash]           = useState<"win"|"lose"|null>(null);
+  const [shaking, setShaking]       = useState(false);
   const [stolen, setStolen]         = useState(284.1);
   const [rounds, setRounds]         = useState(1847);
   const [livePlayers, setLive]      = useState(14);
@@ -184,6 +185,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         setStolen(s => parseFloat((s + gain).toFixed(2)));
         setRounds(r => r + 1);
         setFlash("win"); setTimeout(() => setFlash(null), 600);
+        setShaking(true); setTimeout(() => setShaking(false), 400);
         fireCelebration();
         toast.success(`+${gain} SOL stolen from ${tp.wallet}`, { duration: 3500 });
       } else {
@@ -320,7 +322,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           </div>
 
           {/* Wallet grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2.5 ${shaking ? 'screen-shake' : ''}`}>
             {players.map(p => {
               const pct      = (p.balance / maxBal) * 100;
               const isT      = target === p.id;
@@ -329,7 +331,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               const isKing   = p.isBounty && !p.isYou;
               const isPred   = !isKing && p.balance >= 1.5 && !p.isYou;
               const isCommon = !isKing && !isPred && p.balance >= 0.5 && !p.isYou;
-              const tierClass = p.isYou ? "is-you" : isKing ? "wc-king" : isPred ? "wc-predator" : isCommon ? "wc-common" : "wc-dust";
+              const tierClass = p.isYou ? "is-you" : isKing ? "wc-king neon-pulse-king" : isPred ? "wc-predator neon-pulse-pred" : isCommon ? "wc-common" : "wc-dust";
               const balColor  = p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#a0a0c0';
               const barColor  = p.isYou ? 'linear-gradient(90deg,#00e5ff,#7000ff)' : isKing ? 'linear-gradient(90deg,#ffd200,#ff4d00)' : isPred ? 'linear-gradient(90deg,#a060ff,#00e5ff)' : isCommon ? 'linear-gradient(90deg,#00e87a,#00c8e8)' : '#30304a';
               const stealAmt  = isKing ? parseFloat((p.balance * 0.9).toFixed(3)) : parseFloat((p.balance * 0.5).toFixed(3));
@@ -357,26 +359,32 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     </svg>
                   )}
                   {isPred && (
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }}>
-                      <defs>
-                        <linearGradient id={`pd-${p.id}`} x1="0%" y1="100%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#7000ff" />
-                          <stop offset="100%" stopColor="#00e5ff" />
-                        </linearGradient>
-                      </defs>
-                      <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
-                    </svg>
+                    <>
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.08 }}>
+                        <defs>
+                          <linearGradient id={`pd-${p.id}`} x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#7000ff" />
+                            <stop offset="100%" stopColor="#00e5ff" />
+                          </linearGradient>
+                        </defs>
+                        <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
+                      </svg>
+                      {/* Floating predator icon */}
+                      <span className="absolute top-2 right-2 text-[18px] opacity-15 pointer-events-none float">
+                        {p.id % 3 === 0 ? '🦈' : p.id % 3 === 1 ? '🐺' : '🐻'}
+                      </span>
+                    </>
                   )}
 
                   {/* Tier particles */}
-                  {isPred && <><span className="spark" /><span className="spark" /></>}
-                  {isKing && <><span className="flame" /><span className="flame" /></>}
+                  {isPred && <><span className="spark" /><span className="spark" /><span className="spark" /><span className="spark" /></>}
+                  {isKing && <><span className="flame" /><span className="flame" /><span className="flame" /><span className="flame" /></>}
 
                   {/* Bounty label */}
                   {isKing && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold whitespace-nowrap"
-                      style={{ background: 'rgba(255,210,0,0.9)', color: '#000', boxShadow: '0 2px 10px rgba(255,210,0,0.5)' }}>
-                      BOUNTY
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold whitespace-nowrap flex items-center gap-1"
+                      style={{ background: 'linear-gradient(135deg, rgba(255,210,0,0.95), rgba(255,140,0,0.95))', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.6), 0 0 20px rgba(255,77,0,0.3)' }}>
+                      <span>👑</span> BOUNTY
                     </div>
                   )}
 
@@ -431,8 +439,13 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                   </div>
 
                   {!p.isYou && (
-                    <span className="absolute bottom-2 right-2.5 text-[8px] font-mono"
-                      style={{ color: isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#40405a' }}>
+                    <span className="absolute bottom-2 right-2.5 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-sm"
+                      style={{
+                        color: isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#40405a',
+                        background: isKing ? 'rgba(255,210,0,0.1)' : isPred ? 'rgba(160,96,255,0.1)' : isCommon ? 'rgba(0,212,112,0.08)' : 'transparent',
+                        border: isKing ? '1px solid rgba(255,210,0,0.25)' : isPred ? '1px solid rgba(160,96,255,0.2)' : isCommon ? '1px solid rgba(0,212,112,0.15)' : 'none',
+                        letterSpacing: '0.12em',
+                      }}>
                       {isKing ? "KING" : isPred ? "PRED" : isCommon ? "COM" : "DUST"}
                     </span>
                   )}
