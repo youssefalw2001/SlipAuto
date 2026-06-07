@@ -174,7 +174,7 @@ export default function App() {
                 key={n.id}
                 onClick={() => setPage(n.id)}
                 className={`nav-link relative ${page === n.id ? "active" : ""}`}
-                style={page === n.id ? { textShadow: '0 0 12px rgba(255,77,0,0.4)' } : undefined}
+                style={page === n.id ? { textShadow: '0 0 12px rgba(255,215,0,0.4)' } : undefined}
               >
                 {n.label}
                 {n.id === "crates" && (
@@ -196,7 +196,7 @@ export default function App() {
                 <span className="font-display text-[13px] tracking-[0.06em]" style={{ color: levelData.badgeColor }}>
                   {levelData.name}
                 </span>
-                <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>{xp} XP</span>
+                <span className="text-[11px] font-mono" style={{ color: '#8892a4' }}>{xp} XP</span>
               </div>
             )}
 
@@ -213,7 +213,7 @@ export default function App() {
                   {walletShort}
                 </div>
                 <button onClick={disconnectWallet} className="btn-ghost text-[11px] py-2 px-3"
-                  style={{ color: '#6060a0' }}>
+                  style={{ color: '#8892a4' }}>
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -232,7 +232,7 @@ export default function App() {
 
           {/* Mobile toggle */}
           <button className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors"
-            style={{ color: '#6060a0' }} onClick={() => setOpen(!open)}>
+            style={{ color: '#8892a4' }} onClick={() => setOpen(!open)}>
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -254,7 +254,7 @@ export default function App() {
                   return (
                     <button key={n.id} onClick={() => { setPage(n.id); setOpen(false); }}
                       className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all"
-                      style={{ color: page === n.id ? '#ff7040' : '#6060a0', background: page === n.id ? 'rgba(255,77,0,0.08)' : 'transparent' }}>
+                      style={{ color: page === n.id ? '#ff7040' : '#8892a4', background: page === n.id ? 'rgba(255,215,0,0.08)' : 'transparent' }}>
                       <Icon className="w-4 h-4" />{n.label}
                       {n.id === "crates" && <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#ffd700', color: '#0a0a0f' }}>NEW</span>}
                     </button>
@@ -265,7 +265,7 @@ export default function App() {
                   <div className="mt-1 flex items-center justify-between px-3 py-2 rounded-xl"
                     style={{ background: 'rgba(0,232,122,0.06)', border: '1px solid rgba(0,232,122,0.15)' }}>
                     <span className="text-[12px] font-mono" style={{ color: '#00d470' }}>{walletShort}</span>
-                    <button onClick={disconnectWallet} className="text-[11px]" style={{ color: '#6060a0' }}>Disconnect</button>
+                    <button onClick={disconnectWallet} className="text-[11px]" style={{ color: '#8892a4' }}>Disconnect</button>
                   </div>
                 ) : (
                   <button onClick={connectWallet} disabled={connecting} className="btn-yoink w-full mt-1">
@@ -298,14 +298,14 @@ export default function App() {
         style={{ background: 'linear-gradient(180deg, rgba(4,4,10,0.3) 0%, rgba(4,4,10,0.95) 100%)' }}>
         {/* Subtle gradient line at top */}
         <div className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(112,0,255,0.3), rgba(255,77,0,0.2), transparent)' }} />
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(112,0,255,0.3), rgba(255,215,0,0.2), transparent)' }} />
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-display text-[20px] text-white tracking-[0.02em]" style={{ textShadow: '0 0 16px rgba(255,255,255,0.1)' }}>YOINK</span>
             <span className="font-display text-[20px] tracking-[0.02em]" style={{ color: '#ffd700', textShadow: '0 0 16px rgba(255,215,0,0.4)' }}>.GG</span>
             <span className="text-[11px] ml-2 font-mono" style={{ color: '#5a5a8a' }}>Predatory by design.</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]" style={{ color: '#6060a0' }}>
+          <div className="flex items-center gap-4 text-[11px]" style={{ color: '#8892a4' }}>
             <span>18+ Only</span>
             <span style={{ color: '#30304a' }}>·</span>
             <span>Gamble Responsibly</span>

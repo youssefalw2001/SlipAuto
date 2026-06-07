@@ -54,12 +54,12 @@ export default function Leaderboard(){
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">LEADERBOARD</h1>
-            <p className="text-[13px]" style={{color:'#6060a0'}}>Top stealers win SOL from the prize pool</p>
+            <p className="text-[13px]" style={{color:'#8892a4'}}>Top stealers win SOL from the prize pool</p>
           </div>
           <div className="flex items-center gap-6">
             {prizes.map((p,i)=>(
               <div key={i} className="text-center">
-                <p className="text-[10px] font-mono tracking-[0.1em]" style={{color:'#6060a0'}}>{i===0?"1ST":i===1?"2ND":"3RD"}</p>
+                <p className="text-[10px] font-mono tracking-[0.1em]" style={{color:'#8892a4'}}>{i===0?"1ST":i===1?"2ND":"3RD"}</p>
                 <p className="font-display text-[24px]" style={{color:i===0?'#ffd200':i===1?'#c0c0c0':'#cd7f32'}}>{p}</p>
               </div>
             ))}
@@ -70,7 +70,7 @@ export default function Leaderboard(){
       <div className="flex gap-1 p-1 rounded-xl w-fit" style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)'}}>
         {(["daily","weekly","alltime"] as P[]).map(p=>(
           <button key={p} onClick={()=>setPeriod(p)} className="px-5 py-2 rounded-lg text-[13px] font-semibold transition-all"
-            style={{background:period===p?'#ff4d00':'transparent',color:period===p?'#fff':'#6060a0',boxShadow:period===p?'0 4px 16px rgba(255,77,0,0.35)':'none'}}>
+            style={{background:period===p?'#ffd700':'transparent',color:period===p?'#fff':'#8892a4',boxShadow:period===p?'0 4px 16px rgba(255,77,0,0.35)':'none'}}>
             {p==="alltime"?"All Time":p.charAt(0).toUpperCase()+p.slice(1)}
           </button>
         ))}
@@ -103,8 +103,8 @@ export default function Leaderboard(){
                     </div>
                   </td>
                   <td className="px-4 py-3.5"><span className="font-mono font-bold" style={{color:'#00d470'}}>{p.stolen.toFixed(2)}</span></td>
-                  <td className="px-4 py-3.5 hidden md:table-cell" style={{color:'#6060a0'}}>{p.games}</td>
-                  <td className="px-4 py-3.5 hidden md:table-cell"><span style={{color:p.winRate>=65?'#00d470':p.winRate>=50?'#ffd200':'#6060a0',fontWeight:600}}>{p.winRate}%</span></td>
+                  <td className="px-4 py-3.5 hidden md:table-cell" style={{color:'#8892a4'}}>{p.games}</td>
+                  <td className="px-4 py-3.5 hidden md:table-cell"><span style={{color:p.winRate>=65?'#00d470':p.winRate>=50?'#ffd200':'#8892a4',fontWeight:600}}>{p.winRate}%</span></td>
                   <td className="px-4 py-3.5 hidden md:table-cell">{p.streak>0?<span className="pill pill-yellow" style={{fontSize:'10px'}}>{p.streak}W</span>:<span style={{color:'#30304a'}}>—</span>}</td>
                 </motion.tr>
               ))}
@@ -118,7 +118,7 @@ export default function Leaderboard(){
           <Crown className="w-5 h-5" style={{color:'#ffd200'}}/>
           <div>
             <p className="text-[13px] font-semibold text-white">Your Ranking</p>
-            <p className="text-[11px]" style={{color:'#6060a0'}}>Connect wallet to see your position and claim prizes</p>
+            <p className="text-[11px]" style={{color:'#8892a4'}}>Connect wallet to see your position and claim prizes</p>
           </div>
         </div>
         <motion.button whileHover={{scale:1.03}} whileTap={{scale:0.97}} className="btn-yoink text-[13px] py-2.5">

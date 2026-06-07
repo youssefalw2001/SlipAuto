@@ -8,7 +8,7 @@ const STEPS = [
   {
     game: "yoink" as const,
     icon: <Crosshair className="w-7 h-7" />,
-    color: "#ff4d00",
+    color: "#ffd700",
     title: "YOINK",
     subtitle: "Steal SOL directly from other wallets",
     steps: [
@@ -28,7 +28,7 @@ const STEPS = [
         earn: "Win: +1.0 SOL  |  Lose: -0.10 SOL fee only",
       },
     ],
-    tip: "💡 Keep winning yoinks to grow your balance. A bigger balance means better odds on every future attack — and bigger payouts when you win.",
+    tip: "Keep winning yoinks to grow your balance. A bigger balance means better odds on every future attack — and bigger payouts when you win.",
     earning: "Players regularly 10x their entry in a single session by targeting weaker wallets and compounding wins.",
   },
   {
@@ -54,7 +54,7 @@ const STEPS = [
         earn: "Win: collect 90% of smallest deposit  |  Lose: only if you're the smallest",
       },
     ],
-    tip: "💡 Never be the smallest depositor. Even adding a little more than the minimum puts someone else at risk instead of you.",
+    tip: "Never be the smallest depositor. Even adding a little more than the minimum puts someone else at risk instead of you.",
     earning: "Spin rounds run 24/7. Stack enough SOL across winning rounds and your balance compounds fast.",
   },
 ];
@@ -85,13 +85,13 @@ export default function OnboardingModal({ onClose }: Props) {
         }}
       >
         {/* Rainbow top border */}
-        <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #ff4d00, #7000ff, #00e5ff, transparent)" }} />
+        <div style={{ height: "1px", background: "linear-gradient(90deg, transparent, #ffd700, #7000ff, #00e5ff, transparent)" }} />
 
         {/* Close */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 p-1.5 rounded-lg hover:bg-white/8 transition-colors"
-          style={{ color: "#6060a0" }}
+          style={{ color: "#8892a4" }}
         >
           <X className="w-4 h-4" />
         </button>
@@ -105,12 +105,12 @@ export default function OnboardingModal({ onClose }: Props) {
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               >
                 <div className="text-center mb-7">
-                  <p className="text-[11px] font-mono uppercase tracking-[0.14em] mb-2" style={{ color: "#6060a0" }}>Welcome to</p>
+                  <p className="text-[11px] font-mono uppercase tracking-[0.14em] mb-2" style={{ color: "#8892a4" }}>Welcome to</p>
                   <div className="flex items-center justify-center gap-1 mb-3">
                     <span className="font-display text-[44px] text-white tracking-[0.06em]">YOINK</span>
-                    <span className="font-display text-[44px] tracking-[0.06em]" style={{ color: "#ff4d00" }}>.GG</span>
+                    <span className="font-display text-[44px] tracking-[0.06em]" style={{ color: "#ffd700" }}>.GG</span>
                   </div>
-                  <p className="text-[14px]" style={{ color: "#6060a0" }}>The only Solana platform where you <strong className="text-white">literally steal</strong> other players' SOL.</p>
+                  <p className="text-[14px]" style={{ color: "#8892a4" }}>The only Solana platform where you <strong className="text-white">literally steal</strong> other players' SOL.</p>
                 </div>
 
                 <p className="text-[12px] font-semibold text-white mb-4 text-center">Which game do you want to learn?</p>
@@ -123,19 +123,19 @@ export default function OnboardingModal({ onClose }: Props) {
                       onClick={() => setStep(i + 1)}
                       className="rounded-2xl p-5 text-center border transition-all"
                       style={{
-                        background: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.06)`,
-                        borderColor: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.2)`,
-                        borderTop: `1px solid rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.4)`,
+                        background: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.06)`,
+                        borderColor: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.2)`,
+                        borderTop: `1px solid rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.4)`,
                       }}
                     >
                       <div className="flex justify-center mb-3" style={{ color: g.color }}>{g.icon}</div>
                       <p className="font-display text-[20px] text-white tracking-[0.06em]">{g.title}</p>
-                      <p className="text-[11px] mt-1" style={{ color: "#6060a0" }}>{g.subtitle}</p>
+                      <p className="text-[11px] mt-1" style={{ color: "#8892a4" }}>{g.subtitle}</p>
                     </motion.button>
                   ))}
                 </div>
 
-                <button onClick={onClose} className="w-full text-[12px] py-2.5 rounded-xl transition-colors hover:text-white" style={{ color: "#6060a0" }}>
+                <button onClick={onClose} className="w-full text-[12px] py-2.5 rounded-xl transition-colors hover:text-white" style={{ color: "#8892a4" }}>
                   Skip — I'll figure it out
                 </button>
               </motion.div>
@@ -153,12 +153,12 @@ export default function OnboardingModal({ onClose }: Props) {
                       {/* Header */}
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                          style={{ background: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.12)`, color: g.color, border: `1px solid rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.25)` }}>
+                          style={{ background: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.12)`, color: g.color, border: `1px solid rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.25)` }}>
                           {g.icon}
                         </div>
                         <div>
                           <h2 className="font-display text-[26px] text-white leading-none tracking-[0.06em]">{g.title}</h2>
-                          <p className="text-[12px]" style={{ color: "#6060a0" }}>{g.subtitle}</p>
+                          <p className="text-[12px]" style={{ color: "#8892a4" }}>{g.subtitle}</p>
                         </div>
                       </div>
 
@@ -174,15 +174,15 @@ export default function OnboardingModal({ onClose }: Props) {
                             style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
                           >
                             <div className="flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center font-display text-[16px]"
-                              style={{ background: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.12)`, color: g.color }}>
+                              style={{ background: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.12)`, color: g.color }}>
                               {i + 1}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-[13px] font-semibold text-white mb-1">{s.label}</p>
-                              <p className="text-[12px] leading-relaxed" style={{ color: "#6060a0" }}>{s.desc}</p>
+                              <p className="text-[12px] leading-relaxed" style={{ color: "#8892a4" }}>{s.desc}</p>
                               {s.earn && (
                                 <p className="text-[11px] font-mono font-semibold mt-2 px-2.5 py-1.5 rounded-lg inline-block"
-                                  style={{ background: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.08)`, color: g.color === "#ff4d00" ? "#ff7040" : "#a060ff" }}>
+                                  style={{ background: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.08)`, color: g.color === "#ffd700" ? "#ff7040" : "#a060ff" }}>
                                   {s.earn}
                                 </p>
                               )}
@@ -199,7 +199,7 @@ export default function OnboardingModal({ onClose }: Props) {
 
                       {/* Tip */}
                       <div className="p-3.5 rounded-xl mb-5 text-[12px]"
-                        style={{ background: `rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.06)`, border: `1px solid rgba(${g.color === "#ff4d00" ? "255,77,0" : "112,0,255"},0.15)`, color: "#a0a0c0" }}>
+                        style={{ background: `rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.06)`, border: `1px solid rgba(${g.color === "#ffd700" ? "255,77,0" : "112,0,255"},0.15)`, color: "#a0a0c0" }}>
                         {g.tip}
                       </div>
 
@@ -215,7 +215,7 @@ export default function OnboardingModal({ onClose }: Props) {
                           whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                           onClick={onClose}
                           className="btn-yoink flex-1 text-[14px]"
-                          style={g.color !== "#ff4d00" ? { background: "linear-gradient(135deg,#7000ff,#4400cc)" } : {}}
+                          style={g.color !== "#ffd700" ? { background: "linear-gradient(135deg,#7000ff,#4400cc)" } : {}}
                         >
                           Let's Play!
                         </motion.button>

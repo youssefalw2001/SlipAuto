@@ -1,11 +1,12 @@
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, ArrowUpRight, DoorOpen, Shield, Target, TrendingDown, TrendingUp, Zap } from "lucide-react";
+import { AlertCircle, ArrowUpRight, Coins, Crown, DoorOpen, Flame, Lock, Shield, Skull, Swords, Target, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
 import RoomSystem from "./RoomSystem";
 import YoinkResult, { type YoinkResultData } from "./YoinkResult";
+import PremiumIcon from "./ui/PremiumIcon";
 
 interface Player {
   id: number; wallet: string; balance: number;
@@ -19,18 +20,18 @@ const W = [
   "Lp2k...Mx7t","Dv5n...Qs9b","Cy4h...Tz8r","Ab6j...Wu3o",
 ];
 
-const LEVEL_COLORS = ["#a0a0b0","#00d470","#a060ff","#ff4d00"];
+const LEVEL_COLORS = ["#a0a0b0","#00d470","#a060ff","#ffd700"];
 const LEVEL_NAMES  = ["ROOKIE","HUSTLER","PREDATOR","APEX"];
 
-// ── Deterministic animal avatar mapped from wallet-address hash (Shark / Wolf / Bear) ──
-const ANIMALS = ["🦈", "🐺", "🐻"];
+// ── Deterministic predator icon mapped from wallet-address hash (no emoji) ──
+const PREDATOR_ICONS = [Skull, Swords, Flame];
 function hashWallet(s: string): number {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
-function animalFor(wallet: string): string {
-  return ANIMALS[hashWallet(wallet) % ANIMALS.length];
+function predatorIcon(wallet: string) {
+  return PREDATOR_ICONS[hashWallet(wallet) % PREDATOR_ICONS.length];
 }
 
 // ── Arena grid entrance — cards pop in one by one (staggerChildren) ──
@@ -59,7 +60,7 @@ const SEED: Player[] = Array.from({ length: 12 }, (_, i) => makePlayer(i + 1, W[
 
 function fireCelebration() {
   const o = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-  confetti({ ...o, particleCount: 60, origin: { x: 0.35, y: 0.4 }, colors: ['#ff4d00','#ffd200','#00e87a'] });
+  confetti({ ...o, particleCount: 60, origin: { x: 0.35, y: 0.4 }, colors: ['#ffd700','#ffd200','#00e87a'] });
   confetti({ ...o, particleCount: 50, origin: { x: 0.65, y: 0.4 }, colors: ['#7000ff','#ff0066','#ffd200'] });
 }
 
@@ -136,7 +137,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const chanceColor = (c: number) => c >= 60 ? "#00d470" : c >= 45 ? "#ffd200" : "#ff7040";
 
   const sessionPnL = sessionWins - sessionLosses;
-  const sessionPnLColor = sessionPnL > 0 ? "#00d470" : sessionPnL < 0 ? "#ff7040" : "#6060a0";
+  const sessionPnLColor = sessionPnL > 0 ? "#00d470" : sessionPnL < 0 ? "#ff7040" : "#8892a4";
 
   const join = () => {
     const v = parseFloat(stake);
@@ -274,22 +275,22 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           <div>
             <div className="flex items-center gap-2.5 mb-2">
               <span className="pill pill-live"><span className="w-1.5 h-1.5 rounded-full bg-y-green blink" /> LIVE</span>
-              <span className="text-[12px] font-mono" style={{ color: '#6060a0' }}>{livePlayers} in arena</span>
+              <span className="text-[12px] font-mono" style={{ color: '#8892a4' }}>{livePlayers} in arena</span>
             </div>
             <h1 className="font-display text-[48px] leading-none text-white tracking-[0.06em] mb-1.5">
-              YOINK<span style={{ color: '#ff4d00' }}>.GG</span>
+              YOINK<span style={{ color: '#ffd700' }}>.GG</span>
             </h1>
-            <p className="text-[13px]" style={{ color: '#6060a0' }}>Target a wallet. Pay a small fee. Steal their SOL.</p>
+            <p className="text-[13px]" style={{ color: '#8892a4' }}>Target a wallet. Pay a small fee. Steal their SOL.</p>
           </div>
           <div className="flex items-center gap-5">
             <div className="text-center">
               <div className="font-display text-[38px] leading-none" style={{ color: '#ff7040' }}>{stolen.toFixed(1)}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>SOL Stolen</div>
+              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#8892a4' }}>SOL Stolen</div>
             </div>
             <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.07)' }} />
             <div className="text-center">
               <div className="font-display text-[38px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#6060a0' }}>Rounds</div>
+              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#8892a4' }}>Rounds</div>
             </div>
           </div>
         </div>
@@ -298,18 +299,21 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       {/* How it works — clear and honest */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {[
-          { n:"01", c:"#ff4d00", t:"Lock SOL to enter", d:"Your SOL stays locked in the arena. You can leave and get it back anytime.", earn: null },
-          { n:"02", c:"#a060ff", t:"Pick any target",   d:"See everyone's real locked balance. Hover to see your exact steal odds.", earn: "Steal 50% of target's balance" },
-          { n:"03", c:"#40d8f0", t:"Pay a small fee",   d:"Win = steal 50% of their balance. Lose = only lose the 5% fee. Your balance never disappears in one hit.", earn: "Max loss per attempt: 5% of target" },
-          { n:"04", c:"#00d470", t:"Win & compound",    d:"Every win grows your balance. Bigger balance = better odds on next attack.", earn: "Stack wins to dominate" },
+          { n:"01", c:"#ffd700", rgb:"255,215,0",  icon: Lock,       t:"Lock SOL to enter", d:"Your SOL stays locked in the arena. You can leave and get it back anytime.", earn: null },
+          { n:"02", c:"#a060ff", rgb:"112,0,255",   icon: Target,     t:"Pick any target",   d:"See everyone's real locked balance. Hover to see your exact steal odds.", earn: "Steal 50% of target's balance" },
+          { n:"03", c:"#4da3ff", rgb:"77,163,255",  icon: Coins,      t:"Pay a small fee",   d:"Win = steal 50% of their balance. Lose = only lose the 5% fee. Your balance never disappears in one hit.", earn: "Max loss per attempt: 5% of target" },
+          { n:"04", c:"#00e676", rgb:"0,230,118",   icon: TrendingUp, t:"Win & compound",    d:"Every win grows your balance. Bigger balance = better odds on next attack.", earn: "Stack wins to dominate" },
         ].map(s => (
           <div key={s.n} className="card-sm">
-            <div className="text-[10px] font-mono tracking-widest mb-1.5" style={{ color: '#30304a' }}>{s.n}</div>
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <PremiumIcon icon={s.icon} tone={s.c} size={36} rounded={11} iconSize={18} />
+              <div className="text-[10px] font-mono tracking-[0.18em]" style={{ color: '#4a5060' }}>{s.n}</div>
+            </div>
             <div className="text-[12px] font-bold text-white mb-1">{s.t}</div>
-            <div className="text-[11px] leading-snug" style={{ color: '#6060a0' }}>{s.d}</div>
+            <div className="text-[11px] leading-snug" style={{ color: '#8892a4' }}>{s.d}</div>
             {s.earn && (
               <div className="mt-2 text-[10px] font-mono px-2 py-1 rounded-lg"
-                style={{ background: `rgba(${s.c === "#ff4d00" ? "255,77,0" : s.c === "#a060ff" ? "112,0,255" : s.c === "#40d8f0" ? "0,229,255" : "0,232,122"},0.08)`, color: s.c }}>
+                style={{ background: `rgba(${s.rgb},0.10)`, color: s.c }}>
                 {s.earn}
               </div>
             )}
@@ -321,7 +325,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       {dailyLoss > MAX_DAILY_LOSS * 0.7 && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-3 px-4 py-3 rounded-xl"
-          style={{ background: 'rgba(255,77,0,0.06)', border: '1px solid rgba(255,77,0,0.2)' }}>
+          style={{ background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.2)' }}>
           <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#ff7040' }} />
           <p className="text-[12px]" style={{ color: '#ff7040' }}>
             Daily loss protection: {dailyLoss.toFixed(3)} / {MAX_DAILY_LOSS} SOL used today.
@@ -352,12 +356,12 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               <span className="pill pill-dim text-[10px]">{players.length} wallets</span>
             </h2>
             <div className="flex items-center gap-3">
-              {joined && <span className="text-[11px]" style={{ color: '#6060a0' }}>Hover to see steal odds</span>}
+              {joined && <span className="text-[11px]" style={{ color: '#8892a4' }}>Hover to see steal odds</span>}
               {/* Leave Arena button */}
               {joined && (
                 <button onClick={leaveArena}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all hover:bg-white/5"
-                  style={{ color: '#6060a0', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  style={{ color: '#8892a4', borderColor: 'rgba(255,255,255,0.08)' }}>
                   <DoorOpen className="w-3.5 h-3.5" />
                   Leave Arena
                 </button>
@@ -381,8 +385,8 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               const isPred   = !isKing && p.balance >= 1.5 && !p.isYou;
               const isCommon = !isKing && !isPred && p.balance >= 0.5 && !p.isYou;
               const tierClass = p.isYou ? "is-you" : isKing ? "wc-king" : isPred ? "wc-predator" : isCommon ? "wc-common" : "wc-dust";
-              const balColor  = p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#a0a0c0';
-              const barColor  = p.isYou ? 'linear-gradient(90deg,#00e5ff,#7000ff)' : isKing ? 'linear-gradient(90deg,#ffd200,#ff4d00)' : isPred ? 'linear-gradient(90deg,#a060ff,#00e5ff)' : isCommon ? 'linear-gradient(90deg,#00e87a,#00c8e8)' : '#30304a';
+              const balColor  = p.hit ? '#ffd700' : p.isYou ? '#00e5ff' : isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#a0a0c0';
+              const barColor  = p.isYou ? 'linear-gradient(90deg,#00e5ff,#7000ff)' : isKing ? 'linear-gradient(90deg,#ffd200,#ffd700)' : isPred ? 'linear-gradient(90deg,#a060ff,#00e5ff)' : isCommon ? 'linear-gradient(90deg,#00e87a,#00c8e8)' : '#30304a';
               const stealAmt  = isKing ? parseFloat((p.balance * 0.9).toFixed(3)) : parseFloat((p.balance * 0.5).toFixed(3));
               // Protection badge
               const isProtected = !p.isYou && p.balance <= MIN_BALANCE_PROTECTION;
@@ -401,7 +405,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.12 }}>
                       <defs>
                         <linearGradient id={`kg-${p.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stopColor="#ff4d00" />
+                          <stop offset="0%" stopColor="#ffd700" />
                           <stop offset="100%" stopColor="#ffd200" />
                         </linearGradient>
                       </defs>
@@ -420,9 +424,13 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                         <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
                       </svg>
                       {/* Floating predator icon — mapped from wallet-address hash */}
-                      <span className="absolute top-2 right-2 text-[22px] opacity-20 pointer-events-none float" style={{ filter: 'drop-shadow(0 0 4px rgba(160,96,255,0.4))' }}>
-                        {animalFor(p.wallet)}
-                      </span>
+                      {(() => {
+                        const PI = predatorIcon(p.wallet);
+                        return (
+                          <PI className="absolute top-2 right-2 w-5 h-5 opacity-25 pointer-events-none float"
+                            style={{ color: '#a060ff', filter: 'drop-shadow(0 0 4px rgba(160,96,255,0.4))' }} strokeWidth={2.2} />
+                        );
+                      })()}
                     </>
                   )}
 
@@ -433,8 +441,8 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                   {/* Bounty label */}
                   {isKing && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold whitespace-nowrap flex items-center gap-1"
-                      style={{ background: 'linear-gradient(135deg, rgba(255,210,0,0.95), rgba(255,140,0,0.95))', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.6), 0 0 20px rgba(255,77,0,0.3)' }}>
-                      <span>👑</span> BOUNTY
+                      style={{ background: 'linear-gradient(135deg, rgba(255,210,0,0.95), rgba(255,140,0,0.95))', color: '#000', boxShadow: '0 2px 12px rgba(255,210,0,0.6), 0 0 20px rgba(255,215,0,0.3)' }}>
+                      <Crown className="w-3 h-3" style={{ color: '#000' }} strokeWidth={2.5} /> BOUNTY
                     </div>
                   )}
 
@@ -447,7 +455,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
                   {isT && (
                     <div className="absolute top-2.5 right-2.5 z-10">
-                      <Target className="w-3.5 h-3.5" style={{ color: '#ff4d00' }} />
+                      <Target className="w-3.5 h-3.5" style={{ color: '#ffd700' }} />
                     </div>
                   )}
 
@@ -467,7 +475,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                   )}
 
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="font-mono text-[10px] truncate flex-1" style={{ color: p.isYou ? '#40d8f0' : '#6060a0' }}>
+                    <p className="font-mono text-[10px] truncate flex-1" style={{ color: p.isYou ? '#40d8f0' : '#8892a4' }}>
                       {p.isYou ? "YOU" : p.wallet}
                     </p>
                     {!p.isYou && (
@@ -517,20 +525,20 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           {/* Session P&L — shown when in arena */}
           {joined && (
             <div className="card-sm space-y-3">
-              <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>This Session</h3>
+              <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#8892a4' }}>This Session</h3>
               <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
                 <div className="rounded-lg p-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p style={{ color: '#6060a0' }}>Entered</p>
+                  <p style={{ color: '#8892a4' }}>Entered</p>
                   <p className="font-mono font-bold mt-0.5 text-white">{entryAmount.toFixed(3)}</p>
                 </div>
-                <div className="rounded-lg p-2.5" style={{ background: sessionPnL >= 0 ? 'rgba(0,212,112,0.07)' : 'rgba(255,77,0,0.07)', border: `1px solid ${sessionPnL >= 0 ? 'rgba(0,212,112,0.15)' : 'rgba(255,77,0,0.15)'}` }}>
-                  <p style={{ color: '#6060a0' }}>P&L</p>
+                <div className="rounded-lg p-2.5" style={{ background: sessionPnL >= 0 ? 'rgba(0,212,112,0.07)' : 'rgba(255,215,0,0.07)', border: `1px solid ${sessionPnL >= 0 ? 'rgba(0,212,112,0.15)' : 'rgba(255,215,0,0.15)'}` }}>
+                  <p style={{ color: '#8892a4' }}>P&L</p>
                   <p className="font-mono font-bold mt-0.5" style={{ color: sessionPnLColor }}>
                     {sessionPnL >= 0 ? "+" : ""}{sessionPnL.toFixed(3)}
                   </p>
                 </div>
                 <div className="rounded-lg p-2.5" style={{ background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.12)' }}>
-                  <p style={{ color: '#6060a0' }}>Balance</p>
+                  <p style={{ color: '#8892a4' }}>Balance</p>
                   <p className="font-mono font-bold mt-0.5" style={{ color: '#00e5ff' }}>{myBal.toFixed(3)}</p>
                 </div>
               </div>
@@ -557,7 +565,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     style={{ background: myLevel.badgeBg, color: myLevel.badgeColor, border: `1px solid ${myLevel.badgeColor}30` }}>
                     {myLevel.name}
                   </span>
-                  <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>+{myLevel.successBonus}%</span>
+                  <span className="text-[11px] font-mono" style={{ color: '#8892a4' }}>+{myLevel.successBonus}%</span>
                 </div>
                 {globalPity.current > 0 && (
                   <span className="text-[10px] font-mono px-2 py-1 rounded-lg"
@@ -572,7 +580,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     <div className="h-full rounded-full transition-all duration-700"
                       style={{ width: `${progressPct}%`, background: `linear-gradient(90deg, ${myLevel.badgeColor}, ${myLevel.badgeColor}88)` }} />
                   </div>
-                  <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>
+                  <p className="text-[10px] font-mono" style={{ color: '#8892a4' }}>
                     {xpIntoLevel}/{xpNeeded} XP → <span style={{ color: nextLevel.badgeColor }}>{nextLevel.name}</span>
                   </p>
                 </>
@@ -583,17 +591,17 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           {/* REKT */}
           {isOut && (
             <div className="card-flat text-center space-y-3"
-              style={{ border: '1px solid rgba(255,77,0,0.2)', background: 'rgba(255,77,0,0.04)' }}>
+              style={{ border: '1px solid rgba(255,215,0,0.2)', background: 'rgba(255,215,0,0.04)' }}>
               <h3 className="font-display text-[22px] text-white tracking-[0.06em]">REKT</h3>
-              <p className="text-[12px]" style={{ color: '#6060a0' }}>Balance hit zero. Re-enter to keep playing.</p>
+              <p className="text-[12px]" style={{ color: '#8892a4' }}>Balance hit zero. Re-enter to keep playing.</p>
               <div className="flex flex-wrap gap-2 justify-center">
                 {["0.1","0.25","0.5","1.0"].map(v => (
                   <button key={v} onClick={() => setStake(v)}
                     className="px-3 py-1.5 rounded-lg text-[12px] font-bold border transition-all"
                     style={{
-                      background: stake === v ? 'rgba(255,77,0,0.14)' : 'rgba(255,255,255,0.03)',
-                      borderColor: stake === v ? 'rgba(255,77,0,0.45)' : 'rgba(255,255,255,0.08)',
-                      color: stake === v ? '#ff7040' : '#6060a0',
+                      background: stake === v ? 'rgba(255,215,0,0.14)' : 'rgba(255,255,255,0.03)',
+                      borderColor: stake === v ? 'rgba(255,215,0,0.45)' : 'rgba(255,255,255,0.08)',
+                      color: stake === v ? '#ff7040' : '#8892a4',
                     }}>{v} SOL</button>
                 ))}
               </div>
@@ -608,16 +616,16 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             <div className="card-flat space-y-4">
               <div>
                 <h3 className="font-display text-[24px] text-white leading-none tracking-[0.06em] mb-1">ENTER ARENA</h3>
-                <p className="text-[12px]" style={{ color: '#6060a0' }}>Lock SOL to start. You can leave anytime and get your remaining balance back.</p>
+                <p className="text-[12px]" style={{ color: '#8892a4' }}>Lock SOL to start. You can leave anytime and get your remaining balance back.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {["0.1","0.25","0.5","1.0","2.0"].map(v => (
                   <button key={v} onClick={() => setStake(v)}
                     className="px-3.5 py-2 rounded-xl text-[12px] font-bold border transition-all"
                     style={{
-                      background: stake === v ? 'rgba(255,77,0,0.14)' : 'rgba(255,255,255,0.03)',
-                      borderColor: stake === v ? 'rgba(255,77,0,0.45)' : 'rgba(255,255,255,0.08)',
-                      color: stake === v ? '#ff7040' : '#6060a0',
+                      background: stake === v ? 'rgba(255,215,0,0.14)' : 'rgba(255,255,255,0.03)',
+                      borderColor: stake === v ? 'rgba(255,215,0,0.45)' : 'rgba(255,255,255,0.08)',
+                      color: stake === v ? '#ff7040' : '#8892a4',
                     }}>{v} SOL</button>
                 ))}
               </div>
@@ -628,23 +636,23 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                 style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <p className="text-[11px] font-semibold text-white mb-2">How your SOL is protected:</p>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Your entry</span>
+                  <span style={{ color: '#8892a4' }}>Your entry</span>
                   <span className="font-mono text-white">{stake} SOL</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Max loss per yoink</span>
+                  <span style={{ color: '#8892a4' }}>Max loss per yoink</span>
                   <span className="font-mono" style={{ color: '#ff7040' }}>5% of target's balance</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Win payout</span>
+                  <span style={{ color: '#8892a4' }}>Win payout</span>
                   <span className="font-mono" style={{ color: '#00d470' }}>50% of target's balance</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Daily loss limit</span>
+                  <span style={{ color: '#8892a4' }}>Daily loss limit</span>
                   <span className="font-mono" style={{ color: '#a060ff' }}>{MAX_DAILY_LOSS} SOL max</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Leave anytime</span>
+                  <span style={{ color: '#8892a4' }}>Leave anytime</span>
                   <span className="font-mono" style={{ color: '#00d470' }}>Remaining SOL returned</span>
                 </div>
               </div>
@@ -664,17 +672,17 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               <div className="flex items-center justify-between">
                 <h3 className="font-display text-[22px] text-white leading-none tracking-[0.06em]">YOINK ATTACK</h3>
                 <div className="text-right">
-                  <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>YOUR BALANCE</p>
+                  <p className="text-[10px] font-mono" style={{ color: '#8892a4' }}>YOUR BALANCE</p>
                   <p className="font-display text-[20px] leading-none" style={{ color: '#00e5ff' }}>{myBal.toFixed(3)}</p>
                 </div>
               </div>
 
               {tp ? (
                 <div className="rounded-xl p-4 space-y-3"
-                  style={{ background: 'rgba(255,77,0,0.05)', border: '1px solid rgba(255,77,0,0.2)', borderTop: '1px solid rgba(255,77,0,0.45)' }}>
+                  style={{ background: 'rgba(255,215,0,0.05)', border: '1px solid rgba(255,215,0,0.2)', borderTop: '1px solid rgba(255,215,0,0.45)' }}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>TARGET LOCKED</p>
+                      <p className="text-[10px] font-mono" style={{ color: '#8892a4' }}>TARGET LOCKED</p>
                       <p className="font-mono text-[12px] text-white mt-0.5">{tp.wallet}</p>
                     </div>
                     {tp.isBounty && (
@@ -685,26 +693,26 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                     )}
                   </div>
                   <p className="font-display text-[38px] leading-none" style={{ color: tp.isBounty ? '#ffd200' : '#ff7040' }}>
-                    {tp.balance.toFixed(3)} <span className="text-[14px]" style={{ color: '#6060a0' }}>SOL</span>
+                    {tp.balance.toFixed(3)} <span className="text-[14px]" style={{ color: '#8892a4' }}>SOL</span>
                   </p>
                   <div className="grid grid-cols-3 gap-2 text-[11px] text-center">
                     <div className="rounded-lg p-2" style={{ background: 'rgba(0,212,112,0.07)', border: '1px solid rgba(0,212,112,0.12)' }}>
-                      <p style={{ color: '#6060a0' }}>If you win</p>
+                      <p style={{ color: '#8892a4' }}>If you win</p>
                       <p className="font-mono font-bold mt-0.5" style={{ color: '#00d470' }}>+{(tp.balance*(tp.isBounty?0.9:0.5)).toFixed(3)}</p>
                     </div>
-                    <div className="rounded-lg p-2" style={{ background: 'rgba(255,77,0,0.07)', border: '1px solid rgba(255,77,0,0.12)' }}>
-                      <p style={{ color: '#6060a0' }}>If you lose</p>
+                    <div className="rounded-lg p-2" style={{ background: 'rgba(255,215,0,0.07)', border: '1px solid rgba(255,215,0,0.12)' }}>
+                      <p style={{ color: '#8892a4' }}>If you lose</p>
                       <p className="font-mono font-bold mt-0.5" style={{ color: '#ff7040' }}>-{maxFeeThisAttempt.toFixed(3)}</p>
                     </div>
                     <div className="rounded-lg p-2"
                       style={{ background: `${chanceColor(chance())}12`, border: `1px solid ${chanceColor(chance())}25` }}>
-                      <p style={{ color: '#6060a0' }}>Your odds</p>
+                      <p style={{ color: '#8892a4' }}>Your odds</p>
                       <p className="font-mono font-bold mt-0.5" style={{ color: chanceColor(chance()) }}>{chance()}%</p>
                     </div>
                   </div>
                   {/* Expected value indicator */}
                   <div className="flex items-center justify-between text-[10px] font-mono pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                    <span style={{ color: '#6060a0' }}>Expected value this yoink</span>
+                    <span style={{ color: '#8892a4' }}>Expected value this yoink</span>
                     <span style={{ color: (() => {
                       const ev = (chance() / 100) * (tp.balance*(tp.isBounty?0.9:0.5) - maxFeeThisAttempt) - ((100 - chance()) / 100) * maxFeeThisAttempt;
                       return ev >= 0 ? '#00d470' : '#ff7040';
@@ -719,7 +727,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               ) : (
                 <div className="rounded-xl p-6 text-center border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
                   <Target className="w-8 h-8 mx-auto mb-2" style={{ color: '#30304a' }} />
-                  <p className="text-[12px]" style={{ color: '#6060a0' }}>Tap a wallet to lock your target</p>
+                  <p className="text-[12px]" style={{ color: '#8892a4' }}>Tap a wallet to lock your target</p>
                   <p className="text-[11px] mt-1" style={{ color: '#30304a' }}>Hover first to preview your odds</p>
                 </div>
               )}
@@ -744,7 +752,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
           {/* Success rates */}
           <div className="card-sm space-y-2.5">
-            <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>Your Odds By Balance Ratio</h3>
+            <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#8892a4' }}>Your Odds By Balance Ratio</h3>
             {[
               { l: "You have 2x+ theirs",   pct: 75, c: "#00d470" },
               { l: "You have ~1x theirs",   pct: 60, c: "#40d8f0" },
@@ -753,7 +761,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             ].map(r => (
               <div key={r.l}>
                 <div className="flex justify-between text-[11px] mb-1">
-                  <span style={{ color: '#6060a0' }}>{r.l}</span>
+                  <span style={{ color: '#8892a4' }}>{r.l}</span>
                   <span className="font-mono font-bold text-white">{r.pct}%</span>
                 </div>
                 <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
@@ -767,7 +775,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#40d8f0' }} />
             <div>
               <p className="text-[12px] font-semibold text-white">Player Protections</p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8892a4' }}>
                 Min balance shield at 0.05 SOL · Daily loss cap at {MAX_DAILY_LOSS} SOL · Leave arena anytime · Pity system improves odds after losses.
               </p>
             </div>
@@ -784,7 +792,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             <div className="flex-1 min-w-0">
               {tp ? (
                 <div>
-                  <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>TARGET LOCKED</p>
+                  <p className="text-[10px] font-mono" style={{ color: '#8892a4' }}>TARGET LOCKED</p>
                   <div className="flex items-center gap-2">
                     <span className="font-display text-[20px] leading-none" style={{ color: tp.isBounty ? '#ffd200' : '#ff7040' }}>
                       {tp.balance.toFixed(3)}
@@ -801,7 +809,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               ) : (
                 <div>
                   <p className="text-[12px] font-semibold text-white">No target</p>
-                  <p className="text-[10px]" style={{ color: '#6060a0' }}>Tap a wallet card above</p>
+                  <p className="text-[10px]" style={{ color: '#8892a4' }}>Tap a wallet card above</p>
                 </div>
               )}
             </div>

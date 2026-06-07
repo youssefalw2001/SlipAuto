@@ -12,7 +12,7 @@ interface Props {
 }
 
 const ARENA_NAMES  = ["", "Rookie Arena", "Hustler Arena", "Predator Arena", "APEX Arena"];
-const ARENA_COLORS = ["", "#a0a0b0", "#00d470", "#a060ff", "#ff4d00"];
+const ARENA_COLORS = ["", "#a0a0b0", "#00d470", "#a060ff", "#ffd700"];
 
 // Cap at 500 rooms max — keeps things clean and non-laggy
 function roomForLevel(level: number): number {
@@ -53,7 +53,7 @@ export default function RoomSystem({ levelId, onRoomChange, roomId, playerCount,
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-3 px-4 rounded-2xl"
       style={{
-        background: `rgba(${arenaColor === '#00d470' ? '0,212,112' : arenaColor === '#a060ff' ? '160,96,255' : arenaColor === '#ff4d00' ? '255,77,0' : '160,160,176'},0.04)`,
+        background: `rgba(${arenaColor === '#00d470' ? '0,212,112' : arenaColor === '#a060ff' ? '160,96,255' : arenaColor === '#ffd700' ? '255,77,0' : '160,160,176'},0.04)`,
         border: `1px solid ${arenaColor}20`,
         borderLeft: `3px solid ${arenaColor}`,
       }}
@@ -71,12 +71,12 @@ export default function RoomSystem({ levelId, onRoomChange, roomId, playerCount,
             </span>
           </div>
           <div className="flex items-center gap-3 text-[11px]">
-            <span className="flex items-center gap-1 font-mono" style={{ color: '#6060a0' }}>
+            <span className="flex items-center gap-1 font-mono" style={{ color: '#8892a4' }}>
               <Users className="w-3 h-3" />
               <NumberFlow value={playerCount} /> players
             </span>
             <span style={{ color: '#30304a' }}>·</span>
-            <span className="font-mono" style={{ color: '#6060a0' }}>
+            <span className="font-mono" style={{ color: '#8892a4' }}>
               <NumberFlow value={parseFloat(potSOL.toFixed(2))} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} /> SOL pot
             </span>
           </div>
@@ -108,7 +108,7 @@ export default function RoomSystem({ levelId, onRoomChange, roomId, playerCount,
           style={{
             background: 'rgba(255,255,255,0.03)',
             borderColor: 'rgba(255,255,255,0.08)',
-            color: '#6060a0',
+            color: '#8892a4',
           }}
         >
           <Shuffle className="w-3 h-3" />

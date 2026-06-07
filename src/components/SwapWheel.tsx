@@ -8,7 +8,7 @@ import { toast } from "sonner";
 interface WheelPlayer { id: number; wallet: string; amount: number; color: string; isYou?: boolean; }
 interface Result { winner: string; amount: number; loser: string; loserAmt: number; }
 
-const COLORS = ["#ff4d00","#7000ff","#00e5ff","#00e87a","#ffd200","#ff0066","#00aaff","#ff6b35","#c026d3","#34d399"];
+const COLORS = ["#ffd700","#7000ff","#00e5ff","#00e87a","#ffd200","#ff0066","#00aaff","#ff6b35","#c026d3","#34d399"];
 const W = ["7xKp...3mNq","Bz9r...Wf2j","4tLs...Ck8v","Hn6d...Yp1x","Qm3a...Rt5u","Ew7b...Ln0z","Fs2c...Vg4k","Jp8e...Ah9w"];
 let nid = 30;
 
@@ -31,7 +31,7 @@ function arc(cx: number, cy: number, r: number, s: number, e: number) {
 }
 
 function fireSpin() {
-  confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#ff4d00','#7000ff','#00e5ff','#00e87a','#ffd200'], zIndex: 9999 });
+  confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#ffd700','#7000ff','#00e5ff','#00e87a','#ffd200'], zIndex: 9999 });
 }
 
 export default function SwapWheel() {
@@ -153,7 +153,7 @@ export default function SwapWheel() {
     }, 4500);
   };
 
-  const cdColor = cd <= 5 ? "#ff4d00" : cd <= 10 ? "#ffd200" : "#00d470";
+  const cdColor = cd <= 5 ? "#ffd700" : cd <= 10 ? "#ffd200" : "#00d470";
   const cdClass = cd <= 5 ? "glitch-text countdown-pulse" : "";
   const myChance = total > 0 ? (parseFloat(joinAmt || "0") / (total + parseFloat(joinAmt || "0"))) * 100 : 0;
   const amtVal = parseFloat(joinAmt || "0");
@@ -182,8 +182,10 @@ export default function SwapWheel() {
         {warning && !spinning && (
           <motion.div initial={{ opacity: 0, y: -20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -20, scale: 0.9 }}
             className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-8 py-4 rounded-2xl font-display text-[18px] tracking-[0.08em] text-white text-center glitch-text"
-            style={{ background: 'rgba(255,77,0,0.95)', backdropFilter: 'blur(20px)', boxShadow: '0 8px 50px rgba(255,77,0,0.6), 0 0 100px rgba(255,77,0,0.2)', letterSpacing: '4px' }}>
-            ⚡ WHEEL SPINS IN {cd}s — LAST CHANCE! ⚡
+            style={{ background: 'rgba(255,215,0,0.95)', backdropFilter: 'blur(20px)', boxShadow: '0 8px 50px rgba(255,215,0,0.6), 0 0 100px rgba(255,215,0,0.2)', letterSpacing: '4px' }}>
+            <span className="inline-flex items-center justify-center gap-2.5">
+              <Zap className="w-5 h-5" fill="currentColor" /> WHEEL SPINS IN {cd}s — LAST CHANCE! <Zap className="w-5 h-5" fill="currentColor" />
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -193,13 +195,13 @@ export default function SwapWheel() {
         {isSmallest && !spinning && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             className="flex items-center gap-3 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(255,77,0,0.07)', border: '1px solid rgba(255,77,0,0.25)' }}>
+            style={{ background: 'rgba(255,215,0,0.07)', border: '1px solid rgba(255,215,0,0.25)' }}>
             <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#ff7040' }} />
             <div>
               <p className="text-[12px] font-semibold" style={{ color: '#ff7040' }}>
                 You are the smallest depositor — you are most at risk this round.
               </p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8892a4' }}>
                 Add more SOL to reduce your risk, or wait for the next round.
               </p>
             </div>
@@ -216,7 +218,7 @@ export default function SwapWheel() {
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-[48px] leading-none text-white tracking-[0.06em] mb-1">SWAP <span className="glow-violet" style={{ color: '#a060ff' }}>WHEEL</span></h1>
-            <p className="text-[13px]" style={{ color: '#6060a0' }}>Deposit SOL · Wheel spins every 30s · Winner steals from the smallest depositor</p>
+            <p className="text-[13px]" style={{ color: '#8892a4' }}>Deposit SOL · Wheel spins every 30s · Winner steals from the smallest depositor</p>
           </div>
           <div className="flex items-center gap-5">
             {[
@@ -230,7 +232,7 @@ export default function SwapWheel() {
                   <NumberFlow value={s.val} format={(s as any).fmt} />
                   {s.label === "TO SPIN" && "s"}
                 </div>
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] mt-1" style={{ color: '#6060a0' }}>{s.label}</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] mt-1" style={{ color: '#8892a4' }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -266,7 +268,7 @@ export default function SwapWheel() {
             </div>
             <div>
               <p className="text-[12px] font-bold text-white mb-1">{s.t}</p>
-              <p className="text-[11px] leading-relaxed" style={{ color: '#6060a0' }}>{s.d}</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: '#8892a4' }}>{s.d}</p>
             </div>
           </div>
         ))}
@@ -285,21 +287,21 @@ export default function SwapWheel() {
                   className="absolute inset-4 z-20 rounded-2xl flex flex-col items-center justify-center text-center p-6"
                   style={{
                     background: 'rgba(7,7,16,0.97)',
-                    border: result.winner === "You" ? '1px solid rgba(0,232,122,0.4)' : '1px solid rgba(255,77,0,0.3)',
+                    border: result.winner === "You" ? '1px solid rgba(0,232,122,0.4)' : '1px solid rgba(255,215,0,0.3)',
                     backdropFilter: 'blur(24px)',
                   }}>
-                  <div className="text-[10px] font-mono tracking-[0.14em] mb-3" style={{ color: '#6060a0' }}>ROUND RESULT</div>
+                  <div className="text-[10px] font-mono tracking-[0.14em] mb-3" style={{ color: '#8892a4' }}>ROUND RESULT</div>
                   <p className="font-display text-[24px] tracking-[0.06em]"
                     style={{ color: result.winner === "You" ? '#00d470' : '#eeeef8' }}>
                     {result.winner}
                   </p>
-                  <p className="text-[12px] mb-1" style={{ color: '#6060a0' }}>won</p>
+                  <p className="text-[12px] mb-1" style={{ color: '#8892a4' }}>won</p>
                   <p className="font-display text-[48px] leading-none text-white mb-1">+{result.amount}</p>
-                  <p className="text-[12px] font-mono" style={{ color: '#6060a0' }}>
+                  <p className="text-[12px] font-mono" style={{ color: '#8892a4' }}>
                     SOL — stolen from {result.loser} ({result.loserAmt.toFixed(3)} SOL lost)
                   </p>
                   <div className="mt-4 px-4 py-2 rounded-full text-[11px] font-mono"
-                    style={{ background: 'rgba(255,255,255,0.04)', color: '#6060a0', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    style={{ background: 'rgba(255,255,255,0.04)', color: '#8892a4', border: '1px solid rgba(255,255,255,0.07)' }}>
                     New round starts in ~5s
                   </div>
                 </motion.div>
@@ -310,9 +312,9 @@ export default function SwapWheel() {
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
               <div className="relative">
                 <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[22px] border-l-transparent border-r-transparent"
-                  style={{ borderTopColor: 'white', filter: 'drop-shadow(0 3px 10px rgba(255,77,0,0.6)) drop-shadow(0 0 20px rgba(255,77,0,0.3))' }} />
+                  style={{ borderTopColor: 'white', filter: 'drop-shadow(0 3px 10px rgba(255,215,0,0.6)) drop-shadow(0 0 20px rgba(255,215,0,0.3))' }} />
                 <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full"
-                  style={{ background: '#ff4d00', boxShadow: '0 0 10px #ff4d00, 0 0 20px rgba(255,77,0,0.5)' }} />
+                  style={{ background: '#ffd700', boxShadow: '0 0 10px #ffd700, 0 0 20px rgba(255,215,0,0.5)' }} />
               </div>
             </div>
 
@@ -330,7 +332,7 @@ export default function SwapWheel() {
                 {/* Multi-ring outer decoration */}
                 <circle cx="150" cy="150" r="149" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" />
                 <circle cx="150" cy="150" r="146" fill="none" stroke="rgba(112,0,255,0.15)" strokeWidth="0.5" strokeDasharray="4 6" />
-                <circle cx="150" cy="150" r="143" fill="none" stroke="rgba(255,77,0,0.10)" strokeWidth="0.5" />
+                <circle cx="150" cy="150" r="143" fill="none" stroke="rgba(255,215,0,0.10)" strokeWidth="0.5" />
                 <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(0,229,255,0.06)" strokeWidth="0.5" strokeDasharray="2 10" />
 
                 {segs.map(seg => (
@@ -353,8 +355,8 @@ export default function SwapWheel() {
                       const pos = polar(150, 150, 118, mid);
                       return (
                         <g>
-                          <circle cx={pos.x} cy={pos.y} r="7" fill="none" stroke="#ff4d00" strokeWidth="1.5" opacity="0.8" />
-                          <circle cx={pos.x} cy={pos.y} r="4" fill="#ff4d00" opacity="0.7">
+                          <circle cx={pos.x} cy={pos.y} r="7" fill="none" stroke="#ffd700" strokeWidth="1.5" opacity="0.8" />
+                          <circle cx={pos.x} cy={pos.y} r="4" fill="#ffd700" opacity="0.7">
                             <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite" />
                           </circle>
                         </g>
@@ -376,7 +378,7 @@ export default function SwapWheel() {
             </motion.div>
 
             <p className="text-[10px] font-mono mt-4 flex items-center gap-2 justify-center" style={{ color: '#5a5a8a' }}>
-              <span className="w-3 h-3 rounded-full inline-block" style={{ background: '#ff4d00', boxShadow: '0 0 8px #ff4d00, 0 0 16px rgba(255,77,0,0.4)' }} />
+              <span className="w-3 h-3 rounded-full inline-block" style={{ background: '#ffd700', boxShadow: '0 0 8px #ffd700, 0 0 16px rgba(255,215,0,0.4)' }} />
               Pulsing dot = smallest depositor (at risk)
             </p>
 
@@ -390,7 +392,7 @@ export default function SwapWheel() {
           {/* Player bars with at-risk indicator */}
           <div className="card-sm space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-[11px] font-mono uppercase tracking-[0.12em]" style={{ color: '#6060a0' }}>Players in Round</h3>
+              <h3 className="text-[11px] font-mono uppercase tracking-[0.12em]" style={{ color: '#8892a4' }}>Players in Round</h3>
               <span className="text-[10px] font-mono flex items-center gap-1" style={{ color: '#ff7040' }}>
                 <AlertCircle className="w-3 h-3" /> Red dot = at risk
               </span>
@@ -401,19 +403,19 @@ export default function SwapWheel() {
                 <div key={p.id}>
                   <div className="flex justify-between text-[11px] mb-1.5">
                     <div className="flex items-center gap-2">
-                      {atRisk && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#ff4d00' }} />}
+                      {atRisk && <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#ffd700' }} />}
                       <span className="font-mono" style={{ color: p.isYou ? '#40d8f0' : '#eeeef8' }}>{p.isYou ? "YOU" : p.wallet}</span>
                       {atRisk && <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                        style={{ background: 'rgba(255,77,0,0.12)', color: '#ff7040', border: '1px solid rgba(255,77,0,0.25)' }}>AT RISK</span>}
+                        style={{ background: 'rgba(255,215,0,0.12)', color: '#ff7040', border: '1px solid rgba(255,215,0,0.25)' }}>AT RISK</span>}
                     </div>
                     <div className="flex gap-3">
-                      <span style={{ color: '#6060a0' }}>{((p.amount / total) * 100).toFixed(1)}% chance</span>
+                      <span style={{ color: '#8892a4' }}>{((p.amount / total) * 100).toFixed(1)}% chance</span>
                       <span className="font-mono font-bold" style={{ color: p.color }}>{p.amount.toFixed(3)}</span>
                     </div>
                   </div>
                   <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
                     <motion.div animate={{ width: `${(p.amount / total) * 100}%` }} transition={{ duration: 0.6 }}
-                      className="h-full rounded-full" style={{ background: atRisk ? '#ff4d00' : p.color }} />
+                      className="h-full rounded-full" style={{ background: atRisk ? '#ffd700' : p.color }} />
                   </div>
                 </div>
               );
@@ -427,21 +429,21 @@ export default function SwapWheel() {
           {/* Session P&L when joined */}
           {joined && (
             <div className="card-sm space-y-3">
-              <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#6060a0' }}>This Session</h3>
+              <h3 className="text-[11px] font-mono uppercase tracking-widest" style={{ color: '#8892a4' }}>This Session</h3>
               <div className="grid grid-cols-3 gap-2 text-center text-[11px]">
                 <div className="rounded-lg p-2.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p style={{ color: '#6060a0' }}>Entered</p>
+                  <p style={{ color: '#8892a4' }}>Entered</p>
                   <p className="font-mono font-bold mt-0.5 text-white">{myEntry.toFixed(3)}</p>
                 </div>
                 <div className="rounded-lg p-2.5"
-                  style={{ background: sessionPnL >= 0 ? 'rgba(0,212,112,0.07)' : 'rgba(255,77,0,0.07)', border: `1px solid ${sessionPnL >= 0 ? 'rgba(0,212,112,0.15)' : 'rgba(255,77,0,0.15)'}` }}>
-                  <p style={{ color: '#6060a0' }}>P&L</p>
+                  style={{ background: sessionPnL >= 0 ? 'rgba(0,212,112,0.07)' : 'rgba(255,215,0,0.07)', border: `1px solid ${sessionPnL >= 0 ? 'rgba(0,212,112,0.15)' : 'rgba(255,215,0,0.15)'}` }}>
+                  <p style={{ color: '#8892a4' }}>P&L</p>
                   <p className="font-mono font-bold mt-0.5" style={{ color: sessionPnL >= 0 ? '#00d470' : '#ff7040' }}>
                     {sessionPnL >= 0 ? "+" : ""}{sessionPnL.toFixed(3)}
                   </p>
                 </div>
                 <div className="rounded-lg p-2.5" style={{ background: 'rgba(0,229,255,0.05)', border: '1px solid rgba(0,229,255,0.12)' }}>
-                  <p style={{ color: '#6060a0' }}>Balance</p>
+                  <p style={{ color: '#8892a4' }}>Balance</p>
                   <p className="font-mono font-bold mt-0.5" style={{ color: '#00d470' }}>{myBal.toFixed(3)}</p>
                 </div>
               </div>
@@ -463,7 +465,7 @@ export default function SwapWheel() {
             <div className="card-flat space-y-5">
               <div>
                 <h3 className="font-display text-[24px] text-white leading-none tracking-[0.06em] mb-1">JOIN ROUND</h3>
-                <p className="text-[12px]" style={{ color: '#6060a0' }}>Bigger deposit = bigger wheel slice = higher win chance</p>
+                <p className="text-[12px]" style={{ color: '#8892a4' }}>Bigger deposit = bigger wheel slice = higher win chance</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -473,7 +475,7 @@ export default function SwapWheel() {
                     style={{
                       background: joinAmt === v ? 'rgba(112,0,255,0.14)' : 'rgba(255,255,255,0.03)',
                       borderColor: joinAmt === v ? 'rgba(112,0,255,0.45)' : 'rgba(255,255,255,0.08)',
-                      color: joinAmt === v ? '#a060ff' : '#6060a0',
+                      color: joinAmt === v ? '#a060ff' : '#8892a4',
                     }}>{v} SOL
                   </motion.button>
                 ))}
@@ -485,35 +487,35 @@ export default function SwapWheel() {
                 style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <p className="text-[11px] font-semibold text-white mb-2">What happens when you join:</p>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Your win chance</span>
+                  <span style={{ color: '#8892a4' }}>Your win chance</span>
                   <span className="font-mono font-bold" style={{ color: '#a060ff' }}>{myChance.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>If you win</span>
+                  <span style={{ color: '#8892a4' }}>If you win</span>
                   <span className="font-mono" style={{ color: '#00d470' }}>up to {total.toFixed(2)} SOL</span>
                 </div>
                 <div className="divider" />
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Who loses each round?</span>
+                  <span style={{ color: '#8892a4' }}>Who loses each round?</span>
                   <span className="font-mono font-semibold" style={{ color: '#ff7040' }}>Smallest depositor</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Are you the smallest?</span>
+                  <span style={{ color: '#8892a4' }}>Are you the smallest?</span>
                   <span className="font-mono font-semibold"
                     style={{ color: amtVal < smallestDepositor?.amount ? '#ff7040' : '#00d470' }}>
                     {amtVal < smallestDepositor?.amount ? "YES — increase deposit" : "No — you're safe"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>House fee</span>
-                  <span className="font-mono" style={{ color: '#6060a0' }}>10% of amount stolen</span>
+                  <span style={{ color: '#8892a4' }}>House fee</span>
+                  <span className="font-mono" style={{ color: '#8892a4' }}>10% of amount stolen</span>
                 </div>
               </div>
 
               {/* Warning if they'd be the smallest */}
               {amtVal > 0 && amtVal <= smallestDepositor?.amount && (
                 <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-[11px]"
-                  style={{ background: 'rgba(255,77,0,0.07)', border: '1px solid rgba(255,77,0,0.2)' }}>
+                  style={{ background: 'rgba(255,215,0,0.07)', border: '1px solid rgba(255,215,0,0.2)' }}>
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#ff7040' }} />
                   <p style={{ color: '#ff7040' }}>
                     At {joinAmt} SOL you'd be the smallest depositor — most at risk of losing.
@@ -535,22 +537,22 @@ export default function SwapWheel() {
                 <p className={`font-display text-[30px] leading-none ${cdClass}`} style={{ color: cdColor }}>
                   <NumberFlow value={cd} />s
                 </p>
-                <p className="text-[11px] font-mono mt-1" style={{ color: '#6060a0' }}>until the wheel spins</p>
+                <p className="text-[11px] font-mono mt-1" style={{ color: '#8892a4' }}>until the wheel spins</p>
               </div>
               <div className="divider" />
               <div className="space-y-1.5 text-[11px]">
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Your balance</span>
+                  <span style={{ color: '#8892a4' }}>Your balance</span>
                   <span className="font-mono font-bold" style={{ color: '#00d470' }}>{myBal.toFixed(3)} SOL</span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Win chance</span>
+                  <span style={{ color: '#8892a4' }}>Win chance</span>
                   <span className="font-mono font-bold" style={{ color: '#a060ff' }}>
                     {((myBal / total) * 100).toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: '#6060a0' }}>Your risk</span>
+                  <span style={{ color: '#8892a4' }}>Your risk</span>
                   <span className="font-mono font-bold" style={{ color: isSmallest ? '#ff7040' : '#00d470' }}>
                     {isSmallest ? "HIGH — smallest depositor" : "Low — not at bottom"}
                   </span>
@@ -561,7 +563,7 @@ export default function SwapWheel() {
 
           {/* History */}
           <div className="card-sm space-y-2.5">
-            <h3 className="text-[11px] font-mono uppercase tracking-[0.12em] mb-3" style={{ color: '#6060a0' }}>Recent Spins</h3>
+            <h3 className="text-[11px] font-mono uppercase tracking-[0.12em] mb-3" style={{ color: '#8892a4' }}>Recent Spins</h3>
             {history.length === 0 ? (
               <p className="text-[11px] text-center py-4" style={{ color: '#30304a' }}>No spins yet this session</p>
             ) : history.map((h, i) => (
@@ -583,7 +585,7 @@ export default function SwapWheel() {
             <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#40d8f0' }} />
             <div>
               <p className="text-[12px] font-semibold text-white">Fair play guarantees</p>
-              <p className="text-[11px] mt-0.5" style={{ color: '#6060a0' }}>
+              <p className="text-[11px] mt-0.5" style={{ color: '#8892a4' }}>
                 Odds clearly shown before joining · Smallest depositor risk always displayed · Winner determined by provably fair on-chain randomness.
               </p>
             </div>
