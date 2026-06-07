@@ -158,12 +158,12 @@ export default function App() {
             className="flex items-center gap-3 flex-shrink-0"
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
             <div className="logo-mark">
-              <Crosshair className="w-4 h-4 text-white" strokeWidth={2.5} />
+              <Crosshair className="w-4 h-4 text-[#0a0a0f]" strokeWidth={2.5} />
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-y-green border-2 border-y-base blink" />
             </div>
             <div className="flex items-baseline gap-0">
-              <span className="font-display text-[26px] text-white tracking-[0.08em]" style={{ textShadow: '0 0 24px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.05)' }}>YOINK</span>
-              <span className="font-display text-[26px] tracking-[0.08em]" style={{ color: '#ff4d00', textShadow: '0 0 24px rgba(255,77,0,0.5), 0 0 60px rgba(255,77,0,0.2)' }}>.GG</span>
+              <span className="font-display text-[26px] text-white tracking-[0.02em]" style={{ textShadow: '0 0 24px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.05)' }}>YOINK</span>
+              <span className="font-display text-[26px] tracking-[0.02em]" style={{ color: '#ffd700', textShadow: '0 0 24px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)' }}>.GG</span>
             </div>
           </motion.button>
 
@@ -179,7 +179,7 @@ export default function App() {
                 {n.label}
                 {n.id === "crates" && (
                   <span className="absolute -top-2.5 -right-4 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: '#ff4d00', color: 'white', lineHeight: 1, boxShadow: '0 0 8px rgba(255,77,0,0.5)' }}>
+                    style={{ background: '#ffd700', color: '#0a0a0f', lineHeight: 1, boxShadow: '0 0 8px rgba(255,215,0,0.5)' }}>
                     NEW
                   </span>
                 )}
@@ -256,7 +256,7 @@ export default function App() {
                       className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all"
                       style={{ color: page === n.id ? '#ff7040' : '#6060a0', background: page === n.id ? 'rgba(255,77,0,0.08)' : 'transparent' }}>
                       <Icon className="w-4 h-4" />{n.label}
-                      {n.id === "crates" && <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#ff4d00', color: 'white' }}>NEW</span>}
+                      {n.id === "crates" && <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#ffd700', color: '#0a0a0f' }}>NEW</span>}
                     </button>
                   );
                 })}
@@ -301,8 +301,8 @@ export default function App() {
           style={{ background: 'linear-gradient(90deg, transparent, rgba(112,0,255,0.3), rgba(255,77,0,0.2), transparent)' }} />
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-display text-[20px] text-white tracking-[0.06em]" style={{ textShadow: '0 0 16px rgba(255,255,255,0.1)' }}>YOINK</span>
-            <span className="font-display text-[20px] tracking-[0.06em]" style={{ color: '#ff4d00', textShadow: '0 0 16px rgba(255,77,0,0.4)' }}>.GG</span>
+            <span className="font-display text-[20px] text-white tracking-[0.02em]" style={{ textShadow: '0 0 16px rgba(255,255,255,0.1)' }}>YOINK</span>
+            <span className="font-display text-[20px] tracking-[0.02em]" style={{ color: '#ffd700', textShadow: '0 0 16px rgba(255,215,0,0.4)' }}>.GG</span>
             <span className="text-[11px] ml-2 font-mono" style={{ color: '#5a5a8a' }}>Predatory by design.</span>
           </div>
           <div className="flex items-center gap-4 text-[11px]" style={{ color: '#6060a0' }}>
