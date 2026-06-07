@@ -43,10 +43,10 @@ export default function LiveFeed() {
             {[...items,...items].map((e,i)=>(
               <span key={`${e.id}-${i}`} className="inline-flex items-center gap-2 text-[11px]">
                 {e.game==="yoink"
-                  ?<Crosshair className="w-3 h-3 flex-shrink-0" style={{color:'#ff4d00'}}/>
+                  ?<Crosshair className="w-3 h-3 flex-shrink-0" style={{color:'#ffd700'}}/>
                   :<RotateCcw className="w-3 h-3 flex-shrink-0" style={{color:'#7000ff'}}/>
                 }
-                <span className="font-mono" style={{color:'#6060a0'}}>{e.wallet}</span>
+                <span className="font-mono" style={{color:'#8892a4'}}>{e.wallet}</span>
                 <span className="font-semibold" style={{color:e.win?'#00d470':'#ff7040'}}>
                   {e.win?"+":"-"}{e.amount} SOL
                 </span>

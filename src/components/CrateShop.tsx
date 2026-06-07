@@ -1,7 +1,7 @@
 import NumberFlow from "@number-flow/react";
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Lock, Shield, Sparkles, X, Zap } from "lucide-react";
+import { ChevronDown, Eye, Gift, Lock, Package, Shield, Sparkles, TrendingUp, X, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -9,6 +9,7 @@ import {
   getLevelById, getXPProgress, spinCrate, XP_REWARDS
 } from "../lib/levels";
 import { getAllCrateOpensToday, recordCrateOpen } from "../lib/supabase";
+import PremiumIcon from "./ui/PremiumIcon";
 
 interface Props { xp: number; levelId: number; onXPGain: (xp: number) => void; wallet: string | null; }
 interface OpenResult { reward: CrateReward; crate: CrateTier; }
@@ -16,9 +17,9 @@ interface OpenResult { reward: CrateReward; crate: CrateTier; }
 /* ── Jackpot confetti ── */
 function fireJackpot() {
   const o = { startVelocity: 40, spread: 360, ticks: 100, zIndex: 9999 };
-  confetti({ ...o, particleCount: 120, origin: { x: 0.3, y: 0.35 }, colors: ['#ff4d00','#ffd200','#00e87a','#fff'] });
+  confetti({ ...o, particleCount: 120, origin: { x: 0.3, y: 0.35 }, colors: ['#ffd700','#ffd200','#00e87a','#fff'] });
   confetti({ ...o, particleCount: 100, origin: { x: 0.7, y: 0.35 }, colors: ['#7000ff','#ff0066','#00e5ff','#ffd200'] });
-  confetti({ ...o, particleCount: 80,  origin: { x: 0.5, y: 0.5  }, colors: ['#ff4d00','#ffd200','#fff'] });
+  confetti({ ...o, particleCount: 80,  origin: { x: 0.5, y: 0.5  }, colors: ['#ffd700','#ffd200','#fff'] });
 }
 
 /* ── SVG crate icons per tier ── */
@@ -130,11 +131,11 @@ function CrateCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             {locked
-              ? <Lock className="w-3.5 h-3.5" style={{ color: '#6060a0' }} />
+              ? <Lock className="w-3.5 h-3.5" style={{ color: '#8892a4' }} />
               : <div className="w-1.5 h-1.5 rounded-full blink" style={{ background: crate.color }} />
             }
             <span className="font-mono text-[11px] font-bold tracking-[0.14em]"
-              style={{ color: locked ? '#6060a0' : crate.color }}>
+              style={{ color: locked ? '#8892a4' : crate.color }}>
               {crate.name}
             </span>
           </div>
@@ -171,7 +172,7 @@ function CrateCard({
               style={{ fontSize: 40, color: locked ? '#40406a' : 'white' }}>
               {crate.price}
             </div>
-            <div className="text-[11px] font-mono" style={{ color: '#6060a0' }}>SOL per open</div>
+            <div className="text-[11px] font-mono" style={{ color: '#8892a4' }}>SOL per open</div>
             {!locked && (
               <div className="flex items-center gap-1 mt-1.5">
                 <Sparkles className="w-3 h-3" style={{ color: '#ffd200' }} />
@@ -194,7 +195,7 @@ function CrateCard({
         {/* Daily dots */}
         {!locked && (
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-mono" style={{ color: '#6060a0' }}>Daily opens</span>
+            <span className="text-[10px] font-mono" style={{ color: '#8892a4' }}>Daily opens</span>
             <div className="flex items-center gap-1.5">
               {Array.from({ length: crate.dailyLimit }).map((_, i) => (
                 <motion.div
@@ -209,7 +210,7 @@ function CrateCard({
                 />
               ))}
               <span className="font-mono text-[10px] ml-1"
-                style={{ color: atLimit ? '#ff7040' : '#6060a0' }}>
+                style={{ color: atLimit ? '#ff7040' : '#8892a4' }}>
                 {opened}/{crate.dailyLimit}
               </span>
             </div>
@@ -253,7 +254,7 @@ function CrateCard({
         <button
           onClick={() => setShowOdds(!showOdds)}
           className="w-full flex items-center justify-between px-5 py-3 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors hover:bg-white/2"
-          style={{ color: locked ? '#30304a' : '#6060a0' }}
+          style={{ color: locked ? '#30304a' : '#8892a4' }}
         >
           <span>View odds</span>
           <motion.div animate={{ rotate: showOdds ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -285,7 +286,7 @@ function CrateCard({
                       <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                         <div className="h-full rounded-full" style={{ width: `${r.chance}%`, background: r.rare ? '#ffd200' : r.color }} />
                       </div>
-                      <span className="text-[10px] font-mono w-8 text-right font-bold" style={{ color: r.rare ? '#ffd200' : '#6060a0' }}>
+                      <span className="text-[10px] font-mono w-8 text-right font-bold" style={{ color: r.rare ? '#ffd200' : '#8892a4' }}>
                         {r.chance}%
                       </span>
                     </div>
@@ -351,7 +352,7 @@ function ResultModal({ result, onClose }: { result: OpenResult; onClose: () => v
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-10 p-1.5 rounded-lg hover:bg-white/8 transition-colors"
-          style={{ color: '#6060a0' }}
+          style={{ color: '#8892a4' }}
         >
           <X className="w-4 h-4" />
         </button>
@@ -414,7 +415,7 @@ function ResultModal({ result, onClose }: { result: OpenResult; onClose: () => v
             animate={{ opacity: 1 }}
             transition={{ delay: 0.32 }}
             className="text-[12px] font-mono"
-            style={{ color: '#6060a0' }}
+            style={{ color: '#8892a4' }}
           >
             {isSol    ? `≈ $${((result.reward.value as number) * 148).toFixed(0)} USD`  : ""}
             {isXP     ? "Added to your XP balance"   : ""}
@@ -512,13 +513,16 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
       {/* ── Hero ── */}
       <div className="card-hero">
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-          <div>
-            <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">
-              CRATE <span className="glow-accent" style={{ color: '#ff4d00' }}>SHOP</span>
-            </h1>
-            <p className="text-[13px]" style={{ color: '#6060a0' }}>
-              Open crates to win SOL, XP boosts and exclusive cosmetics
-            </p>
+          <div className="flex items-center gap-4">
+            <PremiumIcon icon={Package} tone="#ffd700" size={58} rounded={20} iconSize={30} />
+            <div>
+              <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">
+                CRATE <span className="gold-text-gradient">SHOP</span>
+              </h1>
+              <p className="text-[13px]" style={{ color: '#8892a4' }}>
+                Open crates to win SOL, XP boosts and exclusive cosmetics
+              </p>
+            </div>
           </div>
 
           {/* Level + XP bar */}
@@ -529,10 +533,10 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
                   style={{ background: level.badgeBg, color: level.badgeColor, border: `1px solid ${level.badgeColor}40` }}>
                   {level.name}
                 </div>
-                <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>Lv.{level.id}</span>
+                <span className="text-[11px] font-mono" style={{ color: '#8892a4' }}>Lv.{level.id}</span>
               </div>
               {next && (
-                <span className="text-[11px] font-mono" style={{ color: '#6060a0' }}>
+                <span className="text-[11px] font-mono" style={{ color: '#8892a4' }}>
                   <NumberFlow value={xpIntoLevel} /> / {xpNeeded} XP
                 </span>
               )}
@@ -557,11 +561,11 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
             </div>
 
             {next ? (
-              <p className="text-[10px] font-mono" style={{ color: '#6060a0' }}>
+              <p className="text-[10px] font-mono" style={{ color: '#8892a4' }}>
                 Next: <span style={{ color: next.badgeColor }}>{next.name}</span> — unlocks {next.maxEntrySOL === Infinity ? "unlimited" : next.maxEntrySOL + " SOL"} entry
               </p>
             ) : (
-              <p className="text-[10px] font-mono" style={{ color: '#ff4d00' }}>MAX LEVEL REACHED</p>
+              <p className="text-[10px] font-mono" style={{ color: '#ffd700' }}>MAX LEVEL REACHED</p>
             )}
           </div>
         </div>
@@ -572,7 +576,7 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
         <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
           style={{ background: 'rgba(0,229,255,0.04)', border: '1px solid rgba(0,229,255,0.12)' }}>
           <Shield className="w-4 h-4 flex-shrink-0" style={{ color: '#40d8f0' }} />
-          <p className="text-[12px]" style={{ color: '#6060a0' }}>
+          <p className="text-[12px]" style={{ color: '#8892a4' }}>
             <span className="font-semibold text-white">Provably fair.</span> All odds shown openly. 5 opens/tier/day.
           </p>
         </div>
@@ -603,14 +607,17 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
         <h3 className="font-display text-[22px] text-white tracking-[0.06em] mb-4">HOW CRATES WORK</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { n:"01", t:"Buy a Crate",  d:"Pay SOL to open. Every crate holds a random reward — SOL, XP, or a gameplay boost.", c:"#ff4d00" },
-            { n:"02", t:"All Odds Shown", d:"Every reward's % chance is displayed before you buy. No hidden odds. Verified on-chain.", c:"#a060ff" },
-            { n:"03", t:"Win SOL Back",  d:"Every tier has real SOL rewards. Hit the jackpot and win back 10x your buy-in. Limits keep it fair.", c:"#00d470" },
+            { n:"01", t:"Buy a Crate",  d:"Pay SOL to open. Every crate holds a random reward — SOL, XP, or a gameplay boost.", c:"#ffd700", icon: Package },
+            { n:"02", t:"All Odds Shown", d:"Every reward's % chance is displayed before you buy. No hidden odds. Verified on-chain.", c:"#4da3ff", icon: Eye },
+            { n:"03", t:"Win SOL Back",  d:"Every tier has real SOL rewards. Hit the jackpot and win back 10x your buy-in. Limits keep it fair.", c:"#00e676", icon: TrendingUp },
           ].map(s => (
             <div key={s.n} className="card-sm">
-              <p className="text-[10px] font-mono tracking-[0.1em] mb-1.5" style={{ color: '#30304a' }}>{s.n}</p>
+              <div className="flex items-center gap-3 mb-3">
+                <PremiumIcon icon={s.icon} tone={s.c} size={40} rounded={12} iconSize={20} />
+                <p className="text-[10px] font-mono tracking-[0.18em]" style={{ color: '#4a5060' }}>STEP {s.n}</p>
+              </div>
               <p className="text-[13px] font-bold text-white mb-1.5">{s.t}</p>
-              <p className="text-[11px] leading-relaxed" style={{ color: '#6060a0' }}>{s.d}</p>
+              <p className="text-[11px] leading-relaxed" style={{ color: '#8892a4' }}>{s.d}</p>
             </div>
           ))}
         </div>

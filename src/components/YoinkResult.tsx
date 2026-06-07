@@ -73,7 +73,7 @@ export default function YoinkResult({
           style={{
             background: win
               ? "radial-gradient(ellipse 70% 70% at 50% 45%, rgba(0,229,255,0.10), rgba(2,2,8,0.86) 65%)"
-              : "radial-gradient(ellipse 70% 70% at 50% 45%, rgba(255,77,0,0.10), rgba(2,2,8,0.88) 65%)",
+              : "radial-gradient(ellipse 70% 70% at 50% 45%, rgba(255,23,68,0.10), rgba(2,2,8,0.88) 65%)",
             backdropFilter: "blur(8px)",
           }}
         >
@@ -84,8 +84,8 @@ export default function YoinkResult({
             animate={{ width: 900, height: 900, opacity: 0 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
             style={{
-              border: `2px solid ${win ? "rgba(0,229,255,0.6)" : "rgba(255,77,0,0.6)"}`,
-              boxShadow: `0 0 60px ${win ? "rgba(0,229,255,0.4)" : "rgba(255,77,0,0.4)"}`,
+              border: `2px solid ${win ? "rgba(0,229,255,0.6)" : "rgba(255,23,68,0.6)"}`,
+              boxShadow: `0 0 60px ${win ? "rgba(0,229,255,0.4)" : "rgba(255,23,68,0.4)"}`,
             }}
           />
 
@@ -130,11 +130,11 @@ export default function YoinkResult({
             className="relative z-10 text-center max-w-sm w-full px-8 py-9 rounded-3xl"
             style={{
               background: "rgba(8,8,18,0.92)",
-              border: `1px solid ${win ? "rgba(0,229,255,0.25)" : "rgba(255,77,0,0.3)"}`,
-              borderTop: `2px solid ${win ? "rgba(0,229,255,0.7)" : "rgba(255,77,0,0.8)"}`,
+              border: `1px solid ${win ? "rgba(0,229,255,0.25)" : "rgba(255,23,68,0.3)"}`,
+              borderTop: `2px solid ${win ? "rgba(0,229,255,0.7)" : "rgba(255,23,68,0.8)"}`,
               boxShadow: win
                 ? "0 0 0 1px rgba(0,229,255,0.1), 0 30px 90px rgba(0,0,0,0.7), 0 0 80px rgba(0,229,255,0.12), 0 0 140px rgba(255,210,0,0.06)"
-                : "0 0 0 1px rgba(255,77,0,0.1), 0 30px 90px rgba(0,0,0,0.7), 0 0 80px rgba(255,77,0,0.14)",
+                : "0 0 0 1px rgba(255,23,68,0.1), 0 30px 90px rgba(0,0,0,0.7), 0 0 80px rgba(255,23,68,0.14)",
             }}
           >
             {/* headline */}
@@ -175,19 +175,19 @@ export default function YoinkResult({
                 className="font-display leading-none"
                 style={{
                   fontSize: 76,
-                  color: win ? "#fff" : "#ff7040",
+                  color: win ? "#fff" : "#ff5c7a",
                   textShadow: win
                     ? "0 0 30px rgba(0,229,255,0.7), 0 0 80px rgba(255,210,0,0.35)"
-                    : "0 0 30px rgba(255,77,0,0.6)",
+                    : "0 0 30px rgba(255,23,68,0.6)",
                 }}
               >
-                <span style={{ fontSize: 40, verticalAlign: "middle", color: win ? "#00e5ff" : "#ff7040" }}>
+                <span style={{ fontSize: 40, verticalAlign: "middle", color: win ? "#00e5ff" : "#ff5c7a" }}>
                   {win ? "+" : "−"}
                 </span>
                 {val.toFixed(3)}
               </div>
               <div className="font-mono text-[12px] uppercase tracking-[0.3em] mt-1"
-                style={{ color: win ? "#40d8f0" : "#ff7040" }}>
+                style={{ color: win ? "#40d8f0" : "#ff5c7a" }}>
                 SOL {win ? "STOLEN" : "FEE"}
               </div>
             </div>
@@ -206,7 +206,7 @@ export default function YoinkResult({
                   {win ? "Fee paid" : "Next-shot odds"}
                 </p>
                 <p className="font-mono text-[15px] font-bold mt-0.5"
-                  style={{ color: win ? "#ff7040" : "#00d470" }}>
+                  style={{ color: win ? "#ff5c7a" : "#00d470" }}>
                   {win ? `−${data.fee.toFixed(3)}` : data.pityNext ? `${data.pityNext}%↑` : "—"}
                 </p>
               </div>

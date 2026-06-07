@@ -62,7 +62,7 @@ export default function ReferralDashboard({ wallet, player }: Props){
     <div className="space-y-6">
       <div className="card-hero">
         <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">REFERRALS</h1>
-        <p className="text-[13px]" style={{color:'#6060a0'}}>Earn 1% of every bet your referrals make — forever, auto-paid to your wallet</p>
+        <p className="text-[13px]" style={{color:'#8892a4'}}>Earn 1% of every bet your referrals make — forever, auto-paid to your wallet</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -70,7 +70,7 @@ export default function ReferralDashboard({ wallet, player }: Props){
           <motion.div key={s.n} whileHover={{y:-3}} className="card-sm text-center">
             <div className="text-[10px] font-mono tracking-[0.1em] mb-2" style={{color:'#30304a'}}>{s.n}</div>
             <div className="text-[14px] font-bold text-white mb-0.5">{s.t}</div>
-            <div className="text-[11px]" style={{color:'#6060a0'}}>{s.d}</div>
+            <div className="text-[11px]" style={{color:'#8892a4'}}>{s.d}</div>
           </motion.div>
         ))}
       </div>
@@ -82,19 +82,19 @@ export default function ReferralDashboard({ wallet, player }: Props){
             <p className="font-display text-[32px] leading-none" style={{color:s.color}}>
               <NumberFlow value={s.val} format={s.fmt}/>
             </p>
-            <p className="text-[11px] font-mono mt-1" style={{color:'#6060a0'}}>{s.unit}</p>
+            <p className="text-[11px] font-mono mt-1" style={{color:'#8892a4'}}>{s.unit}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="card-flat space-y-4">
         <h3 className="text-[14px] font-bold text-white flex items-center gap-2">
-          <Users className="w-4 h-4" style={{color:'#ff4d00'}}/>
+          <Users className="w-4 h-4" style={{color:'#ffd700'}}/>
           Your Referral Link
         </h3>
         <div className="flex gap-2">
           <div className="flex-1 rounded-xl px-4 py-3 font-mono text-[12px] truncate"
-            style={{background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',color:'#6060a0'}}>
+            style={{background:'rgba(255,255,255,0.025)',border:'1px solid rgba(255,255,255,0.07)',color:'#8892a4'}}>
             {link}
           </div>
           <motion.button whileHover={{scale:1.05}} whileTap={{scale:0.95}} onClick={copy} className="btn-ghost"
@@ -111,7 +111,7 @@ export default function ReferralDashboard({ wallet, player }: Props){
 
       <div className="card-flat overflow-hidden p-0">
         <div className="px-5 py-4 flex items-center justify-between" style={{borderBottom:'1px solid rgba(255,255,255,0.05)'}}>
-          <h3 className="text-[13px] font-semibold text-white">Your Referrals ({refs.length}){loading && <span className="text-[11px] font-normal ml-2" style={{color:'#6060a0'}}>loading...</span>}</h3>
+          <h3 className="text-[13px] font-semibold text-white">Your Referrals ({refs.length}){loading && <span className="text-[11px] font-normal ml-2" style={{color:'#8892a4'}}>loading...</span>}</h3>
           <span className="text-[11px]" style={{color:'#30304a'}}>Connect wallet for live data</span>
         </div>
         <div className="overflow-x-auto">
@@ -129,7 +129,7 @@ export default function ReferralDashboard({ wallet, player }: Props){
                 <motion.tr key={i} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*0.05}}
                   style={{borderBottom:'1px solid rgba(255,255,255,0.03)'}} className="hover:bg-white/1 transition-colors">
                   <td className="px-4 py-3 font-mono font-medium text-white">{r.wallet}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell" style={{color:'#6060a0'}}>{r.joined}</td>
+                  <td className="px-4 py-3 hidden sm:table-cell" style={{color:'#8892a4'}}>{r.joined}</td>
                   <td className="px-4 py-3 font-mono" style={{color:'#40d8f0'}}>{r.vol.toFixed(1)}</td>
                   <td className="px-4 py-3 font-mono font-semibold" style={{color:'#00d470'}}>+{r.earned.toFixed(3)}</td>
                   <td className="px-4 py-3 hidden sm:table-cell">

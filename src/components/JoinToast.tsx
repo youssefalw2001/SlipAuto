@@ -24,9 +24,9 @@ const ACTIONS = [
   { text: "opened a Rare Crate",               color: "#00d470" },
   { text: "reached PREDATOR level",            color: "#a060ff" },
   { text: "entered with 2.0 SOL",              color: "#00d470" },
-  { text: "just got yoinked for 0.8 SOL",      color: "#ff4d00" },
+  { text: "just got yoinked for 0.8 SOL",      color: "#ffd700" },
   { text: "won the Swap Wheel — +3.4 SOL",     color: "#ffd200" },
-  { text: "opened a Legendary Crate",          color: "#ff4d00" },
+  { text: "opened a Legendary Crate",          color: "#ffd700" },
   { text: "entered the arena with 1.0 SOL",    color: "#00d470" },
   { text: "just hit a BOUNTY for +4.1 SOL",    color: "#ffd200" },
 ];

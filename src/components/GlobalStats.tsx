@@ -46,7 +46,7 @@ export default function GlobalStats() {
             <span className="font-mono text-[11px] font-bold" style={{ color: '#00d470' }}>
               <NumberFlow value={players} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>online</span>
+            <span className="text-[11px]" style={{ color: '#8892a4' }}>online</span>
           </div>
 
           {/* Active rooms */}
@@ -54,7 +54,7 @@ export default function GlobalStats() {
             <span className="text-[11px] font-mono font-bold text-white">
               <NumberFlow value={rooms} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>active rooms</span>
+            <span className="text-[11px]" style={{ color: '#8892a4' }}>active rooms</span>
           </div>
 
           {/* SOL stolen/min */}
@@ -62,7 +62,7 @@ export default function GlobalStats() {
             <span className="font-mono text-[11px] font-bold" style={{ color: '#ff7040' }}>
               <NumberFlow value={stolenPm} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} />
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>SOL stolen/min</span>
+            <span className="text-[11px]" style={{ color: '#8892a4' }}>SOL stolen/min</span>
           </div>
 
           {/* All-time wagered */}
@@ -70,7 +70,7 @@ export default function GlobalStats() {
             <span className="font-mono text-[11px] font-bold text-white">
               ${<NumberFlow value={wagered} />}
             </span>
-            <span className="text-[11px]" style={{ color: '#6060a0' }}>wagered all time</span>
+            <span className="text-[11px]" style={{ color: '#8892a4' }}>wagered all time</span>
           </div>
         </div>
       </div>
