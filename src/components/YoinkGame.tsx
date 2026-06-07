@@ -322,7 +322,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
           </div>
 
           {/* Wallet grid */}
-          <div className={`grid grid-cols-2 sm:grid-cols-3 gap-2.5 ${shaking ? 'screen-shake' : ''}`}>
+          <div className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 ${shaking ? 'screen-shake' : ''}`}>
             {players.map(p => {
               const pct      = (p.balance / maxBal) * 100;
               const isT      = target === p.id;
@@ -331,7 +331,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               const isKing   = p.isBounty && !p.isYou;
               const isPred   = !isKing && p.balance >= 1.5 && !p.isYou;
               const isCommon = !isKing && !isPred && p.balance >= 0.5 && !p.isYou;
-              const tierClass = p.isYou ? "is-you" : isKing ? "wc-king neon-pulse-king" : isPred ? "wc-predator neon-pulse-pred" : isCommon ? "wc-common" : "wc-dust";
+              const tierClass = p.isYou ? "is-you" : isKing ? "wc-king" : isPred ? "wc-predator" : isCommon ? "wc-common" : "wc-dust";
               const balColor  = p.hit ? '#ff4d00' : p.isYou ? '#00e5ff' : isKing ? '#ffd200' : isPred ? '#a060ff' : isCommon ? '#00d470' : '#a0a0c0';
               const barColor  = p.isYou ? 'linear-gradient(90deg,#00e5ff,#7000ff)' : isKing ? 'linear-gradient(90deg,#ffd200,#ff4d00)' : isPred ? 'linear-gradient(90deg,#a060ff,#00e5ff)' : isCommon ? 'linear-gradient(90deg,#00e87a,#00c8e8)' : '#30304a';
               const stealAmt  = isKing ? parseFloat((p.balance * 0.9).toFixed(3)) : parseFloat((p.balance * 0.5).toFixed(3));
@@ -370,7 +370,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                         <rect width="100%" height="100%" fill={`url(#pd-${p.id})`} rx="14" />
                       </svg>
                       {/* Floating predator icon */}
-                      <span className="absolute top-2 right-2 text-[18px] opacity-15 pointer-events-none float">
+                      <span className="absolute top-2 right-2 text-[22px] opacity-20 pointer-events-none float" style={{ filter: 'drop-shadow(0 0 4px rgba(160,96,255,0.4))' }}>
                         {p.id % 3 === 0 ? '🦈' : p.id % 3 === 1 ? '🐺' : '🐻'}
                       </span>
                     </>
@@ -378,7 +378,7 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
 
                   {/* Tier particles */}
                   {isPred && <><span className="spark" /><span className="spark" /><span className="spark" /><span className="spark" /></>}
-                  {isKing && <><span className="flame" /><span className="flame" /><span className="flame" /><span className="flame" /></>}
+                  {isKing && <><span className="flame" /><span className="flame" /><span className="flame" /><span className="flame" /><span className="flame" /></>}
 
                   {/* Bounty label */}
                   {isKing && (

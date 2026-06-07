@@ -93,22 +93,22 @@ function CrateCard({
       className="relative flex flex-col rounded-2xl overflow-hidden"
       style={{
         background: locked
-          ? '#0c0c1a'
-          : `linear-gradient(160deg, ${crate.color}0d 0%, #0c0c1a 50%, ${crate.color}06 100%)`,
-        border: `1px solid ${locked ? 'rgba(255,255,255,0.06)' : crate.color + '35'}`,
-        borderTop: `2px solid ${locked ? 'rgba(255,255,255,0.06)' : crate.color}`,
-        boxShadow: locked ? 'none' : `0 8px 40px ${crate.glowColor}, 0 2px 0 ${crate.color}20 inset`,
-        opacity: locked ? 0.55 : 1,
-        backdropFilter: !locked ? 'blur(12px)' : undefined,
+          ? '#0a0a18'
+          : `linear-gradient(160deg, ${crate.color}12 0%, #0a0a18 40%, ${crate.color}08 100%)`,
+        border: `1px solid ${locked ? 'rgba(255,255,255,0.04)' : crate.color + '40'}`,
+        borderTop: `2px solid ${locked ? 'rgba(255,255,255,0.04)' : crate.color}`,
+        boxShadow: locked ? 'none' : `0 12px 50px ${crate.glowColor}, 0 0 80px ${crate.glowColor}40, 0 2px 0 ${crate.color}20 inset`,
+        opacity: locked ? 0.5 : 1,
+        backdropFilter: !locked ? 'blur(16px)' : undefined,
       }}
     >
-      {/* God Ray for legendary */}
-      {isLegendary && !locked && <div className="god-ray" />}
+      {/* God Ray for legendary — always spinning */}
+      {isLegendary && !locked && <div className="god-ray" style={{ opacity: 0.8 }} />}
 
       {/* Glassmorphism overlay */}
       {!locked && (
         <div className="absolute inset-0 pointer-events-none rounded-2xl"
-          style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)' }} />
+          style={{ background: 'rgba(255,255,255,0.015)', backdropFilter: 'blur(24px)' }} />
       )}
       {/* Shimmer sweep on hover */}
       {!locked && (
@@ -148,8 +148,10 @@ function CrateCard({
 
         {/* Crate icon + price side by side */}
         <div className="flex items-center gap-4 mb-5">
-          <div className="relative">
-            <CrateIcon color={locked ? '#40406a' : crate.color} size={60} pulse={!locked && !isOpening} />
+          <div className="relative" style={{ perspective: '400px' }}>
+            <div style={{ transform: locked ? 'none' : 'rotateY(-8deg) rotateX(5deg)', transition: 'transform 0.3s' }}>
+              <CrateIcon color={locked ? '#40406a' : crate.color} size={64} pulse={!locked && !isOpening} />
+            </div>
             {isOpening && (
               <motion.div
                 animate={{ rotate: 360 }}
@@ -157,6 +159,11 @@ function CrateCard({
                 className="absolute inset-0 rounded-2xl border-2 border-t-transparent"
                 style={{ borderColor: `${crate.color}60`, borderTopColor: 'transparent' }}
               />
+            )}
+            {/* Glow under crate */}
+            {!locked && (
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-12 h-3 rounded-full"
+                style={{ background: `radial-gradient(ellipse, ${crate.color}40 0%, transparent 70%)`, filter: 'blur(4px)' }} />
             )}
           </div>
           <div>
@@ -222,8 +229,8 @@ function CrateCard({
               ? 'rgba(255,255,255,0.04)'
               : `linear-gradient(135deg, ${crate.color} 0%, ${crate.color}cc 100%)`,
             color: locked || atLimit ? '#40406a' : 'white',
-            boxShadow: !locked && !atLimit ? `0 4px 24px ${crate.glowColor}, inset 0 1px 0 rgba(255,255,255,0.15)` : 'none',
-            border: locked || atLimit ? '1px solid rgba(255,255,255,0.07)' : 'none',
+            boxShadow: !locked && !atLimit ? `0 4px 28px ${crate.glowColor}, 0 0 60px ${crate.glowColor}60, inset 0 1px 0 rgba(255,255,255,0.2)` : 'none',
+            border: locked || atLimit ? '1px solid rgba(255,255,255,0.06)' : 'none',
           }}
         >
           {isOpening ? (
@@ -328,10 +335,10 @@ function ResultModal({ result, onClose }: { result: OpenResult; onClose: () => v
         transition={{ type: "spring", stiffness: 320, damping: 24 }}
         className="w-full max-w-sm rounded-2xl overflow-hidden relative"
         style={{
-          background: `linear-gradient(160deg, ${result.crate.color}12 0%, #0c0c1a 50%)`,
-          border: `1px solid ${result.crate.color}40`,
+          background: `linear-gradient(160deg, ${result.crate.color}15 0%, #0a0a18 50%)`,
+          border: `1px solid ${result.crate.color}50`,
           borderTop: `2px solid ${result.crate.color}`,
-          boxShadow: `0 0 80px ${result.crate.glowColor}, 0 0 120px ${result.crate.glowColor}`,
+          boxShadow: `0 0 80px ${result.crate.glowColor}, 0 0 160px ${result.crate.glowColor}80, 0 0 200px ${result.crate.glowColor}40`,
         }}
       >
         {/* Rainbow top line */}
@@ -507,7 +514,7 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">
-              CRATE SHOP
+              CRATE <span className="glow-accent" style={{ color: '#ff4d00' }}>SHOP</span>
             </h1>
             <p className="text-[13px]" style={{ color: '#6060a0' }}>
               Open crates to win SOL, XP boosts and exclusive cosmetics
