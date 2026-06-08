@@ -4,6 +4,7 @@ import { AlertCircle, ArrowUpRight, Crown, DoorOpen, Flame, Lock, Shield, Skull,
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
+import { useArenaPool } from "../lib/useArenaPool";
 import RoomSystem from "./RoomSystem";
 import YoinkResult, { type YoinkResultData } from "./YoinkResult";
 
@@ -59,6 +60,8 @@ function fireCelebration() {
 interface Props { xp: number; onXPGain: (xp: number, reason?: string) => void; levelId: number; wallet: string | null; }
 
 export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
+  const { deposit, requestPayout, isLoading: poolLoading, poolBalance } = useArenaPool();
+
   const [players, setPlayers]       = useState<Player[]>(SEED);
   const [myBal, setMyBal]           = useState(0);
   const [entryAmount, setEntryAmount] = useState(0); // what they entered with
@@ -131,16 +134,25 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
   const sessionPnL = sessionWins - sessionLosses;
   const sessionPnLColor = sessionPnL > 0 ? "#00d470" : sessionPnL < 0 ? "#ff7040" : "#8892a4";
 
-  const join = () => {
+  const join = async () => {
     const v = parseFloat(stake);
     if (isNaN(v) || v < 0.05) return;
+    if (!wallet) { toast.error("Connect your wallet first"); return; }
+
+    // ── Real SOL deposit — 10% rake + 90% pool ──
+    const ok = await deposit(v);
+    if (!ok) {
+      toast.error("Transaction failed or cancelled");
+      return;
+    }
+
     setJoined(true);
     setMyBal(v);
     setEntryAmount(v);
     setSessionWins(0);
     setSessionLosses(0);
     uid++;
-    setPlayers(prev => [...prev, { id: uid, wallet: "You", balance: v, isYou: true, levelId, isBounty: v >= BOUNTY_THRESHOLD }]);
+    setPlayers(prev => [...prev, { id: uid, wallet: wallet ?? "You", balance: v, isYou: true, levelId, isBounty: v >= BOUNTY_THRESHOLD }]);
     onXPGain(XP_REWARDS.ENTER_ARENA, "enter_arena");
     toast.success(`Entered arena with ${v} SOL`);
   };
@@ -149,7 +161,11 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
     const myPlayer = players.find(p => p.isYou);
     const remaining = myPlayer?.balance ?? 0;
     if (remaining > 0.01) {
-      toast.success(`Left arena. ${remaining.toFixed(3)} SOL returned to your wallet.`);
+      // ── Request return of remaining balance ──
+      if (wallet) {
+        requestPayout(wallet, parseFloat(remaining.toFixed(3)), "leave").catch(console.error);
+      }
+      toast.success(`Left arena. ${remaining.toFixed(3)} SOL being returned to your wallet.`);
     } else {
       toast(`Left arena.`);
     }
@@ -203,6 +219,10 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
         setFlash("win"); setTimeout(() => setFlash(null), 600);
         setShaking(true); setTimeout(() => setShaking(false), 400);
         fireCelebration();
+        // ── Request real SOL payout to winner's wallet ──
+        if (wallet) {
+          requestPayout(wallet, parseFloat((gain - fee).toFixed(3)), "win").catch(console.error);
+        }
         setResult({
           type: "win",
           amount: gain,
@@ -649,8 +669,11 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                 </div>
               </div>
 
-              <button onClick={join} className="btn-yoink w-full">
-                <Zap className="w-4 h-4" /> ENTER — {stake} SOL
+              <button onClick={join} disabled={poolLoading} className="btn-yoink w-full">
+                {poolLoading
+                  ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />CONFIRMING...</>
+                  : <><Zap className="w-4 h-4" /> ENTER — {stake} SOL</>
+                }
               </button>
               <p className="text-[10px] text-center" style={{ color: '#30304a' }}>
                 You can leave the arena at any time to recover your remaining balance.
