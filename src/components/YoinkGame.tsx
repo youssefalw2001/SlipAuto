@@ -33,18 +33,8 @@ function predatorIcon(wallet: string) {
   return PREDATOR_ICONS[hashWallet(wallet) % PREDATOR_ICONS.length];
 }
 
-// ── Arena grid entrance — spring stagger, cards slam in ──
-const arenaGrid = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } },
-};
-const arenaCard = {
-  hidden: { opacity: 0, y: 20, scale: 0.92, filter: "blur(4px)" },
-  show: {
-    opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
-    transition: { type: "spring" as const, stiffness: 260, damping: 22 },
-  },
-};
+// ── Arena grid: CSS stagger entrance, no Framer overhead ──
+// Cards use .arena-grid-item class with nth-child animation-delay in CSS.
 const BOUNTY_THRESHOLD = 3.0;
 const MAX_DAILY_LOSS   = 10; // SOL — protection cap
 const MIN_BALANCE_PROTECTION = 0.05; // can't be yoinked below this
@@ -374,12 +364,10 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
             </div>
           </div>
 
-          {/* Wallet grid */}
-          <motion.div
-            variants={arenaGrid}
-            initial="hidden"
-            animate="show"
+          {/* Wallet grid — CSS stagger, promoted compositor layer */}
+          <div
             className={`grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 ${shaking ? 'screen-shake' : ''}`}
+            style={{ willChange: 'transform' }}
           >
             {players.map(p => {
               const pct      = (p.balance / maxBal) * 100;
@@ -397,13 +385,12 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
               const isProtected = !p.isYou && p.balance <= MIN_BALANCE_PROTECTION;
 
               return (
-                <motion.div key={p.id}
-                  variants={arenaCard}
+                <div key={p.id}
+                  className={`wallet-card arena-grid-item relative ${tierClass} ${isT ? "targeted" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou || isProtected) ? "!cursor-default" : ""}`}
+                  style={{ marginTop: isKing ? '12px' : undefined }}
                   onClick={() => !p.isYou && !isProtected && joined && setTarget(isT ? null : p.id)}
                   onMouseEnter={() => !p.isYou && joined && showTooltip(p.id)}
                   onMouseLeave={hideTooltip}
-                  className={`wallet-card relative ${tierClass} ${isT ? "targeted" : ""} ${p.hit ? "hit" : ""} ${(!joined || p.isYou || isProtected) ? "!cursor-default" : ""}`}
-                  style={{ marginTop: isKing ? '12px' : undefined }}
                 >
                   {/* SVG tier background — GPU safe, no layout impact */}
                   {isKing && (
@@ -518,10 +505,10 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
                       {c}% chance
                     </p>
                   )}
-                </motion.div>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
 
         {/* Action panel */}
