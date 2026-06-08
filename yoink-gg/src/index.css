@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: #ff4d00;
+    --color-secondary: #00e5ff;
+    --color-accent: #7000ff;
+    --color-success: #00e87a;
+    --color-obsidian: #04040a;
+  }
+
+  body {
+    background: radial-gradient(ellipse at 50% 0%, #000a1a 0%, #04040a 70%);
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #04040a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ffffff20;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #ffffff40;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+  }
+
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-xl;
+  }
+
+  .text-gradient-fire {
+    @apply bg-gradient-to-r from-primary via-yellow-500 to-primary bg-clip-text text-transparent;
+  }
+
+  .text-gradient-cyber {
+    @apply bg-gradient-to-r from-secondary via-accent to-secondary bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply relative overflow-hidden px-6 py-3 bg-primary text-white font-display text-lg tracking-wider rounded-lg
+           hover:shadow-neon-orange transition-all duration-300 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply relative overflow-hidden px-6 py-3 border border-secondary text-secondary font-display text-lg tracking-wider rounded-lg
+           hover:shadow-neon-cyan hover:bg-secondary/10 transition-all duration-300 active:scale-95;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+}
