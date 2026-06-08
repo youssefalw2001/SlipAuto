@@ -22,40 +22,62 @@ function fireJackpot() {
   confetti({ ...o, particleCount: 80,  origin: { x: 0.5, y: 0.5  }, colors: ['#ffd700','#ffd200','#fff'] });
 }
 
-/* ── SVG crate icons per tier ── */
+/* ── Premium 3D SVG crate icon ── */
 function CrateIcon({ color, size = 64, pulse = false }: { color: string; size?: number; pulse?: boolean }) {
+  const id = color.replace("#", "c");
   return (
     <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
       {pulse && (
         <motion.div
-          animate={{ scale: [1, 1.22, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 rounded-2xl"
-          style={{ background: `radial-gradient(circle, ${color}50, transparent)` }}
+          animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${color}55, transparent 70%)` }}
         />
       )}
       <svg width={size} height={size} viewBox="0 0 64 64" fill="none">
-        {/* Box body */}
-        <rect x="8" y="22" width="48" height="36" rx="5"
-          fill={`${color}18`} stroke={color} strokeWidth="1.5" />
-        {/* Box lid */}
-        <rect x="5" y="16" width="54" height="10" rx="4"
-          fill={`${color}28`} stroke={color} strokeWidth="1.5" />
-        {/* Ribbon vertical */}
-        <rect x="29" y="16" width="6" height="42" rx="1"
-          fill={color} opacity="0.7" />
-        {/* Ribbon horizontal */}
-        <rect x="5" y="19" width="54" height="4" rx="1"
-          fill={color} opacity="0.7" />
-        {/* Bow left */}
-        <path d="M32 16 C28 8 18 8 20 14 C22 18 30 17 32 16Z"
-          fill={color} opacity="0.9" />
-        {/* Bow right */}
-        <path d="M32 16 C36 8 46 8 44 14 C42 18 34 17 32 16Z"
-          fill={color} opacity="0.9" />
-        {/* Shine */}
-        <rect x="12" y="26" width="6" height="24" rx="3"
-          fill="white" opacity="0.07" />
+        <defs>
+          {/* Face gradients for 3D illusion */}
+          <linearGradient id={`front-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.38" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.14" />
+          </linearGradient>
+          <linearGradient id={`top-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.55" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.25" />
+          </linearGradient>
+          <linearGradient id={`side-${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.08" />
+          </linearGradient>
+          <filter id={`glow-${id}`}>
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        {/* ── ISO 3D box ── */}
+        {/* Right face (darker) */}
+        <path d="M36 22 L52 30 L52 50 L36 42 Z" fill={`url(#side-${id})`} stroke={color} strokeWidth="1" strokeOpacity="0.5" />
+        {/* Front face */}
+        <path d="M14 30 L36 22 L36 42 L14 50 Z" fill={`url(#front-${id})`} stroke={color} strokeWidth="1" strokeOpacity="0.6" />
+        {/* Top face (brightest) */}
+        <path d="M14 30 L30 22 L52 30 L36 38 Z" fill={`url(#top-${id})`} stroke={color} strokeWidth="1" strokeOpacity="0.7" />
+
+        {/* Ribbon — front */}
+        <path d="M24 30 L24 50" stroke={color} strokeWidth="3" strokeOpacity="0.8" strokeLinecap="round" />
+        {/* Ribbon — top */}
+        <path d="M24 30 L38 24" stroke={color} strokeWidth="3" strokeOpacity="0.8" strokeLinecap="round" />
+
+        {/* Bow */}
+        <path d="M24 30 C20 22 10 22 12 27 C14 31 22 30 24 30 Z" fill={color} opacity="0.9" filter={`url(#glow-${id})`} />
+        <path d="M24 30 C28 22 38 22 36 27 C34 31 26 30 24 30 Z" fill={color} opacity="0.9" filter={`url(#glow-${id})`} />
+
+        {/* Specular highlight on top face */}
+        <ellipse cx="26" cy="27" rx="5" ry="2.5" fill="white" opacity="0.14" transform="rotate(-20,26,27)" />
+
+        {/* Ground shadow */}
+        <ellipse cx="33" cy="52" rx="16" ry="3" fill={color} opacity="0.12" />
       </svg>
     </div>
   );
@@ -89,18 +111,19 @@ function CrateCard({
 
   return (
     <motion.div
-      whileHover={!locked ? { y: -6, scale: 1.015 } : {}}
-      transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      whileHover={!locked ? { y: -8, scale: 1.02 } : {}}
+      transition={{ type: "spring", stiffness: 280, damping: 22 }}
       className="relative flex flex-col rounded-2xl overflow-hidden"
       style={{
         background: locked
-          ? '#0a0a18'
-          : `linear-gradient(160deg, ${crate.color}12 0%, #0a0a18 40%, ${crate.color}08 100%)`,
-        border: `1px solid ${locked ? 'rgba(255,255,255,0.04)' : crate.color + '40'}`,
-        borderTop: `2px solid ${locked ? 'rgba(255,255,255,0.04)' : crate.color}`,
-        boxShadow: locked ? 'none' : `0 12px 50px ${crate.glowColor}, 0 0 80px ${crate.glowColor}40, 0 2px 0 ${crate.color}20 inset`,
+          ? "#0a0a14"
+          : `linear-gradient(160deg, ${crate.color}14 0%, #080a12 40%, ${crate.color}08 100%)`,
+        border: `1px solid ${locked ? "rgba(255,255,255,0.04)" : crate.color + "42"}`,
+        borderTop: `2px solid ${locked ? "rgba(255,255,255,0.04)" : crate.color}`,
+        boxShadow: locked
+          ? "none"
+          : `0 16px 60px ${crate.glowColor}, 0 0 100px ${crate.glowColor}50, inset 0 1px 0 rgba(255,255,255,0.07)`,
         opacity: locked ? 0.5 : 1,
-        backdropFilter: !locked ? 'blur(16px)' : undefined,
       }}
     >
       {/* God Ray for legendary — always spinning */}
@@ -511,16 +534,42 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
     <div className="space-y-7">
 
       {/* ── Hero ── */}
-      <div className="card-hero">
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
+        className="relative overflow-hidden rounded-3xl"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,215,0,0.10) 0%, rgba(8,10,17,0.92) 45%, rgba(0,245,255,0.05) 100%)",
+          border: "1px solid rgba(255,215,0,0.22)",
+          borderTop: "2px solid rgba(255,215,0,0.55)",
+          boxShadow: "0 12px 60px rgba(0,0,0,0.5), 0 0 80px rgba(255,215,0,0.06)",
+          padding: "28px 32px",
+        }}>
+        {/* Ambient glow */}
+        <div className="absolute top-0 left-0 w-80 h-full pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 80% 80% at 0% 50%, rgba(255,215,0,0.08), transparent)" }} />
+        <div className="absolute inset-0 pointer-events-none opacity-25"
+          style={{ background: "repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px)" }} />
+
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <PremiumIcon icon={Package} tone="#ffd700" size={58} rounded={20} iconSize={30} />
+            <div className="relative">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                style={{ background: `conic-gradient(from 0deg, rgba(255,215,0,0.3), rgba(255,215,0,0), rgba(255,215,0,0.3))` }}
+              />
+              <PremiumIcon icon={Package} tone="#ffd700" size={58} rounded={20} iconSize={30} />
+            </div>
             <div>
-              <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1">
+              <h1 className="font-display text-[52px] leading-none text-white tracking-[0.06em] mb-1"
+                style={{ textShadow: "0 0 40px rgba(255,255,255,0.1)" }}>
                 CRATE <span className="gold-text-gradient">SHOP</span>
               </h1>
-              <p className="text-[13px]" style={{ color: '#8892a4' }}>
-                Open crates to win SOL, XP boosts and exclusive cosmetics
+              <p className="text-[13px]" style={{ color: "#8892a4" }}>
+                Open crates · Win SOL · Climb the ranks
               </p>
             </div>
           </div>
@@ -569,7 +618,7 @@ export default function CrateShop({ xp, levelId, onXPGain, wallet }: Props) {
             )}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Info bar ── */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">

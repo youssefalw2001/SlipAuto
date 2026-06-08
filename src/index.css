@@ -1,3 +1,6 @@
+@import '@fontsource/orbitron/400.css';
+@import '@fontsource/orbitron/700.css';
+@import '@fontsource/orbitron/900.css';
 @import '@fontsource/space-grotesk/400.css';
 @import '@fontsource/space-grotesk/500.css';
 @import '@fontsource/space-grotesk/700.css';
@@ -32,7 +35,7 @@
   --color-y-green:    #00e676;
   --color-y-yellow:   #ffd200;
   --color-y-pink:     #ff1744;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-display: 'Orbitron', 'Space Grotesk', system-ui, sans-serif;
   --font-sans:    'Space Grotesk', system-ui, sans-serif;
   --font-mono:    'JetBrains Mono', 'Geist Mono', monospace;
 }
@@ -50,36 +53,64 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Premium scene — Koinara gold + blue depth ── */
+/* ── Premium aurora scene — deep OLED + animated colour pools ── */
 body::before {
   content: '';
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(900px 480px at 50% -12%, rgba(77,163,255,0.18) 0%, transparent 60%),
-    radial-gradient(620px 420px at 95% 6%, rgba(255,215,0,0.12) 0%, transparent 58%),
-    radial-gradient(640px 420px at 5% 72%, rgba(0,245,255,0.05) 0%, transparent 55%),
-    linear-gradient(180deg, #090911 0%, #06070d 50%, #030409 100%);
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(112,0,255,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 95% 5%,  rgba(255,215,0,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 5%  80%, rgba(0,245,255,0.08) 0%, transparent 52%),
+    radial-gradient(ellipse 60% 40% at 80% 95%, rgba(255,23,68,0.08)  0%, transparent 50%),
+    linear-gradient(180deg, #08080f 0%, #05060b 55%, #030408 100%);
+}
+
+/* Aurora animation — subtle shifting colour pools */
+@keyframes auroraShift {
+  0%,100% { opacity: 1; transform: scale(1) translate(0,0); }
+  33%     { opacity: 0.8; transform: scale(1.08) translate(-1%, 2%); }
+  66%     { opacity: 0.9; transform: scale(0.96) translate(1%, -1%); }
+}
+body::after {
+  content: '';
+  position: fixed; inset: -10%; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 50% 35% at 20% 25%, rgba(112,0,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 30% at 75% 70%, rgba(255,215,0,0.09) 0%, transparent 60%);
+  animation: auroraShift 18s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 #root { position: relative; z-index: 1; }
 
 /* ============================================================
-   CINEMATIC FX LAYERS — the "expensive" difference
-   Film grain + vignette kill the flat "AI gradient" look and
-   add real depth. These sit over the scene, under modals.
+   CINEMATIC FX LAYERS
+   Vignette + scanlines + film grain — three separate passes
+   that together create a premium "real screen" feeling.
    ============================================================ */
 .fx-vignette {
   position: fixed; inset: 0; pointer-events: none; z-index: 1;
   background:
-    radial-gradient(ellipse 92% 78% at 50% 38%, transparent 48%, rgba(0,0,0,0.42) 86%, rgba(0,0,0,0.6) 100%);
+    radial-gradient(ellipse 92% 78% at 50% 38%, transparent 42%, rgba(0,0,0,0.5) 82%, rgba(0,0,0,0.72) 100%);
+}
+/* Scanlines — ultra-subtle horizontal lines, no perf cost */
+.fx-scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+  opacity: 0.4;
 }
 .fx-grain {
   position: fixed; inset: 0; pointer-events: none; z-index: 55;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
 }
-/* Mobile: drop grain entirely — biggest win on low-power GPUs */
-@media (max-width: 640px) { .fx-grain { display: none; } }
+@media (max-width: 640px) { .fx-grain, .fx-scanlines { display: none; } }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -90,7 +121,7 @@ body::before {
 .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
 
 /* ── Typography ── */
-.font-display { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+.font-display { font-family: 'Orbitron', 'Space Grotesk', system-ui, sans-serif; font-weight: 700; letter-spacing: 0.05em; }
 .font-mono    { font-family: 'JetBrains Mono', monospace; }
 
 /* ============================================================
@@ -337,29 +368,45 @@ body::before {
 
 /* ── Targeted state ── */
 .wallet-card.targeted {
-  border-color: var(--color-y-accent) !important;
-  border-top-color: var(--color-y-accent) !important;
-  background: rgba(255,77,0,0.08) !important;
-  transform: translateY(-4px) scale(1.03) !important;
+  border-color: #ffd700 !important;
+  border-top-color: #ffe266 !important;
+  background: rgba(255,215,0,0.07) !important;
+  transform: translateY(-5px) scale(1.04) !important;
   box-shadow:
-    0 0 0 2px rgba(255,77,0,0.3),
-    0 0 30px rgba(255,77,0,0.25),
-    0 16px 48px rgba(255,77,0,0.15) !important;
+    0 0 0 2px rgba(255,215,0,0.25),
+    0 0 40px rgba(255,215,0,0.2),
+    0 20px 50px rgba(0,0,0,0.4) !important;
+}
+
+/* ── Scanning pulse — while yoink is processing ── */
+.wallet-card.scanning {
+  animation: scanPulse 0.6s ease-in-out infinite;
+}
+@keyframes scanPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+  50%     { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
 }
 
 /* ── Hit shake ── */
 .wallet-card.hit {
   animation: hitShake 0.45s ease;
-  border-color: rgba(255,0,102,0.6) !important;
-  background: rgba(255,0,102,0.08) !important;
+  border-color: rgba(255,23,68,0.6) !important;
+  background: rgba(255,23,68,0.08) !important;
 }
 @keyframes hitShake {
   0%,100% { transform: translateX(0); }
-  20%     { transform: translateX(-6px) rotate(-1.5deg); }
-  40%     { transform: translateX(6px) rotate(1.5deg); }
-  60%     { transform: translateX(-4px); }
-  80%     { transform: translateX(4px); }
+  20%     { transform: translateX(-8px) rotate(-2deg); }
+  40%     { transform: translateX(8px) rotate(2deg); }
+  60%     { transform: translateX(-5px) rotate(-1deg); }
+  80%     { transform: translateX(5px) rotate(1deg); }
 }
+
+/* ── 3D tilt container (applied to wallet-card parent grid for hover depth) ── */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease;
+}
+.tilt-card:hover { transform: perspective(600px) rotateX(-2deg) rotateY(2deg) scale(1.03); }
 
 /* is-you state */
 .wallet-card.is-you {
@@ -651,13 +698,69 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ── Screen Shake — big impact ── */
 @keyframes screenShake {
   0%,100% { transform: translate(0); }
-  10%     { transform: translate(-5px, 3px); }
-  30%     { transform: translate(5px, -3px); }
-  50%     { transform: translate(-3px, 5px); }
-  70%     { transform: translate(3px, -5px); }
-  90%     { transform: translate(-2px, 1px); }
+  10%     { transform: translate(-6px, 4px) rotate(-0.5deg); }
+  25%     { transform: translate(7px, -4px) rotate(0.5deg); }
+  40%     { transform: translate(-5px, 6px) rotate(-0.3deg); }
+  60%     { transform: translate(5px, -5px) rotate(0.3deg); }
+  80%     { transform: translate(-3px, 2px); }
 }
-.screen-shake { animation: screenShake 0.5s ease-out; }
+.screen-shake { animation: screenShake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+
+/* ── Jackpot burst — element scales up and settles ── */
+@keyframes jackpotBurst {
+  0%   { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+  40%  { transform: scale(1.18) rotate(2deg); opacity: 1; }
+  65%  { transform: scale(0.94) rotate(-1deg); }
+  80%  { transform: scale(1.04); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.jackpot-burst { animation: jackpotBurst 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* ── Number slam — count-up lands with weight ── */
+@keyframes numberSlam {
+  0%   { transform: scale(1.5); opacity: 0; filter: blur(6px); }
+  60%  { transform: scale(0.92); opacity: 1; filter: blur(0); }
+  80%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+.number-slam { animation: numberSlam 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+/* ── Card entrance — slide up with spring ── */
+@keyframes cardEntrance {
+  0%   { transform: translateY(24px) scale(0.96); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.card-entrance { animation: cardEntrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+/* ── Neon flicker — adds life to accent elements ── */
+@keyframes neonFlicker {
+  0%,19%,21%,23%,25%,54%,56%,100% { opacity: 1; }
+  20%,24%,55% { opacity: 0.4; }
+}
+.neon-flicker { animation: neonFlicker 5s linear infinite; }
+
+/* ── Glitch Text — countdown danger ── */
+@keyframes glitch {
+  0%   { transform: translate(0);         text-shadow: 3px 0 #ff1744, -3px 0 #00f5ff; }
+  25%  { transform: translate(-3px, 1px); text-shadow: -3px 0 #ff1744, 3px 0 #00f5ff; }
+  50%  { transform: translate(2px, -1px); text-shadow: 2px 0 #ff1744, -2px 0 #00f5ff; }
+  75%  { transform: translate(-1px, 2px); text-shadow: -1px 0 #ff1744, 1px 0 #00f5ff; }
+  100% { transform: translate(0);         text-shadow: 3px 0 #ff1744, -3px 0 #00f5ff; }
+}
+.glitch-text { animation: glitch 0.3s ease-in-out infinite; color: #ff1744 !important; }
+
+/* ── Magnetic orbit dot ── */
+@keyframes magneticOrbit {
+  from { transform: rotate(0deg) translateX(28px) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
+}
+.magnetic-orbit {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: #ffd700; box-shadow: 0 0 8px #ffd700, 0 0 16px rgba(255,215,0,0.5);
+  animation: magneticOrbit 2.4s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
 
 /* ── Glitch Text — countdown danger ── */
 @keyframes glitch {
@@ -710,7 +813,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* ============================================================
    SELECTION
    ============================================================ */
-::selection { background: rgba(255,77,0,0.35); color: #fff; }
+::selection { background: rgba(255,215,0,0.35); color: #0a0a0f; }
 
 /* ============================================================
    number-flow custom
