@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import CrateShop from "./components/CrateShop";
 import GlobalStats from "./components/GlobalStats";
 import JoinToast from "./components/JoinToast";
+import LandingPage from "./components/LandingPage";
 import LiveFeed from "./components/LiveFeed";
 import Leaderboard from "./components/Leaderboard";
 import OnboardingModal from "./components/OnboardingModal";
@@ -15,11 +16,11 @@ import YoinkGame from "./components/YoinkGame";
 import { getLevelByXP } from "./lib/levels";
 import { getPlayer, upsertPlayer, saveXP, initDatabase, type PlayerRow } from "./lib/supabase";
 
-export type Page = "yoink" | "wheel" | "crates" | "leaderboard" | "referral";
+export type Page = "landing" | "yoink" | "wheel" | "crates" | "leaderboard" | "referral";
 
 const pageAnim = {
   initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.25, 1, 0.4, 1] } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.25, 1, 0.4, 1] as [number, number, number, number] } },
   exit:    { opacity: 0, y: -10, transition: { duration: 0.16 } },
 };
 
@@ -36,7 +37,7 @@ const NAV = [
 const DEMO_WALLET = "demo_" + Math.random().toString(36).slice(2, 10);
 
 export default function App() {
-  const [page, setPage]               = useState<Page>("yoink");
+  const [page, setPage]               = useState<Page>("landing");
   const [open, setOpen]               = useState(false);
   const [showOnboard, setShowOnboard] = useState(false);
   const [xp, setXp]                   = useState(0);
@@ -67,10 +68,12 @@ export default function App() {
     initDatabase();
   }, []);
 
-  // ── First visit onboarding ──
-  useEffect(() => {
-    const seen = localStorage.getItem("yoink_onboarded");
-    if (!seen) setTimeout(() => setShowOnboard(true), 800);
+  // ── First visit: educate on first Arena entry (not over the landing) ──
+  const enterArena = useCallback(() => {
+    setPage("yoink");
+    if (!localStorage.getItem("yoink_onboarded")) {
+      setTimeout(() => setShowOnboard(true), 450);
+    }
   }, []);
 
   // ── Add XP — saves to Supabase if wallet connected ──
@@ -154,7 +157,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto px-5 h-[60px] flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <motion.button onClick={() => setPage("yoink")}
+          <motion.button onClick={() => setPage("landing")}
             className="flex items-center gap-3 flex-shrink-0"
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
             <div className="logo-mark">
@@ -279,20 +282,37 @@ export default function App() {
         </AnimatePresence>
       </header>
 
-      <LiveFeed />
-      <GlobalStats />
-
-      <main className="flex-1 max-w-6xl mx-auto w-full px-5 py-8">
-        <AnimatePresence mode="wait">
-          <motion.div key={page} variants={pageAnim} initial="initial" animate="animate" exit="exit">
-            {page === "yoink"       && <YoinkGame xp={xp} onXPGain={addXP} levelId={levelData.id} wallet={wallet} />}
-            {page === "wheel"       && <SwapWheel />}
-            {page === "crates"      && <CrateShop xp={xp} levelId={levelData.id} onXPGain={addXP} wallet={wallet} />}
-            {page === "leaderboard" && <Leaderboard />}
-            {page === "referral"    && <ReferralDashboard wallet={wallet} player={player} />}
+      <AnimatePresence mode="wait">
+        {page === "landing" ? (
+          <motion.div key="landing" className="flex-1"
+            variants={pageAnim} initial="initial" animate="animate" exit="exit">
+            <LandingPage
+              onEnter={enterArena}
+              onConnect={connectWallet}
+              connecting={connecting}
+              wallet={wallet}
+              onHowto={() => setShowOnboard(true)}
+            />
           </motion.div>
-        </AnimatePresence>
-      </main>
+        ) : (
+          <motion.div key="app" className="flex-1 flex flex-col"
+            variants={pageAnim} initial="initial" animate="animate" exit="exit">
+            <LiveFeed />
+            <GlobalStats />
+            <main className="flex-1 max-w-6xl mx-auto w-full px-5 py-8">
+              <AnimatePresence mode="wait">
+                <motion.div key={page} variants={pageAnim} initial="initial" animate="animate" exit="exit">
+                  {page === "yoink"       && <YoinkGame xp={xp} onXPGain={addXP} levelId={levelData.id} wallet={wallet} />}
+                  {page === "wheel"       && <SwapWheel />}
+                  {page === "crates"      && <CrateShop xp={xp} levelId={levelData.id} onXPGain={addXP} wallet={wallet} />}
+                  {page === "leaderboard" && <Leaderboard />}
+                  {page === "referral"    && <ReferralDashboard wallet={wallet} player={player} />}
+                </motion.div>
+              </AnimatePresence>
+            </main>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <footer className="border-t border-y-border py-8 relative overflow-hidden"
         style={{ background: 'linear-gradient(180deg, rgba(4,4,10,0.3) 0%, rgba(4,4,10,0.95) 100%)' }}>

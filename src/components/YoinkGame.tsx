@@ -1,12 +1,11 @@
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, ArrowUpRight, Coins, Crown, DoorOpen, Flame, Lock, Shield, Skull, Swords, Target, TrendingDown, TrendingUp, Zap } from "lucide-react";
+import { AlertCircle, ArrowUpRight, Crown, DoorOpen, Flame, Lock, Shield, Skull, Swords, Target, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { getLevelByXP, getXPProgress, XP_REWARDS } from "../lib/levels";
 import RoomSystem from "./RoomSystem";
 import YoinkResult, { type YoinkResultData } from "./YoinkResult";
-import PremiumIcon from "./ui/PremiumIcon";
 
 interface Player {
   id: number; wallet: string; balance: number;
@@ -269,56 +268,26 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       {/* Cinematic win/lose reveal — the dopamine payoff moment */}
       <YoinkResult data={result} onClose={() => setResult(null)} />
 
-      {/* Hero */}
-      <div className="card-hero">
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+      {/* Arena bar — compact, game-first */}
+      <div className="card-flat flex flex-wrap items-center justify-between gap-4" style={{ padding: '16px 20px' }}>
+        <div className="flex items-center gap-3">
+          <span className="pill pill-live"><span className="w-1.5 h-1.5 rounded-full bg-y-green blink" /> LIVE</span>
           <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="pill pill-live"><span className="w-1.5 h-1.5 rounded-full bg-y-green blink" /> LIVE</span>
-              <span className="text-[12px] font-mono" style={{ color: '#8892a4' }}>{livePlayers} in arena</span>
-            </div>
-            <h1 className="font-display text-[48px] leading-none text-white tracking-[0.06em] mb-1.5">
-              YOINK<span style={{ color: '#ffd700' }}>.GG</span>
-            </h1>
-            <p className="text-[13px]" style={{ color: '#8892a4' }}>Target a wallet. Pay a small fee. Steal their SOL.</p>
-          </div>
-          <div className="flex items-center gap-5">
-            <div className="text-center">
-              <div className="font-display text-[38px] leading-none" style={{ color: '#ff7040' }}>{stolen.toFixed(1)}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#8892a4' }}>SOL Stolen</div>
-            </div>
-            <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.07)' }} />
-            <div className="text-center">
-              <div className="font-display text-[38px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
-              <div className="text-[10px] font-mono uppercase tracking-widest mt-1" style={{ color: '#8892a4' }}>Rounds</div>
-            </div>
+            <div className="font-display text-[24px] leading-none text-white tracking-[0.04em]">THE ARENA</div>
+            <p className="text-[11px] mt-0.5" style={{ color: '#8892a4' }}>{livePlayers} hunters circling · tap a wallet to strike</p>
           </div>
         </div>
-      </div>
-
-      {/* How it works — clear and honest */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        {[
-          { n:"01", c:"#ffd700", rgb:"255,215,0",  icon: Lock,       t:"Lock SOL to enter", d:"Your SOL stays locked in the arena. You can leave and get it back anytime.", earn: null },
-          { n:"02", c:"#a060ff", rgb:"112,0,255",   icon: Target,     t:"Pick any target",   d:"See everyone's real locked balance. Hover to see your exact steal odds.", earn: "Steal 50% of target's balance" },
-          { n:"03", c:"#4da3ff", rgb:"77,163,255",  icon: Coins,      t:"Pay a small fee",   d:"Win = steal 50% of their balance. Lose = only lose the 5% fee. Your balance never disappears in one hit.", earn: "Max loss per attempt: 5% of target" },
-          { n:"04", c:"#00e676", rgb:"0,230,118",   icon: TrendingUp, t:"Win & compound",    d:"Every win grows your balance. Bigger balance = better odds on next attack.", earn: "Stack wins to dominate" },
-        ].map(s => (
-          <div key={s.n} className="card-sm">
-            <div className="flex items-center gap-2.5 mb-2.5">
-              <PremiumIcon icon={s.icon} tone={s.c} size={36} rounded={11} iconSize={18} />
-              <div className="text-[10px] font-mono tracking-[0.18em]" style={{ color: '#4a5060' }}>{s.n}</div>
-            </div>
-            <div className="text-[12px] font-bold text-white mb-1">{s.t}</div>
-            <div className="text-[11px] leading-snug" style={{ color: '#8892a4' }}>{s.d}</div>
-            {s.earn && (
-              <div className="mt-2 text-[10px] font-mono px-2 py-1 rounded-lg"
-                style={{ background: `rgba(${s.rgb},0.10)`, color: s.c }}>
-                {s.earn}
-              </div>
-            )}
+        <div className="flex items-center gap-5">
+          <div className="text-center">
+            <div className="font-display text-[26px] leading-none gold-text-gradient">{stolen.toFixed(1)}</div>
+            <div className="text-[9px] font-mono uppercase tracking-[0.16em] mt-1" style={{ color: '#8892a4' }}>SOL Stolen</div>
           </div>
-        ))}
+          <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.08)' }} />
+          <div className="text-center">
+            <div className="font-display text-[26px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
+            <div className="text-[9px] font-mono uppercase tracking-[0.16em] mt-1" style={{ color: '#8892a4' }}>Rounds</div>
+          </div>
+        </div>
       </div>
 
       {/* Daily protection banner — only show if near limit */}
