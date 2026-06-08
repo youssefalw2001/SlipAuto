@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Crosshair, Menu, Package, RotateCcw, Trophy, Users, Wallet, X } from "lucide-react";
+import { Crosshair, Menu, Package, Trophy, Users, Wallet, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
@@ -11,12 +11,11 @@ import LiveFeed from "./components/LiveFeed";
 import Leaderboard from "./components/Leaderboard";
 import OnboardingModal from "./components/OnboardingModal";
 import ReferralDashboard from "./components/ReferralDashboard";
-import SwapWheel from "./components/SwapWheel";
 import YoinkGame from "./components/YoinkGame";
 import { getLevelByXP } from "./lib/levels";
 import { getPlayer, upsertPlayer, saveXP, initDatabase, type PlayerRow } from "./lib/supabase";
 
-export type Page = "landing" | "yoink" | "wheel" | "crates" | "leaderboard" | "referral";
+export type Page = "landing" | "yoink" | "crates" | "leaderboard" | "referral";
 
 const pageAnim = {
   initial: { opacity: 0, y: 16 },
@@ -25,11 +24,10 @@ const pageAnim = {
 };
 
 const NAV = [
-  { id: "yoink"       as Page, label: "Yoink",       icon: Crosshair },
-  { id: "wheel"       as Page, label: "Swap Wheel",  icon: RotateCcw },
-  { id: "crates"      as Page, label: "Crates",      icon: Package   },
-  { id: "leaderboard" as Page, label: "Leaderboard", icon: Trophy    },
-  { id: "referral"    as Page, label: "Referrals",   icon: Users     },
+  { id: "yoink"       as Page, label: "Arena",        icon: Crosshair },
+  { id: "crates"      as Page, label: "Crates",       icon: Package   },
+  { id: "leaderboard" as Page, label: "Leaderboard",  icon: Trophy    },
+  { id: "referral"    as Page, label: "Referrals",    icon: Users     },
 ];
 
 // ── Demo wallet (until real wallet adapter is wired) ──
@@ -377,7 +375,6 @@ export default function App() {
               <AnimatePresence mode="wait">
                 <motion.div key={page} variants={pageAnim} initial="initial" animate="animate" exit="exit">
                   {page === "yoink"       && <YoinkGame xp={xp} onXPGain={addXP} levelId={levelData.id} wallet={wallet} />}
-                  {page === "wheel"       && <SwapWheel />}
                   {page === "crates"      && <CrateShop xp={xp} levelId={levelData.id} onXPGain={addXP} wallet={wallet} />}
                   {page === "leaderboard" && <Leaderboard />}
                   {page === "referral"    && <ReferralDashboard wallet={wallet} player={player} />}

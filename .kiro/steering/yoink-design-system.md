@@ -148,7 +148,7 @@ that previously were emojis. **No emojis allowed anywhere in the active app.**
 ## Navigation
 
 - Logo click → Landing page
-- Nav: Yoink | Swap Wheel | Crates | Leaderboard | Referrals
+- Nav: **Arena | Crates | Leaderboard | Referrals** (4 items — Swap Wheel removed)
 - "NEW" badge: gold background, dark text
 - Active nav: gold underline glow
 - Mobile: slide-down overlay, same gold active state
