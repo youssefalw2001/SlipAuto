@@ -212,8 +212,8 @@ export default function YoinkResult({ data, onClose }: { data: YoinkResultData |
             {/* Headline */}
             {win ? (
               <motion.div
-                initial={{ y: -16, opacity: 0, filter: "blur(8px)" }}
-                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                initial={{ y: -16, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
                 {tier === "jackpot" ? (
                   <h2 className="font-display leading-none mb-1 neon-flicker"
@@ -255,7 +255,7 @@ export default function YoinkResult({ data, onClose }: { data: YoinkResultData |
 
             {/* Big number */}
             <motion.div className="my-4 relative"
-              initial={{ scale: 1.4, opacity: 0, filter: "blur(10px)" }}
+              initial={{ scale: 1.3, opacity: 0 }}
               animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
               transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
               <div className="font-display leading-none"

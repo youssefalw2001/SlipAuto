@@ -266,78 +266,82 @@ body::after {
   transform: translateY(-3px) scale(1.02) !important;
 }
 
-/* ── PREDATOR tier (1.5–3 SOL) — dual purple/cyan neon, ALWAYS glowing ── */
+/* ── PREDATOR tier (1.5–3 SOL) ──────────────────────────────────────
+   KEY: box-shadow is STATIC. Only opacity animates — free on the GPU.
+   The glowing pseudo-element fades in/out without triggering repaint.
+   ─────────────────────────────────────────────────────────────────── */
 .wc-predator {
   border: 2px solid rgba(160,96,255,0.4) !important;
   border-top: 2px solid rgba(0,229,255,0.5) !important;
   background: linear-gradient(135deg, rgba(112,0,255,0.06) 0%, rgba(0,229,255,0.03) 100%) !important;
-  box-shadow:
-    0 0 15px rgba(112,0,255,0.2),
-    0 0 30px rgba(0,229,255,0.08),
-    inset 0 0 20px rgba(112,0,255,0.04);
-  animation: predatorGlow 3s ease-in-out infinite;
 }
-@keyframes predatorGlow {
-  0%,100% { box-shadow: 0 0 15px rgba(112,0,255,0.2), 0 0 30px rgba(0,229,255,0.08), inset 0 0 20px rgba(112,0,255,0.04); }
-  50%     { box-shadow: 0 0 25px rgba(112,0,255,0.35), 0 0 50px rgba(0,229,255,0.15), inset 0 0 30px rgba(112,0,255,0.06); }
+/* Static glow layer — opacity animates, not box-shadow */
+.wc-predator::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  box-shadow: 0 0 28px rgba(112,0,255,0.4), 0 0 56px rgba(0,229,255,0.15);
+  animation: glowFade 3s ease-in-out infinite;
+  pointer-events: none;
+  will-change: opacity;
+}
+@keyframes glowFade {
+  0%,100% { opacity: 0.45; }
+  50%     { opacity: 1; }
 }
 .wc-predator:hover {
   border-color: rgba(160,96,255,0.7) !important;
-  box-shadow: 0 0 30px rgba(112,0,255,0.4), 0 0 60px rgba(0,229,255,0.2), 0 12px 40px rgba(112,0,255,0.15) !important;
   transform: translateY(-4px) scale(1.025) !important;
 }
-/* Predator corner sparks — always visible */
+/* Predator corner sparks — opacity-only pulse, free */
 .wc-predator .spark {
   position: absolute;
   width: 4px; height: 4px;
   border-radius: 50%;
   pointer-events: none;
-  animation: sparkPulse 2s ease-in-out infinite;
+  animation: sparkFade 2s ease-in-out infinite;
+  will-change: opacity;
 }
-@keyframes sparkPulse {
-  0%,100% { opacity: 0.5; transform: scale(1); }
-  50%     { opacity: 1; transform: scale(1.5); }
+@keyframes sparkFade {
+  0%,100% { opacity: 0.4; }
+  50%     { opacity: 1; }
 }
-.wc-predator .spark:nth-child(1) { top: 5px; right: 5px; background: #a060ff; box-shadow: 0 0 8px #a060ff; animation-delay: 0s; }
-.wc-predator .spark:nth-child(2) { bottom: 5px; left: 5px; background: #00e5ff; box-shadow: 0 0 8px #00e5ff; animation-delay: 0.5s; }
-.wc-predator .spark:nth-child(3) { top: 5px; left: 5px; background: #7000ff; box-shadow: 0 0 8px #7000ff; animation-delay: 1s; }
-.wc-predator .spark:nth-child(4) { bottom: 5px; right: 5px; background: #00e5ff; box-shadow: 0 0 8px #00e5ff; animation-delay: 1.5s; }
+.wc-predator .spark:nth-child(1) { top: 5px; right: 5px; background: #a060ff; box-shadow: 0 0 6px #a060ff; animation-delay: 0s; }
+.wc-predator .spark:nth-child(2) { bottom: 5px; left: 5px; background: #00e5ff; box-shadow: 0 0 6px #00e5ff; animation-delay: 0.5s; }
+.wc-predator .spark:nth-child(3) { top: 5px; left: 5px; background: #7000ff; box-shadow: 0 0 6px #7000ff; animation-delay: 1s; }
+.wc-predator .spark:nth-child(4) { bottom: 5px; right: 5px; background: #00e5ff; box-shadow: 0 0 6px #00e5ff; animation-delay: 1.5s; }
 
-/* ── KING tier (3+ SOL) — FIRE. MASSIVE PRESENCE. ── */
+/* ── KING tier (3+ SOL) ──────────────────────────────────────────────
+   Same pattern: static box-shadow, animate opacity only.
+   ─────────────────────────────────────────────────────────────────── */
 .wc-king {
-  border: 2px solid rgba(255,77,0,0.6) !important;
-  border-top: 2px solid rgba(255,210,0,0.8) !important;
-  background: linear-gradient(145deg, rgba(255,77,0,0.08) 0%, rgba(255,210,0,0.04) 50%, rgba(10,10,24,0.95) 100%) !important;
-  box-shadow:
-    0 0 20px rgba(255,77,0,0.3),
-    0 0 40px rgba(255,77,0,0.15),
-    0 0 80px rgba(255,77,0,0.06),
-    inset 0 0 30px rgba(255,77,0,0.05);
-  animation: kingPulse 2.5s ease-in-out infinite;
+  border: 2px solid rgba(255,100,0,0.55) !important;
+  border-top: 2px solid rgba(255,210,0,0.75) !important;
+  background: linear-gradient(145deg, rgba(255,77,0,0.07) 0%, rgba(255,210,0,0.03) 50%, rgba(10,10,24,0.95) 100%) !important;
 }
-@keyframes kingPulse {
-  0%,100% { box-shadow: 0 0 20px rgba(255,77,0,0.3), 0 0 40px rgba(255,77,0,0.15), 0 0 80px rgba(255,77,0,0.06), inset 0 0 30px rgba(255,77,0,0.05); }
-  50%     { box-shadow: 0 0 35px rgba(255,77,0,0.5), 0 0 70px rgba(255,77,0,0.25), 0 0 120px rgba(255,77,0,0.1), inset 0 0 40px rgba(255,77,0,0.08); }
+/* Static king glow — opacity pulses, not box-shadow */
+.wc-king::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: inherit;
+  box-shadow: 0 0 35px rgba(255,80,0,0.5), 0 0 70px rgba(255,80,0,0.22), 0 0 100px rgba(255,80,0,0.08);
+  animation: glowFade 2.5s ease-in-out infinite;
+  pointer-events: none;
+  will-change: opacity;
 }
 .wc-king:hover {
   border-color: rgba(255,210,0,0.8) !important;
-  box-shadow: 0 0 40px rgba(255,77,0,0.6), 0 0 80px rgba(255,77,0,0.3), 0 0 140px rgba(255,77,0,0.12), 0 16px 60px rgba(255,77,0,0.25) !important;
   transform: translateY(-5px) scale(1.03) !important;
 }
-/* King top shimmer line — always active */
+/* King top shimmer — opacity only, free */
 .wc-king::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, transparent 0%, #ff4d00 20%, #ffd200 50%, #ff4d00 80%, transparent 100%);
-  animation: kingShimmer 2s ease-in-out infinite;
+  animation: glowFade 2s ease-in-out infinite;
   pointer-events: none;
+  will-change: opacity;
 }
-@keyframes kingShimmer {
-  0%,100% { opacity: 0.6; }
-  50%     { opacity: 1; }
-}
-/* King flame particles — ALWAYS visible, dramatic */
+/* King flames — transform+opacity, GPU compositor ✓ */
 .wc-king .flame {
   position: absolute;
   bottom: 4px;
@@ -359,7 +363,7 @@ body::after {
   100% { transform: translateY(-28px) scale(0.2); opacity: 0; }
 }
 
-/* ── Targeted state ── */
+/* ── Targeted state — static shadow, no animation ── */
 .wallet-card.targeted {
   border-color: #ffd700 !important;
   border-top-color: #ffe266 !important;
@@ -371,13 +375,16 @@ body::after {
     0 20px 50px rgba(0,0,0,0.4) !important;
 }
 
-/* ── Scanning pulse — while yoink is processing ── */
+/* ── Scanning pulse — outline-only, no box-shadow repaint ── */
 .wallet-card.scanning {
-  animation: scanPulse 0.6s ease-in-out infinite;
+  outline: 2px solid rgba(255,215,0,0.6);
+  outline-offset: 2px;
+  animation: scanOutline 0.6s ease-in-out infinite;
+  will-change: outline-color;
 }
-@keyframes scanPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
-  50%     { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
+@keyframes scanOutline {
+  0%,100% { outline-color: rgba(255,215,0,0.3); }
+  50%     { outline-color: rgba(255,215,0,0.9); }
 }
 
 /* ── Hit shake ── */
@@ -474,10 +481,11 @@ body::after {
 .btn-yoink:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-yoink.pulsing {
   animation: btnPulse 1.2s ease-in-out infinite;
+  will-change: opacity;
 }
 @keyframes btnPulse {
-  0%,100% { box-shadow: 0 0 24px rgba(255,215,0,0.45), 0 8px 28px rgba(0,0,0,0.35); }
-  50%     { box-shadow: 0 0 44px rgba(255,215,0,0.75), 0 0 0 8px rgba(255,215,0,0.10); }
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.82; }
 }
 
 .btn-ghost {
@@ -791,12 +799,12 @@ input[type="number"] { -moz-appearance: textfield; }
 .wheel-glow { filter: drop-shadow(0 0 20px rgba(112,0,255,0.25)) drop-shadow(0 0 40px rgba(255,215,0,0.15)); }
 .wheel-spinning { filter: drop-shadow(0 0 40px rgba(255,215,0,0.5)) drop-shadow(0 0 80px rgba(112,0,255,0.3)); will-change: transform; }
 
-/* ── Violet aura for wheel center ── */
+/* ── Violet aura for wheel center / arena ── */
 @keyframes auraPulse {
-  0%,100% { box-shadow: 0 0 20px rgba(112,0,255,0.35), 0 0 50px rgba(112,0,255,0.15); }
-  50%     { box-shadow: 0 0 40px rgba(112,0,255,0.55), 0 0 80px rgba(112,0,255,0.25); }
+  0%,100% { opacity: 0.5; }
+  50%     { opacity: 1; }
 }
-.aura-pulse { animation: auraPulse 2s ease-in-out infinite; }
+.aura-pulse { animation: auraPulse 2s ease-in-out infinite; will-change: opacity; }
 
 /* ============================================================
    XP BAR
@@ -826,8 +834,28 @@ number-flow-react {
 }
 
 
-/* ============================================================
-   KOINARA DESIGN-SYSTEM UTILITIES (ported)
+/* ── Arena grid CSS entrance — stagger via nth-child, zero JS ── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.arena-grid-item {
+  animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  will-change: transform, opacity;
+}
+.arena-grid-item:nth-child(1)  { animation-delay: 0.04s; }
+.arena-grid-item:nth-child(2)  { animation-delay: 0.08s; }
+.arena-grid-item:nth-child(3)  { animation-delay: 0.12s; }
+.arena-grid-item:nth-child(4)  { animation-delay: 0.16s; }
+.arena-grid-item:nth-child(5)  { animation-delay: 0.20s; }
+.arena-grid-item:nth-child(6)  { animation-delay: 0.24s; }
+.arena-grid-item:nth-child(7)  { animation-delay: 0.28s; }
+.arena-grid-item:nth-child(8)  { animation-delay: 0.32s; }
+.arena-grid-item:nth-child(9)  { animation-delay: 0.36s; }
+.arena-grid-item:nth-child(10) { animation-delay: 0.40s; }
+.arena-grid-item:nth-child(11) { animation-delay: 0.44s; }
+.arena-grid-item:nth-child(12) { animation-delay: 0.48s; }
+.arena-grid-item:nth-child(n+13) { animation-delay: 0.50s; }
    Premium glass cards, gold accents, progress bars, chips.
    Use these on new/restyled components for the pro look.
    ============================================================ */
