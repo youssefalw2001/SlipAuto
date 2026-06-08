@@ -126,8 +126,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Cinematic FX — vignette (depth) + film grain (texture). Pure CSS, zero assets. */}
+      {/* Cinematic FX — vignette + scanlines + film grain */}
       <div className="fx-vignette" aria-hidden />
+      <div className="fx-scanlines" aria-hidden />
       <div className="fx-grain" aria-hidden />
 
       <Toaster
@@ -140,7 +141,7 @@ export default function App() {
             border: "1px solid rgba(255,255,255,0.06)",
             borderTop: "1px solid rgba(255,255,255,0.10)",
             color: "#eeeef8",
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Space Grotesk', system-ui, sans-serif",
             fontSize: "13px",
             boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 0 60px rgba(112,0,255,0.05)",
           },
@@ -152,81 +153,134 @@ export default function App() {
       </AnimatePresence>
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-40 border-b border-y-border"
-        style={{ background: 'rgba(4,4,10,0.92)', backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: '0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(112,0,255,0.03), 0 1px 0 rgba(255,255,255,0.04) inset' }}>
-        <div className="max-w-6xl mx-auto px-5 h-[60px] flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40"
+        style={{
+          background: "rgba(3,4,9,0.88)",
+          backdropFilter: "blur(28px) saturate(1.4)",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.5), 0 0 120px rgba(112,0,255,0.04)",
+        }}>
+        {/* Top gold accent line */}
+        <div className="absolute top-0 left-0 right-0 h-px pointer-events-none"
+          style={{ background: "linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.4) 20%, rgba(112,0,255,0.5) 50%, rgba(0,245,255,0.3) 80%, transparent 100%)" }} />
 
-          {/* Logo */}
+        <div className="max-w-6xl mx-auto px-5 h-[62px] flex items-center justify-between gap-4">
+
+          {/* ── Logo ── */}
           <motion.button onClick={() => setPage("landing")}
-            className="flex items-center gap-3 flex-shrink-0"
+            className="flex items-center gap-3 flex-shrink-0 group"
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
             <div className="logo-mark">
               <Crosshair className="w-4 h-4 text-[#0a0a0f]" strokeWidth={2.5} />
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-y-green border-2 border-y-base blink" />
             </div>
             <div className="flex items-baseline gap-0">
-              <span className="font-display text-[26px] text-white tracking-[0.02em]" style={{ textShadow: '0 0 24px rgba(255,255,255,0.2), 0 0 60px rgba(255,255,255,0.05)' }}>YOINK</span>
-              <span className="font-display text-[26px] tracking-[0.02em]" style={{ color: '#ffd700', textShadow: '0 0 24px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)' }}>.GG</span>
+              <span className="font-display text-[22px] text-white tracking-[0.06em]"
+                style={{ textShadow: "0 0 20px rgba(255,255,255,0.15)" }}>YOINK</span>
+              <span className="font-display text-[22px] tracking-[0.06em]"
+                style={{ color: "#ffd700", textShadow: "0 0 20px rgba(255,215,0,0.5)" }}>.GG</span>
             </div>
           </motion.button>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-5">
-            {NAV.map(n => (
-              <button
-                key={n.id}
-                onClick={() => setPage(n.id)}
-                className={`nav-link relative ${page === n.id ? "active" : ""}`}
-                style={page === n.id ? { textShadow: '0 0 12px rgba(255,215,0,0.4)' } : undefined}
-              >
-                {n.label}
-                {n.id === "crates" && (
-                  <span className="absolute -top-2.5 -right-4 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full"
-                    style={{ background: '#ffd700', color: '#0a0a0f', lineHeight: 1, boxShadow: '0 0 8px rgba(255,215,0,0.5)' }}>
-                    NEW
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* ── Desktop Nav ── */}
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV.map(n => {
+              const isActive = page === n.id;
+              const Icon = n.icon;
+              return (
+                <motion.button
+                  key={n.id}
+                  onClick={() => setPage(n.id)}
+                  className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-semibold transition-colors"
+                  style={{
+                    color: isActive ? "#fff" : "#6a7080",
+                    background: isActive ? "rgba(255,215,0,0.08)" : "transparent",
+                  }}
+                  whileHover={{ color: "#fff", backgroundColor: "rgba(255,255,255,0.05)" }}
+                  whileTap={{ scale: 0.96 }}
+                >
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0"
+                    style={{ color: isActive ? "#ffd700" : "currentColor" }} strokeWidth={2.2} />
+                  {n.label}
+
+                  {/* Active gold underline — animated */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-active"
+                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+                      style={{ background: "linear-gradient(90deg, #ffd700, #f5b700)", boxShadow: "0 0 8px rgba(255,215,0,0.6)" }}
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+
+                  {/* NEW badge */}
+                  {n.id === "crates" && (
+                    <span className="absolute -top-1.5 -right-1 text-[7px] font-mono font-bold px-1.5 py-0.5 rounded-full leading-none"
+                      style={{ background: "#ffd700", color: "#0a0a0f", boxShadow: "0 0 8px rgba(255,215,0,0.6)" }}>
+                      NEW
+                    </span>
+                  )}
+                </motion.button>
+              );
+            })}
           </nav>
 
-          {/* Right side */}
-          <div className="hidden md:flex items-center gap-3">
-            {/* Level badge — only when wallet connected */}
+          {/* ── Right side ── */}
+          <div className="hidden md:flex items-center gap-2.5">
+            {/* Level badge */}
             {wallet && (
-              <div className="px-3 py-1.5 rounded-xl flex items-center gap-2"
-                style={{ background: levelData.badgeBg, border: `1px solid ${levelData.badgeColor}30` }}>
-                <span className="font-display text-[13px] tracking-[0.06em]" style={{ color: levelData.badgeColor }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="px-3 py-1.5 rounded-xl flex items-center gap-2"
+                style={{
+                  background: levelData.badgeBg,
+                  border: `1px solid ${levelData.badgeColor}35`,
+                  boxShadow: `0 0 16px ${levelData.badgeColor}15`,
+                }}>
+                <span className="font-display text-[12px] tracking-[0.06em]" style={{ color: levelData.badgeColor }}>
                   {levelData.name}
                 </span>
-                <span className="text-[11px] font-mono" style={{ color: '#8892a4' }}>{xp} XP</span>
-              </div>
+                <span className="text-[10px] font-mono" style={{ color: "#8892a4" }}>{xp} XP</span>
+              </motion.div>
             )}
 
-            <button onClick={() => setShowOnboard(true)} className="btn-ghost text-[12px] py-2 px-4">
+            <button onClick={() => setShowOnboard(true)}
+              className="btn-ghost text-[12px] py-2 px-3.5"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               How to Play
             </button>
 
-            {/* Wallet button */}
+            {/* Wallet */}
             {wallet ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-mono"
-                  style={{ background: 'rgba(0,232,122,0.06)', border: '1px solid rgba(0,232,122,0.25)', color: '#00d470', boxShadow: '0 0 20px rgba(0,232,122,0.08)' }}>
-                  <span className="w-2 h-2 rounded-full bg-y-green blink" />
+                <motion.div
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-mono cursor-default"
+                  style={{
+                    background: "rgba(0,230,118,0.07)",
+                    border: "1px solid rgba(0,230,118,0.28)",
+                    color: "#00e676",
+                    boxShadow: "0 0 20px rgba(0,230,118,0.08)",
+                  }}>
+                  <span className="w-2 h-2 rounded-full blink"
+                    style={{ background: "#00e676", boxShadow: "0 0 6px #00e676" }} />
                   {walletShort}
-                </div>
-                <button onClick={disconnectWallet} className="btn-ghost text-[11px] py-2 px-3"
-                  style={{ color: '#8892a4' }}>
+                </motion.div>
+                <button onClick={disconnectWallet}
+                  className="btn-ghost text-[11px] py-2 px-2.5"
+                  style={{ color: "#6a7080" }}>
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
               <motion.button
-                whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={connectWallet}
                 disabled={connecting}
-                className="btn-yoink text-[14px] py-2.5 px-6 disabled:opacity-60"
-              >
+                className="btn-yoink text-[13px] py-2.5 px-5 disabled:opacity-60">
                 <Wallet className="w-4 h-4" />
                 {connecting ? "Connecting..." : "Connect Wallet"}
               </motion.button>
@@ -248,27 +302,47 @@ export default function App() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.22 }}
-              className="overflow-hidden md:hidden border-t border-y-border"
-              style={{ background: 'rgba(3,3,8,0.96)', backdropFilter: 'blur(20px)' }}
+              className="overflow-hidden md:hidden border-t"
+              style={{ background: "rgba(3,4,9,0.97)", backdropFilter: "blur(24px)", borderColor: "rgba(255,255,255,0.05)" }}
             >
-              <div className="px-5 py-3 flex flex-col gap-0.5">
+              <div className="px-5 py-3 flex flex-col gap-1">
                 {NAV.map(n => {
                   const Icon = n.icon;
+                  const isActive = page === n.id;
                   return (
-                    <button key={n.id} onClick={() => { setPage(n.id); setOpen(false); }}
-                      className="flex items-center gap-3 px-3 py-3 rounded-xl text-[13px] font-semibold transition-all"
-                      style={{ color: page === n.id ? '#ff7040' : '#8892a4', background: page === n.id ? 'rgba(255,215,0,0.08)' : 'transparent' }}>
-                      <Icon className="w-4 h-4" />{n.label}
-                      {n.id === "crates" && <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: '#ffd700', color: '#0a0a0f' }}>NEW</span>}
-                    </button>
+                    <motion.button key={n.id}
+                      onClick={() => { setPage(n.id); setOpen(false); }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold transition-all"
+                      style={{
+                        color: isActive ? "#fff" : "#6a7080",
+                        background: isActive ? "rgba(255,215,0,0.08)" : "transparent",
+                        borderLeft: isActive ? "2px solid #ffd700" : "2px solid transparent",
+                      }}
+                      whileTap={{ scale: 0.97 }}>
+                      <Icon className="w-4 h-4" style={{ color: isActive ? "#ffd700" : "currentColor" }} strokeWidth={2.2} />
+                      {n.label}
+                      {n.id === "crates" && (
+                        <span className="ml-auto text-[9px] px-1.5 py-0.5 rounded-full font-bold"
+                          style={{ background: "#ffd700", color: "#0a0a0f" }}>NEW</span>
+                      )}
+                    </motion.button>
                   );
                 })}
-                <button onClick={() => { setShowOnboard(true); setOpen(false); }} className="btn-ghost w-full mt-1 text-[13px]">How to Play</button>
+                <div className="h-px my-1" style={{ background: "rgba(255,255,255,0.05)" }} />
+                <button onClick={() => { setShowOnboard(true); setOpen(false); }}
+                  className="btn-ghost w-full mt-1 text-[13px]">
+                  How to Play
+                </button>
                 {wallet ? (
-                  <div className="mt-1 flex items-center justify-between px-3 py-2 rounded-xl"
-                    style={{ background: 'rgba(0,232,122,0.06)', border: '1px solid rgba(0,232,122,0.15)' }}>
-                    <span className="text-[12px] font-mono" style={{ color: '#00d470' }}>{walletShort}</span>
-                    <button onClick={disconnectWallet} className="text-[11px]" style={{ color: '#8892a4' }}>Disconnect</button>
+                  <div className="mt-1 flex items-center justify-between px-4 py-3 rounded-xl"
+                    style={{ background: "rgba(0,230,118,0.06)", border: "1px solid rgba(0,230,118,0.15)" }}>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full blink" style={{ background: "#00e676" }} />
+                      <span className="text-[12px] font-mono" style={{ color: "#00e676" }}>{walletShort}</span>
+                    </div>
+                    <button onClick={disconnectWallet} className="text-[11px]" style={{ color: "#6a7080" }}>
+                      Disconnect
+                    </button>
                   </div>
                 ) : (
                   <button onClick={connectWallet} disabled={connecting} className="btn-yoink w-full mt-1">

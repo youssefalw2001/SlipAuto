@@ -33,14 +33,17 @@ function predatorIcon(wallet: string) {
   return PREDATOR_ICONS[hashWallet(wallet) % PREDATOR_ICONS.length];
 }
 
-// ── Arena grid entrance — cards pop in one by one (staggerChildren) ──
+// ── Arena grid entrance — spring stagger, cards slam in ──
 const arenaGrid = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.045, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.04, delayChildren: 0.08 } },
 };
 const arenaCard = {
-  hidden: { opacity: 0, y: 14, scale: 0.95 },
-  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.32, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 20, scale: 0.92, filter: "blur(4px)" },
+  show: {
+    opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+    transition: { type: "spring" as const, stiffness: 260, damping: 22 },
+  },
 };
 const BOUNTY_THRESHOLD = 3.0;
 const MAX_DAILY_LOSS   = 10; // SOL — protection cap
@@ -268,27 +271,60 @@ export default function YoinkGame({ xp, onXPGain, levelId, wallet }: Props) {
       {/* Cinematic win/lose reveal — the dopamine payoff moment */}
       <YoinkResult data={result} onClose={() => setResult(null)} />
 
-      {/* Arena bar — compact, game-first */}
-      <div className="card-flat flex flex-wrap items-center justify-between gap-4" style={{ padding: '16px 20px' }}>
-        <div className="flex items-center gap-3">
-          <span className="pill pill-live"><span className="w-1.5 h-1.5 rounded-full bg-y-green blink" /> LIVE</span>
+      {/* Arena bar — cinematic, game-first */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="relative overflow-hidden rounded-2xl flex flex-wrap items-center justify-between gap-4"
+        style={{
+          padding: '18px 22px',
+          background: 'linear-gradient(135deg, rgba(112,0,255,0.10) 0%, rgba(8,10,17,0.9) 50%, rgba(255,215,0,0.06) 100%)',
+          border: '1px solid rgba(255,215,0,0.18)',
+          borderTop: '2px solid rgba(255,215,0,0.4)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.4), 0 0 60px rgba(112,0,255,0.05)',
+        }}>
+        {/* Ambient glow */}
+        <div className="absolute top-0 right-0 w-64 h-full pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse 80% 80% at 100% 50%, rgba(255,215,0,0.06), transparent)' }} />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,0.012) 3px, rgba(255,255,255,0.012) 4px)', opacity: 0.5 }} />
+
+        <div className="relative flex items-center gap-4">
+          {/* Pulsing live indicator */}
+          <div className="relative flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0"
+            style={{ background: 'rgba(0,230,118,0.10)', border: '1px solid rgba(0,230,118,0.25)' }}>
+            <div className="absolute inset-0 rounded-xl" style={{ animation: 'auraPulse 2s ease-in-out infinite', border: '1px solid rgba(0,230,118,0.3)' }} />
+            <span className="w-3 h-3 rounded-full blink" style={{ background: '#00e676', boxShadow: '0 0 10px #00e676' }} />
+          </div>
           <div>
-            <div className="font-display text-[24px] leading-none text-white tracking-[0.04em]">THE ARENA</div>
-            <p className="text-[11px] mt-0.5" style={{ color: '#8892a4' }}>{livePlayers} hunters circling · tap a wallet to strike</p>
+            <div className="font-display text-[28px] leading-none text-white tracking-[0.08em]"
+              style={{ textShadow: '0 0 30px rgba(255,255,255,0.1)' }}>
+              THE <span style={{ color: '#ffd700', textShadow: '0 0 20px rgba(255,215,0,0.4)' }}>ARENA</span>
+            </div>
+            <p className="text-[11px] mt-0.5 font-mono" style={{ color: '#8892a4' }}>
+              <span style={{ color: '#00e676' }}>{livePlayers}</span> hunters circling · tap a wallet to strike
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-5">
+
+        <div className="relative flex items-center gap-6">
           <div className="text-center">
-            <div className="font-display text-[26px] leading-none gold-text-gradient">{stolen.toFixed(1)}</div>
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] mt-1" style={{ color: '#8892a4' }}>SOL Stolen</div>
+            <motion.div key={stolen} className="font-display text-[30px] leading-none gold-text-gradient"
+              initial={{ scale: 1.08 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}>
+              {stolen.toFixed(1)}
+            </motion.div>
+            <div className="text-[9px] font-mono uppercase tracking-[0.2em] mt-1" style={{ color: '#8892a4' }}>SOL Stolen</div>
           </div>
-          <div className="w-px h-8" style={{ background: 'rgba(255,255,255,0.08)' }} />
+          <div className="w-px h-10 rounded-full" style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.12), transparent)' }} />
           <div className="text-center">
-            <div className="font-display text-[26px] leading-none" style={{ color: '#a060ff' }}>{rounds.toLocaleString()}</div>
-            <div className="text-[9px] font-mono uppercase tracking-[0.16em] mt-1" style={{ color: '#8892a4' }}>Rounds</div>
+            <div className="font-display text-[30px] leading-none" style={{ color: '#a060ff', textShadow: '0 0 20px rgba(112,0,255,0.4)' }}>
+              {rounds.toLocaleString()}
+            </div>
+            <div className="text-[9px] font-mono uppercase tracking-[0.2em] mt-1" style={{ color: '#8892a4' }}>Rounds</div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Daily protection banner — only show if near limit */}
       {dailyLoss > MAX_DAILY_LOSS * 0.7 && (
