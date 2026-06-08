@@ -3,6 +3,8 @@ import { Crosshair, Menu, Package, Trophy, Users, Wallet, X } from "lucide-react
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import CrateShop from "./components/CrateShop";
 import GlobalStats from "./components/GlobalStats";
 import JoinToast from "./components/JoinToast";
@@ -13,7 +15,7 @@ import OnboardingModal from "./components/OnboardingModal";
 import ReferralDashboard from "./components/ReferralDashboard";
 import YoinkGame from "./components/YoinkGame";
 import { getLevelByXP } from "./lib/levels";
-import { getPlayer, upsertPlayer, saveXP, initDatabase, type PlayerRow } from "./lib/supabase";
+import { upsertPlayer, saveXP, initDatabase, type PlayerRow } from "./lib/supabase";
 
 export type Page = "landing" | "yoink" | "crates" | "leaderboard" | "referral";
 
@@ -30,36 +32,36 @@ const NAV = [
   { id: "referral"    as Page, label: "Referrals",    icon: Users     },
 ];
 
-// ── Demo wallet (until real wallet adapter is wired) ──
-// In production this becomes the user's Phantom/Backpack address
-const DEMO_WALLET = "demo_" + Math.random().toString(36).slice(2, 10);
+// ── Demo wallet removed — using real Phantom adapter ──
 
 export default function App() {
+  const { publicKey, disconnect, connected, connecting } = useWallet();
+  const { setVisible: openWalletModal } = useWalletModal();
+
+  const wallet = publicKey?.toString() ?? null;
+
   const [page, setPage]               = useState<Page>("landing");
   const [open, setOpen]               = useState(false);
   const [showOnboard, setShowOnboard] = useState(false);
   const [xp, setXp]                   = useState(0);
-  const [wallet, setWallet]           = useState<string | null>(null);
   const [player, setPlayer]           = useState<PlayerRow | null>(null);
-  const [connecting, setConnecting]   = useState(false);
 
   const levelData = getLevelByXP(xp);
 
-  // ── Load player from Supabase when wallet is set ──
+  // ── Load player from Supabase when real wallet connects ──
   useEffect(() => {
-    if (!wallet) return;
+    if (!wallet || !connected) return;
     (async () => {
-      // Check for referral code in URL (?ref=CODE)
       const params  = new URLSearchParams(window.location.search);
-      const refCode  = params.get("ref") ?? undefined;
-      const row      = await upsertPlayer(wallet, refCode);
+      const refCode = params.get("ref") ?? undefined;
+      const row     = await upsertPlayer(wallet, refCode);
       if (row) {
         setPlayer(row);
         setXp(row.xp);
-        toast.success(`Welcome back! ${row.xp} XP · Level ${row.level_id}`);
+        toast.success(`Wallet connected! ${row.xp} XP · Level ${row.level_id}`);
       }
     })();
-  }, [wallet]);
+  }, [wallet, connected]);
 
   // ── Init database on first load ──
   useEffect(() => {
@@ -82,34 +84,17 @@ export default function App() {
     }
   }, [wallet]);
 
-  // ── Simulated wallet connect (replace with real adapter later) ──
-  const connectWallet = async () => {
-    setConnecting(true);
-    try {
-      // Try real Phantom connection if available
-      const phantom = (window as any).solana;
-      if (phantom?.isPhantom) {
-        const resp = await phantom.connect();
-        const addr = resp.publicKey.toString();
-        setWallet(addr);
-        toast.success("Wallet connected!");
-      } else {
-        // Fallback: demo wallet for testing
-        setWallet(DEMO_WALLET);
-        toast("Demo wallet connected — install Phantom for real play");
-      }
-    } catch {
-      toast.error("Wallet connection cancelled");
-    }
-    setConnecting(false);
-  };
+  // ── Real Phantom wallet connect ──
+  const connectWallet = useCallback(() => {
+    openWalletModal(true);
+  }, [openWalletModal]);
 
-  const disconnectWallet = () => {
-    setWallet(null);
+  const disconnectWallet = useCallback(() => {
+    disconnect().catch(() => {});
     setPlayer(null);
     setXp(0);
     toast("Wallet disconnected");
-  };
+  }, [disconnect]);
 
   const closeOnboard = () => {
     setShowOnboard(false);
@@ -117,9 +102,7 @@ export default function App() {
   };
 
   const walletShort = wallet
-    ? wallet.startsWith("demo_")
-      ? "Demo Wallet"
-      : `${wallet.slice(0, 4)}...${wallet.slice(-4)}`
+    ? `${wallet.slice(0, 4)}...${wallet.slice(-4)}`
     : null;
 
   return (
